@@ -20,8 +20,9 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
+            height: 100vh;
             position: relative;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
 
@@ -82,6 +83,8 @@
             right: 0;
             bottom: 0;
             z-index: 1;
+            width: 100vw;
+            height: 100vh;
         }
 
         #map {
@@ -130,38 +133,56 @@
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.1);
             backdrop-filter: blur(20px);
             margin: 0 20px 20px 20px;
-            border-radius: 16px 16px 0 0;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 16px 24px 24px;
             box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .location-info {
             margin-bottom: 20px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .location-label {
             font-size: 0.8rem;
-            color: #6c757d;
+            color: rgba(255,255,255,0.9);
             margin-bottom: 6px;
             font-weight: 500;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
         }
 
         .location-value {
             font-size: 1rem;
-            color: #495057;
+            color: white;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 8px;
+            background: rgba(0,0,0,0.4);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 8px;
         }
 
         .location-accuracy {
             font-size: 0.75rem;
-            color: #28a745;
-            margin-top: 4px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 8px;
+            background: rgba(40,167,69,0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
         }
 
         /* Action Buttons */
@@ -182,60 +203,67 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            backdrop-filter: blur(10px);
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: rgba(0,123,255,0.8);
             color: white;
-            border-radius: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 20px rgba(0,123,255,0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+            transform: translateY(-2px);
+            background: rgba(0,123,255,0.9);
+            box-shadow: 0 6px 25px rgba(0,123,255,0.4);
         }
 
         .btn-secondary {
-            background: transparent;
-            color: #495057;
-            border: 1px solid rgba(73,80,87,0.3);
-            border-radius: 8px;
+            background: rgba(0,0,0,0.4);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            backdrop-filter: blur(15px);
         }
 
         .btn-secondary:hover {
-            background: rgba(73,80,87,0.1);
+            background: rgba(0,0,0,0.6);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
         }
 
-        /* Location Status */
-        .location-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: rgba(40,167,69,0.1);
-            border: 1px solid rgba(40,167,69,0.2);
-            border-radius: 8px;
+        /* Drag Handle */
+        .drag-handle {
+            width: 40px;
+            height: 4px;
+            background: rgba(0,123,255,0.8);
+            border-radius: 2px;
+            margin: 0 auto 16px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
         }
 
-        .status-icon {
-            color: #28a745;
+        .drag-handle:active {
+            cursor: grabbing;
         }
 
-        .status-text {
-            font-size: 0.85rem;
-            color: #155724;
+        .drag-handle:hover {
+            background: rgba(0,123,255,0.9);
+            transform: scaleY(1.5);
+            box-shadow: 0 3px 12px rgba(0,123,255,0.4);
         }
 
-        /* Error State */
-        .location-error {
-            background: rgba(220,53,69,0.1);
-            border: 1px solid rgba(220,53,69,0.2);
-            color: #721c24;
+        /* Panel Animation States */
+        .bottom-panel.collapsed {
+            transform: translateY(calc(100% - 60px));
         }
 
-        .location-error .status-icon {
-            color: #dc3545;
+        .bottom-panel {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Loading Overlay */
@@ -269,20 +297,37 @@
             }
 
             .map-container {
-                margin: 0 16px 16px 16px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: 0;
+                z-index: 1;
             }
 
             .bottom-panel {
-                margin: 0 16px 16px 16px;
+                margin: 0 12px 12px 12px;
                 padding: 20px;
+                border-radius: 16px;
             }
 
             #map {
-                min-height: 350px;
+                width: 100%;
+                height: 100%;
             }
 
             .service-title {
                 font-size: 1.1rem;
+            }
+
+            .location-info {
+                padding: 12px;
+            }
+
+            .action-btn {
+                padding: 14px;
+                font-size: 0.9rem;
             }
         }
 
@@ -296,6 +341,20 @@
             .action-btn, .back-button {
                 -webkit-tap-highlight-color: transparent;
                 touch-action: manipulation;
+            }
+
+            .map-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: 0;
+                z-index: 1;
+            }
+
+            .bottom-panel {
+                margin: 0 16px 16px 16px;
             }
         }
 
@@ -349,19 +408,16 @@
     </div>
 
     <!-- Bottom Panel -->
-    <div class="bottom-panel">
-        <!-- Location Status -->
-        <div class="location-status" id="locationStatus">
-            <i class="fas fa-spinner fa-spin status-icon"></i>
-            <span class="status-text">Detectando sua localização...</span>
-        </div>
+    <div class="bottom-panel" id="bottomPanel">
+        <!-- Drag Handle -->
+        <div class="drag-handle" id="dragHandle"></div>
 
         <!-- Location Info -->
         <div class="location-info">
             <div class="location-label">Sua localização atual</div>
             <div class="location-value" id="locationValue">
                 <i class="fas fa-map-marker-alt"></i>
-                <span>Aguardando localização...</span>
+                <span>Detectando localização...</span>
             </div>
             <div class="location-accuracy" id="locationAccuracy"></div>
         </div>
@@ -392,6 +448,7 @@
         let userLocation = null;
         let selectedService = '';
         let geocoder;
+        let currentAddress = 'Detectando localização...';
 
         // Service names mapping
         const serviceNames = {
@@ -442,8 +499,10 @@
             // Hide map loading
             document.getElementById('mapLoading').style.display = 'none';
 
-            // Get user location
-            getUserLocation();
+            // Get user location - only call once
+            if (!userLocation) {
+                getUserLocation();
+            }
         }
 
         // Fallback map initialization (without Google Maps API)
@@ -453,14 +512,12 @@
                 <div class="map-loading-text" style="color: #dc3545;">
                     <i class="fas fa-exclamation-triangle"></i><br>
                     Mapa indisponível<br>
-                    <small style="font-size: 0.8rem;">Simulação ativa</small>
+                    <small style="font-size: 0.8rem;">Tentando localização...</small>
                 </div>
             `;
 
-            // Simulate location detection
-            setTimeout(() => {
-                simulateLocationDetection();
-            }, 2000);
+            // Try to get location even without map
+            getUserLocation();
         }
 
         // Check if location access is supported and allowed
@@ -488,20 +545,14 @@
             const permissionStatus = await checkLocationPermission();
             
             if (permissionStatus === 'denied') {
-                updateLocationStatus('error', 'Acesso à localização negado. Ative nas configurações do navegador.');
                 showLocationInstructions();
                 return;
             }
 
             if (!navigator.geolocation) {
-                updateLocationStatus('error', 'Geolocalização não suportada neste dispositivo.');
-                userLocation = { lat: -23.5505, lng: -46.6333 };
-                displayUserLocation();
+                useDefaultLocation();
                 return;
             }
-
-            // Show requesting permission message
-            updateLocationStatus('loading', 'Solicitando permissão de localização...');
 
             // iPhone-specific: Use multiple attempts for better success rate
             let attempts = 0;
@@ -518,7 +569,8 @@
                             accuracy: position.coords.accuracy
                         };
                         
-                        updateLocationStatus('success', `Localização detectada! (±${Math.round(position.coords.accuracy)}m)`);
+                        currentAddress = 'Obtendo endereço...';
+                        updateLocationDisplay();
                         displayUserLocation();
                     },
                     function(error) {
@@ -543,16 +595,14 @@
                         
                         if (attempts < maxAttempts && error.code === error.TIMEOUT) {
                             // Try again with less strict settings
-                            updateLocationStatus('loading', `Tentando novamente... (${attempts}/${maxAttempts})`);
                             setTimeout(() => tryGetLocation(), 2000);
                             return;
                         }
                         
-                        updateLocationStatus('error', errorMessage);
-                        
-                        // Use default location as fallback
-                        userLocation = { lat: -23.5505, lng: -46.6333 };
-                        displayUserLocation();
+                        // Use default location as fallback only after all attempts
+                        if (attempts >= maxAttempts) {
+                            useDefaultLocation();
+                        }
                     },
                     {
                         enableHighAccuracy: attempts <= 1, // First attempt high accuracy, then standard
@@ -565,19 +615,41 @@
             tryGetLocation();
         }
 
-        // Simulate location detection (fallback)
-        function simulateLocationDetection() {
-            updateLocationStatus('success', 'Localização simulada detectada!');
+        // Use default location only as last resort
+        function useDefaultLocation() {
             userLocation = { lat: -23.5505, lng: -46.6333 };
             
-            // Update location display
+            // Try to get real address for default coordinates
+            if (geocoder) {
+                geocoder.geocode({ location: userLocation }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        currentAddress = results[0].formatted_address;
+                        updateLocationDisplay();
+                    } else {
+                        currentAddress = 'São Paulo, SP - Brasil';
+                        updateLocationDisplay();
+                    }
+                });
+            } else {
+                currentAddress = 'São Paulo, SP - Brasil';
+                updateLocationDisplay();
+            }
+            
+            document.getElementById('confirmBtn').disabled = false;
+        }
+
+        // Update location display in UI
+        function updateLocationDisplay() {
             document.getElementById('locationValue').innerHTML = `
                 <i class="fas fa-map-marker-alt"></i>
-                <span>Rua das Flores, 123 - Centro, São Paulo - SP</span>
+                <span>${currentAddress}</span>
             `;
             
-            document.getElementById('locationAccuracy').textContent = 'Precisão: ±10 metros';
-            document.getElementById('confirmBtn').disabled = false;
+            // Update accuracy based on location source
+            const accuracy = userLocation && userLocation.accuracy ? 
+                `Precisão: ±${Math.round(userLocation.accuracy)}m` : 
+                'Precisão: Aproximada';
+            document.getElementById('locationAccuracy').textContent = accuracy;
         }
 
         // Display user location on map
@@ -612,18 +684,21 @@
             if (geocoder) {
                 geocoder.geocode({ location: userLocation }, function(results, status) {
                     if (status === 'OK' && results[0]) {
-                        const address = results[0].formatted_address;
-                        document.getElementById('locationValue').innerHTML = `
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>${address}</span>
-                        `;
+                        currentAddress = results[0].formatted_address;
+                        updateLocationDisplay();
+                    } else {
+                        currentAddress = 'Endereço não encontrado';
+                        updateLocationDisplay();
                     }
                 });
+            } else {
+                // Fallback when no geocoder available
+                currentAddress = `Lat: ${userLocation.lat.toFixed(6)}, Lng: ${userLocation.lng.toFixed(6)}`;
+                updateLocationDisplay();
             }
 
             // Enable confirm button
             document.getElementById('confirmBtn').disabled = false;
-            document.getElementById('locationAccuracy').textContent = 'Precisão: ±10 metros';
         }
 
         // Show location permission instructions for iPhone
@@ -632,42 +707,116 @@
             
             if (isIOS) {
                 const instructions = `
-                    <div style="margin-top: 12px; padding: 12px; background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.3); border-radius: 8px; font-size: 0.8rem; color: #856404;">
-                        <strong>iPhone:</strong><br>
+                    <div style="margin-top: 12px; padding: 12px; background: rgba(255,193,7,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,193,7,0.4); border-radius: 12px; font-size: 0.8rem; color: white;">
+                        <div style="background: rgba(255,193,7,0.3); padding: 6px 10px; border-radius: 8px; margin-bottom: 8px;"><strong>iPhone:</strong></div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 8px; line-height: 1.4;">
                         1. Vá em Configurações > Privacidade > Localização<br>
                         2. Ative "Serviços de Localização"<br>
                         3. Encontre seu navegador (Safari/Chrome)<br>
                         4. Selecione "Ao Usar o App"<br>
                         5. Recarregue esta página
+                        </div>
                     </div>
                 `;
-                document.getElementById('locationStatus').innerHTML += instructions;
+                // Instructions can be shown elsewhere if needed
             }
         }
 
-        // Update location status with loading state
-        function updateLocationStatus(type, message) {
-            const statusDiv = document.getElementById('locationStatus');
-            
-            if (type === 'success') {
-                statusDiv.className = 'location-status';
-                statusDiv.innerHTML = `
-                    <i class="fas fa-check-circle status-icon"></i>
-                    <span class="status-text">${message}</span>
-                `;
-            } else if (type === 'error') {
-                statusDiv.className = 'location-status location-error';
-                statusDiv.innerHTML = `
-                    <i class="fas fa-exclamation-circle status-icon"></i>
-                    <span class="status-text">${message}</span>
-                `;
-            } else if (type === 'loading') {
-                statusDiv.className = 'location-status';
-                statusDiv.innerHTML = `
-                    <i class="fas fa-spinner fa-spin status-icon"></i>
-                    <span class="status-text">${message}</span>
-                `;
+        // Panel drag functionality
+        let isDragging = false;
+        let startY = 0;
+        let currentY = 0;
+        let panelCollapsed = false;
+
+        function initPanelDrag() {
+            const dragHandle = document.getElementById('dragHandle');
+            const bottomPanel = document.getElementById('bottomPanel');
+
+            // Touch events
+            dragHandle.addEventListener('touchstart', handleDragStart, { passive: false });
+            document.addEventListener('touchmove', handleDragMove, { passive: false });
+            document.addEventListener('touchend', handleDragEnd);
+
+            // Mouse events
+            dragHandle.addEventListener('mousedown', handleDragStart);
+            document.addEventListener('mousemove', handleDragMove);
+            document.addEventListener('mouseup', handleDragEnd);
+
+            // Click to toggle
+            dragHandle.addEventListener('click', togglePanel);
+        }
+
+        function handleDragStart(e) {
+            isDragging = true;
+            startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            e.preventDefault();
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging) return;
+
+            currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            const deltaY = currentY - startY;
+            const bottomPanel = document.getElementById('bottomPanel');
+
+            // Only allow dragging down when expanded or up when collapsed
+            if ((!panelCollapsed && deltaY > 0) || (panelCollapsed && deltaY < 0)) {
+                const translateY = panelCollapsed ? Math.max(deltaY, -200) : Math.min(deltaY, 200);
+                bottomPanel.style.transform = panelCollapsed ? 
+                    `translateY(calc(100% - 60px + ${translateY}px))` : 
+                    `translateY(${translateY}px)`;
             }
+
+            e.preventDefault();
+        }
+
+        function handleDragEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const deltaY = currentY - startY;
+            const threshold = 50;
+
+            if (Math.abs(deltaY) > threshold) {
+                if (!panelCollapsed && deltaY > 0) {
+                    // Dragged down - collapse
+                    collapsePanel();
+                } else if (panelCollapsed && deltaY < 0) {
+                    // Dragged up - expand
+                    expandPanel();
+                }
+            } else {
+                // Snap back to current state
+                resetPanelPosition();
+            }
+        }
+
+        function togglePanel() {
+            if (panelCollapsed) {
+                expandPanel();
+            } else {
+                collapsePanel();
+            }
+        }
+
+        function collapsePanel() {
+            const bottomPanel = document.getElementById('bottomPanel');
+            bottomPanel.classList.add('collapsed');
+            bottomPanel.style.transform = '';
+            panelCollapsed = true;
+        }
+
+        function expandPanel() {
+            const bottomPanel = document.getElementById('bottomPanel');
+            bottomPanel.classList.remove('collapsed');
+            bottomPanel.style.transform = '';
+            panelCollapsed = false;
+        }
+
+        function resetPanelPosition() {
+            const bottomPanel = document.getElementById('bottomPanel');
+            bottomPanel.style.transform = panelCollapsed ? 
+                'translateY(calc(100% - 60px))' : 'translateY(0)';
         }
 
         // Confirm location and proceed
@@ -693,16 +842,46 @@
             if (address && address.trim()) {
                 showLoading();
                 
-                // Simulate geocoding
-                setTimeout(() => {
-                    hideLoading();
-                    document.getElementById('locationValue').innerHTML = `
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>${address.trim()}</span>
-                    `;
-                    document.getElementById('confirmBtn').disabled = false;
-                    updateLocationStatus('success', 'Endereço inserido manualmente!');
-                }, 1000);
+                // Try to geocode the manual address
+                if (geocoder) {
+                    geocoder.geocode({ address: address.trim() }, function(results, status) {
+                        hideLoading();
+                        if (status === 'OK' && results[0]) {
+                            userLocation = {
+                                lat: results[0].geometry.location.lat(),
+                                lng: results[0].geometry.location.lng()
+                            };
+                            currentAddress = results[0].formatted_address;
+                            
+                            // Update map to show manual location
+                            if (map) {
+                                map.setCenter(userLocation);
+                                if (marker) marker.setMap(null);
+                                marker = new google.maps.Marker({
+                                    position: userLocation,
+                                    map: map,
+                                    title: 'Localização inserida'
+                                });
+                            }
+                            
+                            updateLocationDisplay();
+                            document.getElementById('confirmBtn').disabled = false;
+                        } else {
+                            // If geocoding fails, still save the typed address
+                            currentAddress = address.trim();
+                            updateLocationDisplay();
+                            document.getElementById('confirmBtn').disabled = false;
+                        }
+                    });
+                } else {
+                    // Fallback when no geocoder
+                    setTimeout(() => {
+                        hideLoading();
+                        currentAddress = address.trim();
+                        updateLocationDisplay();
+                        document.getElementById('confirmBtn').disabled = false;
+                    }, 1000);
+                }
             }
         }
 
@@ -730,13 +909,9 @@
                 setTimeout(initMapFallback, 1000);
             }
             
-            // iPhone-specific: Add click handler to retry location
-            const statusDiv = document.getElementById('locationStatus');
-            statusDiv.addEventListener('click', function() {
-                if (statusDiv.classList.contains('location-error')) {
-                    getUserLocation();
-                }
-            });
+            
+            // Initialize panel drag functionality
+            initPanelDrag();
         });
 
         // Handle API load errors
