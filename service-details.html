@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- iPhone-specific meta tags for better location access -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Guincho App - Localização</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -14,36 +17,26 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #007bff 0%, #495057 100%);
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
             position: relative;
             overflow-x: hidden;
         }
 
-        /* Subtle background pattern */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.05) 0%, transparent 40%),
-                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.03) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: 0;
-        }
 
         /* Header */
         .header {
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
             padding: 20px;
             text-align: center;
             color: white;
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
+            backdrop-filter: blur(10px);
         }
 
         .back-button {
@@ -51,18 +44,21 @@
             left: 20px;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.8);
-            padding: 8px 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
         }
 
         .back-button:hover {
-            background: rgba(255,255,255,0.2);
-            color: white;
+            background: rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-50%) scale(1.05);
         }
 
         .service-title {
@@ -80,20 +76,17 @@
 
         /* Map Container */
         .map-container {
-            flex: 1;
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             z-index: 1;
-            margin: 0 20px 20px 20px;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
         #map {
             width: 100%;
             height: 100%;
-            min-height: 400px;
         }
 
         /* Loading for map */
@@ -132,13 +125,17 @@
 
         /* Bottom Panel */
         .bottom-panel {
-            position: relative;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
             background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
             margin: 0 20px 20px 20px;
-            border-radius: 12px;
+            border-radius: 16px 16px 0 0;
             padding: 24px;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
         }
 
         .location-info {
@@ -385,7 +382,7 @@
 
     <!-- Google Maps API -->
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap&libraries=geometry,places">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&callback=initMap&libraries=geometry,places">
     </script>
 
     <script>
@@ -466,38 +463,106 @@
             }, 2000);
         }
 
-        // Get user's current location
-        function getUserLocation() {
-            if (navigator.geolocation) {
+        // Check if location access is supported and allowed
+        async function checkLocationPermission() {
+            if (!navigator.geolocation) {
+                return 'not_supported';
+            }
+
+            // For modern browsers with permission API
+            if (navigator.permissions) {
+                try {
+                    const permission = await navigator.permissions.query({name: 'geolocation'});
+                    return permission.state; // 'granted', 'denied', or 'prompt'
+                } catch (error) {
+                    console.log('Permission API not supported');
+                }
+            }
+
+            return 'unknown';
+        }
+
+        // Get user's current location with iPhone-specific optimizations
+        async function getUserLocation() {
+            // Check permission first
+            const permissionStatus = await checkLocationPermission();
+            
+            if (permissionStatus === 'denied') {
+                updateLocationStatus('error', 'Acesso à localização negado. Ative nas configurações do navegador.');
+                showLocationInstructions();
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                updateLocationStatus('error', 'Geolocalização não suportada neste dispositivo.');
+                userLocation = { lat: -23.5505, lng: -46.6333 };
+                displayUserLocation();
+                return;
+            }
+
+            // Show requesting permission message
+            updateLocationStatus('loading', 'Solicitando permissão de localização...');
+
+            // iPhone-specific: Use multiple attempts for better success rate
+            let attempts = 0;
+            const maxAttempts = 3;
+
+            function tryGetLocation() {
+                attempts++;
+                
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         userLocation = {
                             lat: position.coords.latitude,
-                            lng: position.coords.longitude
+                            lng: position.coords.longitude,
+                            accuracy: position.coords.accuracy
                         };
                         
-                        updateLocationStatus('success', 'Localização detectada com sucesso!');
+                        updateLocationStatus('success', `Localização detectada! (±${Math.round(position.coords.accuracy)}m)`);
                         displayUserLocation();
                     },
                     function(error) {
-                        console.error('Error getting location:', error);
-                        updateLocationStatus('error', 'Erro ao detectar localização. Tente manualmente.');
+                        console.error(`Location attempt ${attempts}:`, error);
                         
-                        // Use default location
+                        let errorMessage = '';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = 'Permissão de localização negada. Ative nas configurações.';
+                                showLocationInstructions();
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = 'Localização indisponível. Verifique sua conexão.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = `Tempo esgotado (tentativa ${attempts}/${maxAttempts})`;
+                                break;
+                            default:
+                                errorMessage = 'Erro desconhecido ao obter localização.';
+                                break;
+                        }
+                        
+                        if (attempts < maxAttempts && error.code === error.TIMEOUT) {
+                            // Try again with less strict settings
+                            updateLocationStatus('loading', `Tentando novamente... (${attempts}/${maxAttempts})`);
+                            setTimeout(() => tryGetLocation(), 2000);
+                            return;
+                        }
+                        
+                        updateLocationStatus('error', errorMessage);
+                        
+                        // Use default location as fallback
                         userLocation = { lat: -23.5505, lng: -46.6333 };
                         displayUserLocation();
                     },
                     {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 600000
+                        enableHighAccuracy: attempts <= 1, // First attempt high accuracy, then standard
+                        timeout: attempts === 1 ? 20000 : 10000, // More time for first attempt
+                        maximumAge: 0 // Always get fresh location
                     }
                 );
-            } else {
-                updateLocationStatus('error', 'Geolocalização não suportada neste dispositivo.');
-                userLocation = { lat: -23.5505, lng: -46.6333 };
-                displayUserLocation();
             }
+
+            tryGetLocation();
         }
 
         // Simulate location detection (fallback)
@@ -561,7 +626,26 @@
             document.getElementById('locationAccuracy').textContent = 'Precisão: ±10 metros';
         }
 
-        // Update location status
+        // Show location permission instructions for iPhone
+        function showLocationInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            
+            if (isIOS) {
+                const instructions = `
+                    <div style="margin-top: 12px; padding: 12px; background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.3); border-radius: 8px; font-size: 0.8rem; color: #856404;">
+                        <strong>iPhone:</strong><br>
+                        1. Vá em Configurações > Privacidade > Localização<br>
+                        2. Ative "Serviços de Localização"<br>
+                        3. Encontre seu navegador (Safari/Chrome)<br>
+                        4. Selecione "Ao Usar o App"<br>
+                        5. Recarregue esta página
+                    </div>
+                `;
+                document.getElementById('locationStatus').innerHTML += instructions;
+            }
+        }
+
+        // Update location status with loading state
         function updateLocationStatus(type, message) {
             const statusDiv = document.getElementById('locationStatus');
             
@@ -575,6 +659,12 @@
                 statusDiv.className = 'location-status location-error';
                 statusDiv.innerHTML = `
                     <i class="fas fa-exclamation-circle status-icon"></i>
+                    <span class="status-text">${message}</span>
+                `;
+            } else if (type === 'loading') {
+                statusDiv.className = 'location-status';
+                statusDiv.innerHTML = `
+                    <i class="fas fa-spinner fa-spin status-icon"></i>
                     <span class="status-text">${message}</span>
                 `;
             }
@@ -639,6 +729,14 @@
                 // Fallback initialization
                 setTimeout(initMapFallback, 1000);
             }
+            
+            // iPhone-specific: Add click handler to retry location
+            const statusDiv = document.getElementById('locationStatus');
+            statusDiv.addEventListener('click', function() {
+                if (statusDiv.classList.contains('location-error')) {
+                    getUserLocation();
+                }
+            });
         });
 
         // Handle API load errors
