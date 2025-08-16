@@ -1149,7 +1149,7 @@
                         if (currentSelectionType === 'origin') {
                             originAddress = address;
                             updateOriginDisplay();
-                            // Não abrir modal de destino automaticamente quando usando GPS
+                            // Modal de destino será aberto automaticamente via updateOriginDisplay()
                         }
                         // Limpar o tipo de seleção após processar
                         currentSelectionType = '';
@@ -1406,6 +1406,11 @@
             // Enable destination if not already enabled
             const destinationItem = document.getElementById('destinationItem');
             destinationItem.classList.remove('disabled');
+            
+            // Abrir automaticamente o modal de destino após definir origem
+            setTimeout(() => {
+                selectDestination();
+            }, 500); // Pequeno delay para suavizar a transição
         }
 
         function updateDestinationDisplay() {
