@@ -1004,9 +1004,10 @@
                                     document.querySelector('.map-container').classList.add('css-3d');
                                 }
                                 
-                                // Set initial heading - start with north facing up
+                                // Set initial heading - o mapa começa com norte para cima
+                                // Conforme o usuário gira, o MAPA vai rotacionar para manter a seta sempre apontando para cima
                                 map.setHeading(0);
-                                console.log('Map initialized with north facing up, will rotate as user moves/turns');
+                                console.log('Mapa inicializado com norte para cima. A seta permanece fixa e o mapa rotaciona conforme orientação.');
                                 
                                 // Start monitoring
                                 startTiltMonitoring();
@@ -1111,7 +1112,7 @@
             });
         }
 
-        // Create navigation arrow marker (modern Waze-style)
+        // Create navigation arrow marker (seta fixa sempre para cima)
         function createNavigationMarker() {
             if (navigationMarker) {
                 navigationMarker.setMap(null);
@@ -1121,7 +1122,7 @@
                 position: userLocation,
                 map: map,
                 icon: {
-                    // Simple blue triangle pointing in user direction
+                    // Seta azul sempre apontando para o topo da tela
                     path: 'M0,-20 L-10,10 L0,5 L10,10 Z',
                     fillColor: '#1E90FF',
                     fillOpacity: 1.0,
@@ -1129,7 +1130,7 @@
                     strokeWeight: 2,
                     scale: 1.2,
                     anchor: new google.maps.Point(0, 0),
-                    rotation: currentHeading
+                    rotation: 0 // Sempre 0 - seta fixa para o topo
                 },
                 zIndex: 1000,
                 optimized: false
@@ -1210,12 +1211,12 @@
                 if (Math.abs(smoothedHeading - currentHeading) > 2) {
                     currentHeading = smoothedHeading;
                     
-                    // Update map orientation immediately with current position
+                    // Rotacionar o mapa para manter a seta sempre apontando para cima
                     if (map && userLocation) {
                         updateMapFollowing(userLocation);
                     }
                     
-                    console.log('Device orientation updated - Raw:', compassHeading.toFixed(1), '° Smoothed:', currentHeading.toFixed(1), '°');
+                    console.log('Orientação do dispositivo - Raw:', compassHeading.toFixed(1), '° Suavizado:', currentHeading.toFixed(1), '° (mapa rotacionará)');
                 }
             }
         }
@@ -1462,7 +1463,7 @@
             }
             
             navigationMarker.setIcon({
-                // Enhanced triangle with shadow effect
+                // Seta sempre apontando para o topo da tela (sem rotação)
                 path: 'M0,-20 L-10,10 L0,5 L10,10 Z',
                 fillColor: fillColor,
                 fillOpacity: 0.9,
@@ -1470,7 +1471,7 @@
                 strokeWeight: 2.5,
                 scale: scale,
                 anchor: new google.maps.Point(0, 0),
-                rotation: currentHeading
+                rotation: 0 // Seta fixa sempre apontando para norte/topo
             });
         }
 
@@ -1479,7 +1480,7 @@
             
             // Use batched updates for performance
             scheduleMapUpdate(() => {
-                // Smooth pan to new position
+                // Centralizar mapa na posição do usuário (seta sempre no centro)
                 map.panTo(position);
                 
                 // Maintain 3D tilt based on navigation state
@@ -1494,10 +1495,16 @@
                     return;
                 }
                 
-                // Get adaptive settings for rotation
+                // Rotacionar o mapa para que o topo da tela aponte na direção do motorista
+                // O mapa deve rotacionar de forma que a direção do usuário fique sempre "para cima"
                 const settings = getAdaptiveSettings(userSpeed, 10);
                 const currentMapHeading = map.getHeading() || 0;
-                let headingDiff = currentHeading - currentMapHeading;
+                
+                // O heading do mapa deve ser o oposto da direção do usuário
+                // Se o usuário está olhando para 90° (leste), o mapa deve rotacionar -90°
+                // para que o leste fique "para cima" na tela
+                const targetMapHeading = normalizeHeading(-currentHeading);
+                let headingDiff = targetMapHeading - currentMapHeading;
                 
                 // Normalize heading difference to shortest rotation
                 if (headingDiff > 180) headingDiff -= 360;
@@ -1505,12 +1512,12 @@
                 
                 // Use adaptive threshold for rotation
                 if (Math.abs(headingDiff) > settings.threshold) {
-                    const targetHeading = normalizeHeading(currentHeading);
-                    map.setHeading(targetHeading);
+                    map.setHeading(targetMapHeading);
                     
-                    console.log('Adaptive map rotation:', {
+                    console.log('Rotação do mapa (seta fixa):', {
                         mode: orientationMode,
-                        heading: currentHeading.toFixed(1) + '°',
+                        userHeading: currentHeading.toFixed(1) + '°',
+                        mapHeading: targetMapHeading.toFixed(1) + '°',
                         threshold: settings.threshold + '°',
                         state: navigationState
                     });
