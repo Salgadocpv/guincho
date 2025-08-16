@@ -96,16 +96,16 @@
             font-weight: 600;
         }
 
-        /* Map Container - Expanded for 3D rotation */
+        /* Map Container - Expanded for 3D rotation and tilt */
         .map-container {
             position: fixed;
-            top: -25vh;
-            left: -25vw;
-            right: -25vw;
-            bottom: -25vh;
+            top: -40vh;
+            left: -30vw;
+            right: -30vw;
+            bottom: -30vh;
             z-index: 1;
-            width: 150vw;
-            height: 150vh;
+            width: 160vw;
+            height: 170vh;
             overflow: hidden;
         }
 
@@ -117,7 +117,7 @@
 
         /* CSS-based 3D perspective as fallback - optimal 45 degrees */
         .map-container.css-3d #map {
-            transform: perspective(800px) rotateX(15deg) scale(1.1);
+            transform: perspective(1000px) rotateX(15deg) scale(1.05);
             transform-origin: center bottom;
             transition: transform 0.5s ease;
         }
@@ -289,7 +289,7 @@
 
             /* Extra safety for mobile devices */
             .map-container.css-3d #map {
-                transform: perspective(800px) rotateX(15deg) scale(1.15);
+                transform: perspective(1000px) rotateX(15deg) scale(1.1);
             }
         }
 
