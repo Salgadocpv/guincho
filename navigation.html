@@ -396,30 +396,38 @@
             const shortDestination = formatAddressForDisplay(destinationAddress);
             document.getElementById('navigationSubtitle').textContent = `Para: ${shortDestination}`;
             
-            // Initialize map
+            // Initialize map with navigation optimized settings
             map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 18,
+                zoom: 19,
                 center: userLocation,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
-                tilt: 0,
-                heading: 0,
+                tilt: 45,
+                heading: currentHeading,
                 disableDefaultUI: true,
                 gestureHandling: 'greedy',
-                minZoom: 10,
-                maxZoom: 20
+                minZoom: 15,
+                maxZoom: 20,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
             });
             
-            // Apply 3D view after map is loaded
+            // Apply 3D navigation view configuration
             google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
                 setTimeout(() => {
-                    console.log('Applying 3D tilt...');
+                    console.log('Configuring 3D navigation view...');
+                    
+                    // Ensure 3D tilt is always active during navigation
+                    map.setTilt(45);
                     map.setZoom(19);
                     
-                    setTimeout(() => {
-                        map.setTilt(45);
-                        console.log('3D tilt applied. Current tilt:', map.getTilt());
-                    }, 300);
-                }, 500);
+                    // Set initial heading based on user orientation
+                    if (currentHeading !== 0) {
+                        map.setHeading(currentHeading);
+                    }
+                    
+                    console.log('3D navigation view configured. Tilt:', map.getTilt(), 'Heading:', map.getHeading());
+                }, 300);
             });
 
             // Initialize directions service
@@ -472,6 +480,9 @@
                     
                     // Start GPS tracking
                     startGPSTracking();
+                    
+                    // Initialize compass heading if available
+                    initializeCompass();
                     
                     isNavigating = true;
                     
@@ -531,6 +542,56 @@
             });
         }
 
+        // Initialize compass and device orientation
+        function initializeCompass() {
+            // Request device orientation permission if needed (iOS)
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            startCompassTracking();
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Start compass tracking for other devices
+                startCompassTracking();
+            }
+        }
+
+        // Start compass tracking
+        function startCompassTracking() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                console.log('Compass tracking started');
+            }
+        }
+
+        // Handle device orientation changes
+        function handleDeviceOrientation(event) {
+            if (!isNavigating) return;
+            
+            let compassHeading = null;
+            
+            if (event.webkitCompassHeading) {
+                // iOS Safari
+                compassHeading = event.webkitCompassHeading;
+            } else if (event.alpha !== null) {
+                // Android and other browsers
+                compassHeading = 360 - event.alpha;
+            }
+            
+            if (compassHeading !== null) {
+                // Apply smoothing to compass heading
+                currentHeading = applySmoothingToHeading(compassHeading);
+                
+                // Update map orientation immediately
+                if (map && map.getHeading() !== undefined) {
+                    updateMapFollowing(userLocation);
+                }
+            }
+        }
+
         // Start GPS tracking
         function startGPSTracking() {
             if (!navigator.geolocation) {
@@ -569,17 +630,24 @@
             // Check for route deviation
             checkRouteDeviation(smoothedPosition);
 
-            // Calculate heading
+            // Calculate heading with improved accuracy
             if (lastPosition) {
                 const distance = calculateDistance(lastPosition, smoothedPosition);
-                if (distance > 3) {
+                if (distance > 2) {
                     let newHeading;
-                    if (rawPosition.heading !== null && rawPosition.speed > 1) {
+                    
+                    // Prefer device compass when available and moving
+                    if (rawPosition.heading !== null && rawPosition.heading !== undefined && rawPosition.speed > 0.5) {
                         newHeading = rawPosition.heading;
                     } else {
+                        // Calculate heading from movement
                         newHeading = calculateHeading(lastPosition, smoothedPosition);
                     }
+                    
+                    // Apply smoothing for stable rotation
                     currentHeading = applySmoothingToHeading(newHeading);
+                    
+                    console.log('Heading updated:', currentHeading, 'Raw heading:', rawPosition.heading, 'Speed:', rawPosition.speed);
                 }
             }
 
@@ -677,18 +745,29 @@
         }
 
         function applySmoothingToHeading(newHeading) {
+            // Add to smoothing array
             headingSmoothing.push(newHeading);
             if (headingSmoothing.length > smoothingWindow) {
                 headingSmoothing.shift();
             }
 
+            // Use circular mean for heading angles
             let x = 0, y = 0;
-            for (let heading of headingSmoothing) {
-                x += Math.cos(heading * Math.PI / 180);
-                y += Math.sin(heading * Math.PI / 180);
+            for (let i = 0; i < headingSmoothing.length; i++) {
+                const weight = (i + 1) / headingSmoothing.length; // Weighted towards more recent values
+                const heading = headingSmoothing[i];
+                x += Math.cos(heading * Math.PI / 180) * weight;
+                y += Math.sin(heading * Math.PI / 180) * weight;
             }
 
-            return Math.atan2(y, x) * 180 / Math.PI;
+            let smoothedHeading = Math.atan2(y, x) * 180 / Math.PI;
+            
+            // Normalize to 0-360 range
+            if (smoothedHeading < 0) {
+                smoothedHeading += 360;
+            }
+            
+            return smoothedHeading;
         }
 
         function updateNavigationMarker(position) {
@@ -708,14 +787,44 @@
         }
 
         function updateMapFollowing(position) {
+            // Smooth pan to new position
             map.panTo(position);
+            
+            // Ensure 3D tilt is maintained during navigation
+            const currentTilt = map.getTilt();
+            if (currentTilt < 45) {
+                map.setTilt(45);
+            }
+            
+            // Smooth heading rotation like Waze
             const currentMapHeading = map.getHeading() || 0;
             let headingDiff = currentHeading - currentMapHeading;
+            
+            // Normalize heading difference to shortest rotation
             if (headingDiff > 180) headingDiff -= 360;
             if (headingDiff < -180) headingDiff += 360;
-            if (Math.abs(headingDiff) > 5) {
-                map.setHeading(currentHeading);
+            
+            // More sensitive rotation for better navigation experience
+            if (Math.abs(headingDiff) > 2) {
+                // Smooth rotation instead of instant snap
+                const targetHeading = normalizeHeading(currentHeading);
+                map.setHeading(targetHeading);
+                
+                console.log('Map heading updated:', targetHeading, 'User heading:', currentHeading);
             }
+            
+            // Keep optimal zoom level for navigation
+            const currentZoom = map.getZoom();
+            if (currentZoom < 18 || currentZoom > 20) {
+                map.setZoom(19);
+            }
+        }
+        
+        // Helper function to normalize heading values
+        function normalizeHeading(heading) {
+            while (heading < 0) heading += 360;
+            while (heading >= 360) heading -= 360;
+            return heading;
         }
 
         function calculateDistance(pos1, pos2) {
