@@ -25,15 +25,15 @@
             background: #000;
         }
 
-        /* Navigation Header */
+        /* Navigation Header - Compact overlay */
         .navigation-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 150;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 70%, transparent 100%);
-            padding: 20px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 80%, transparent 100%);
+            padding: 12px 16px 8px 16px;
             text-align: center;
             color: white;
         }
@@ -42,23 +42,23 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .back-button {
-            background: rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.3);
             color: white;
-            padding: 10px 14px;
+            padding: 8px 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.9rem;
-            border-radius: 8px;
+            font-size: 0.8rem;
+            border-radius: 6px;
             backdrop-filter: blur(10px);
         }
 
         .back-button:hover {
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             border-color: rgba(255,255,255,0.5);
         }
 
@@ -66,11 +66,11 @@
             background: rgba(220, 53, 69, 0.8);
             border: 1px solid rgba(255,255,255,0.3);
             color: white;
-            padding: 10px 16px;
+            padding: 8px 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.9rem;
-            border-radius: 8px;
+            font-size: 0.8rem;
+            border-radius: 6px;
             backdrop-filter: blur(10px);
         }
 
@@ -79,20 +79,20 @@
         }
 
         .navigation-title {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .navigation-subtitle {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: rgba(255,255,255,0.8);
         }
 
         .navigation-distance {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: rgba(40,167,69,1);
-            margin-top: 4px;
+            margin-top: 2px;
             font-weight: 600;
         }
 
@@ -161,17 +161,17 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Bottom Info Panel */
+        /* Bottom Info Panel - Compact */
         .bottom-info {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
             z-index: 100;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 12px;
+            padding: 12px;
             border: 1px solid rgba(255,255,255,0.2);
             color: white;
         }
@@ -180,7 +180,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .route-stat {
@@ -189,36 +189,37 @@
         }
 
         .route-stat-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: rgba(255,255,255,0.7);
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
         .route-stat-value {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: white;
         }
 
         .current-instruction {
             background: rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
             text-align: center;
+            line-height: 1.2;
         }
 
-        /* Navigation Status */
+        /* Navigation Status - Compact */
         .nav-status {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 8px 16px;
+            gap: 6px;
+            padding: 6px 12px;
             background: rgba(40,167,69,0.3);
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-top: 8px;
+            border-radius: 16px;
+            font-size: 0.7rem;
+            margin-top: 6px;
         }
 
         .status-dot {
@@ -234,29 +235,52 @@
             50% { opacity: 0.5; }
         }
 
-        /* Responsive */
+        /* Responsive - Mobile first */
         @media (max-width: 480px) {
             .navigation-header {
-                padding: 16px;
+                padding: 10px 12px 6px 12px;
             }
             
             .bottom-info {
-                margin: 0 12px 12px 12px;
-                padding: 12px;
+                bottom: 8px;
+                left: 8px;
+                right: 8px;
+                padding: 10px;
+            }
+
+            .route-stat-label {
+                font-size: 0.6rem;
+            }
+
+            .route-stat-value {
+                font-size: 0.75rem;
+            }
+
+            .current-instruction {
+                font-size: 0.75rem;
+                padding: 6px 8px;
+            }
+
+            .navigation-title {
+                font-size: 0.9rem;
+            }
+
+            .navigation-subtitle {
+                font-size: 0.75rem;
             }
         }
 
-        /* Recalculation notification */
+        /* Recalculation notification - Compact */
         .recalc-notification {
             position: fixed;
-            top: 120px;
+            top: 80px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(255,193,7,0.9);
             color: #000;
-            padding: 12px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 0.8rem;
             font-weight: 600;
             z-index: 200;
             opacity: 0;
@@ -265,7 +289,7 @@
 
         .recalc-notification.show {
             opacity: 1;
-            transform: translateX(-50%) translateY(10px);
+            transform: translateX(-50%) translateY(8px);
         }
     </style>
 </head>
