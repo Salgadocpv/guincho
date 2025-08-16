@@ -244,6 +244,20 @@
             box-shadow: 0 6px 25px rgba(0,123,255,0.4);
         }
 
+        .btn-success {
+            background: rgba(40,167,69,0.8);
+            color: white;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 20px rgba(40,167,69,0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            background: rgba(40,167,69,0.9);
+            box-shadow: 0 6px 25px rgba(40,167,69,0.4);
+        }
+
         .btn-secondary {
             background: rgba(0,0,0,0.4);
             color: white;
@@ -290,6 +304,49 @@
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Center Crosshair/Pin */
+        .center-pin {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            pointer-events: none;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center-pin i {
+            font-size: 2.5rem;
+            color: #dc3545;
+            text-shadow: 
+                0 0 10px rgba(220, 53, 69, 0.8),
+                0 2px 8px rgba(0, 0, 0, 0.6),
+                0 0 0 2px white;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            animation: pinPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pinPulse {
+            0%, 100% { 
+                transform: scale(1);
+                text-shadow: 
+                    0 0 10px rgba(220, 53, 69, 0.8),
+                    0 2px 8px rgba(0, 0, 0, 0.6),
+                    0 0 0 2px white;
+            }
+            50% { 
+                transform: scale(1.1);
+                text-shadow: 
+                    0 0 15px rgba(220, 53, 69, 1),
+                    0 2px 12px rgba(0, 0, 0, 0.8),
+                    0 0 0 3px white;
+            }
+        }
+
         /* Current Position Indicator */
         .current-position {
             position: fixed;
@@ -313,7 +370,7 @@
 
         .current-position.show {
             opacity: 1;
-            transform: translate(-50%, -50%) translateY(-20px);
+            transform: translate(-50%, -50%) translateY(-70px);
         }
 
         .current-position i {
@@ -601,6 +658,55 @@
             }
         }
 
+        /* Navigation Mode Styles */
+        .navigation-mode {
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .navigation-mode .bottom-panel {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .navigation-mode .location-info {
+            background: rgba(40,167,69,0.2);
+            border: 1px solid rgba(40,167,69,0.4);
+        }
+
+        .navigation-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 150;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 70%, transparent 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            display: none;
+        }
+
+        .navigation-header.active {
+            display: block;
+        }
+
+        .navigation-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .navigation-subtitle {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .navigation-distance {
+            font-size: 0.8rem;
+            color: rgba(40,167,69,1);
+            margin-top: 4px;
+        }
+
         /* Enhanced Animations */
         @keyframes fadeInUp {
             from {
@@ -611,6 +717,19 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        @keyframes navigationPulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
+            }
+        }
+
+        .navigation-marker {
+            animation: navigationPulse 2s infinite;
         }
 
         .header, .map-container, .bottom-panel {
@@ -641,6 +760,13 @@
         <div class="service-subtitle">Confirme sua localização</div>
     </div>
 
+    <!-- Navigation Header -->
+    <div class="navigation-header" id="navigationHeader">
+        <div class="navigation-title">Navegando para o destino</div>
+        <div class="navigation-subtitle" id="navigationSubtitle">Siga as instruções do mapa</div>
+        <div class="navigation-distance" id="navigationDistance"></div>
+    </div>
+
     <!-- Map Container -->
     <div class="map-container">
         <div class="map-loading" id="mapLoading">
@@ -649,9 +775,14 @@
         </div>
         <div id="map"></div>
         
+        <!-- Center Pin -->
+        <div class="center-pin" id="centerPin">
+            <i class="fas fa-map-marker-alt"></i>
+        </div>
+        
         <!-- Current Position Indicator -->
         <div class="current-position" id="currentPosition">
-            <i class="fas fa-map-marker-alt"></i>
+            <i class="fas fa-crosshairs"></i>
             <span id="currentPositionText">Sua posição atual</span>
         </div>
     </div>
@@ -695,9 +826,9 @@
         <!-- Drag Handle -->
         <div class="drag-handle" id="dragHandle"></div>
 
-        <!-- Location Info -->
+        <!-- Origin Info -->
         <div class="location-info">
-            <div class="location-label">Sua localização atual</div>
+            <div class="location-label">Origem (Sua localização)</div>
             <div class="location-value" id="locationValue">
                 <i class="fas fa-map-marker-alt"></i>
                 <span>Detectando localização...</span>
@@ -705,11 +836,25 @@
             <div class="location-accuracy" id="locationAccuracy"></div>
         </div>
 
+        <!-- Destination Info -->
+        <div class="location-info" style="margin-top: 16px;">
+            <div class="location-label">Destino</div>
+            <div class="location-value" id="destinationValue" onclick="selectDestination()" style="cursor: pointer;">
+                <i class="fas fa-flag-checkered"></i>
+                <span>Toque para selecionar destino</span>
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="action-buttons">
             <button class="action-btn btn-primary" onclick="confirmLocation()" id="confirmBtn" disabled>
                 <i class="fas fa-check"></i>
                 Confirmar Localização
+            </button>
+            
+            <button class="action-btn btn-success" onclick="startNavigation()" id="navigationBtn" style="display: none;">
+                <i class="fas fa-navigation"></i>
+                Iniciar Navegação
             </button>
             
             <button class="action-btn btn-secondary" onclick="manualLocation()">
@@ -727,12 +872,26 @@
     <script>
         // Global variables
         let map;
-        let marker;
         let userLocation = null;
+        let destinationLocation = null;
         let selectedService = '';
         let geocoder;
+        let directionsService;
+        let directionsRenderer;
         let currentAddress = 'Detectando localização...';
+        let destinationAddress = '';
         let lastManualAddress = '';
+        let mapInitialized = false;
+        let isSelectingDestination = false;
+        
+        // Navigation mode variables
+        let isNavigating = false;
+        let navigationMarker = null;
+        let watchId = null;
+        let currentHeading = 0;
+        let lastPosition = null;
+        let routeSteps = [];
+        let currentStepIndex = 0;
 
         // Service names mapping
         const serviceNames = {
@@ -762,7 +921,7 @@
             
             // Initialize map
             map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 15,
+                zoom: 18,
                 center: defaultLocation,
                 styles: [
                     {
@@ -785,16 +944,31 @@
             // Initialize geocoder
             geocoder = new google.maps.Geocoder();
 
+            // Initialize directions service and renderer
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: false,
+                draggable: false
+            });
+
             // Hide map loading
             document.getElementById('mapLoading').style.display = 'none';
 
             // Enable single finger navigation
             setupSingleFingerNavigation();
 
+            // Set up map event listeners for center tracking
+            setupCenterTracking();
+
+            // Set up map click listener to hide panel
+            setupMapClickListener();
+
             // Get user location - only call once
             if (!userLocation) {
                 getUserLocation();
             }
+
+            mapInitialized = true;
         }
 
         // Fallback map initialization (without Google Maps API)
@@ -966,15 +1140,6 @@
             // Show position indicator briefly
             showCurrentPositionIndicator();
             
-            // Animate marker if it exists
-            if (marker) {
-                // Bounce animation
-                marker.setAnimation(google.maps.Animation.BOUNCE);
-                setTimeout(() => {
-                    marker.setAnimation(null);
-                }, 2000);
-            }
-            
             // Collapse panel to show more of the map
             if (!panelCollapsed) {
                 collapsePanel();
@@ -988,51 +1153,76 @@
             // Center map on user location
             map.setCenter(userLocation);
             
-            // Remove existing marker
-            if (marker) {
-                marker.setMap(null);
-            }
-
-            // Add draggable marker for user location
-            marker = new google.maps.Marker({
-                position: userLocation,
-                map: map,
-                title: 'Arraste para ajustar sua localização',
-                draggable: true,
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-                            <circle cx="16" cy="16" r="12" fill="#007bff" stroke="white" stroke-width="3"/>
-                            <circle cx="16" cy="16" r="6" fill="white"/>
-                            <circle cx="16" cy="16" r="2" fill="#007bff"/>
-                        </svg>
-                    `),
-                    anchor: new google.maps.Point(16, 16)
-                }
-            });
-
-            // Add drag listener to update location
-            marker.addListener('dragend', function(event) {
-                const newPosition = {
-                    lat: event.latLng.lat(),
-                    lng: event.latLng.lng()
-                };
-                
-                userLocation = newPosition;
-                updateAddressFromPosition(newPosition);
-                showCurrentPositionIndicator();
-            });
-
-            // Add drag start listener
-            marker.addListener('dragstart', function() {
-                showCurrentPositionIndicator();
-            });
-
             // Reverse geocode to get address
             updateAddressFromPosition(userLocation);
 
             // Enable confirm button
             document.getElementById('confirmBtn').disabled = false;
+        }
+
+        // Setup center tracking for the map
+        function setupCenterTracking() {
+            if (!map) return;
+
+            // Listen for map center changes (when user drags/moves the map)
+            google.maps.event.addListener(map, 'center_changed', function() {
+                // Debounce the center change event to avoid too many API calls
+                clearTimeout(window.centerChangeTimeout);
+                window.centerChangeTimeout = setTimeout(() => {
+                    const center = map.getCenter();
+                    if (center) {
+                        userLocation = {
+                            lat: center.lat(),
+                            lng: center.lng()
+                        };
+                        
+                        // Update address for the new center position
+                        updateAddressFromPosition(userLocation);
+                    }
+                }, 1000); // Wait 1 second after user stops moving the map
+            });
+
+            // Show position indicator when map starts moving
+            google.maps.event.addListener(map, 'dragstart', function() {
+                showCurrentPositionIndicator();
+            });
+
+            // Also show when map stops moving
+            google.maps.event.addListener(map, 'dragend', function() {
+                showCurrentPositionIndicator();
+            });
+        }
+
+        // Setup map click listener to hide panel automatically
+        function setupMapClickListener() {
+            if (!map) return;
+
+            // Listen for clicks on the map
+            google.maps.event.addListener(map, 'click', function(event) {
+                // If selecting destination, set destination location
+                if (isSelectingDestination) {
+                    destinationLocation = {
+                        lat: event.latLng.lat(),
+                        lng: event.latLng.lng()
+                    };
+                    
+                    isSelectingDestination = false;
+                    updateDestinationDisplay();
+                    return;
+                }
+
+                // Otherwise, collapse panel when map is clicked
+                if (!panelCollapsed) {
+                    collapsePanel();
+                }
+            });
+
+            // Also listen for double clicks
+            google.maps.event.addListener(map, 'dblclick', function() {
+                if (!panelCollapsed) {
+                    collapsePanel();
+                }
+            });
         }
 
         // Update address from coordinates
@@ -1186,14 +1376,408 @@
                 return;
             }
 
+            // Hide confirm button and show navigation setup
+            document.getElementById('confirmBtn').style.display = 'none';
+            
+            // Expand panel if collapsed to show destination options
+            if (panelCollapsed) {
+                expandPanel();
+            }
+            
+            showCurrentPositionIndicator();
+        }
+
+        // Select destination function
+        function selectDestination() {
+            isSelectingDestination = true;
+            
+            // Change destination display to indicate selection mode
+            const destinationValue = document.getElementById('destinationValue');
+            destinationValue.innerHTML = `
+                <i class="fas fa-crosshairs"></i>
+                <span>Toque no mapa para selecionar</span>
+            `;
+            destinationValue.style.background = 'rgba(255,193,7,0.6)';
+            
+            // Show instruction
+            showCurrentPositionIndicator();
+            updateCurrentPositionIndicator('Toque no mapa para selecionar destino');
+            
+            // Collapse panel to show more of the map
+            if (!panelCollapsed) {
+                collapsePanel();
+            }
+        }
+
+        // Update destination display
+        function updateDestinationDisplay() {
+            if (!destinationLocation) return;
+            
+            const destinationValue = document.getElementById('destinationValue');
+            destinationValue.style.background = '';
+            
+            // Get address for destination
+            if (geocoder) {
+                geocoder.geocode({ location: destinationLocation }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        destinationAddress = results[0].formatted_address;
+                    } else {
+                        destinationAddress = `Lat: ${destinationLocation.lat.toFixed(6)}, Lng: ${destinationLocation.lng.toFixed(6)}`;
+                    }
+                    
+                    destinationValue.innerHTML = `
+                        <i class="fas fa-flag-checkered"></i>
+                        <span>${destinationAddress}</span>
+                    `;
+                    
+                    // Show navigation button
+                    document.getElementById('navigationBtn').style.display = 'block';
+                    
+                    showCurrentPositionIndicator();
+                    updateCurrentPositionIndicator('Destino selecionado!');
+                });
+            } else {
+                destinationAddress = `Lat: ${destinationLocation.lat.toFixed(6)}, Lng: ${destinationLocation.lng.toFixed(6)}`;
+                destinationValue.innerHTML = `
+                    <i class="fas fa-flag-checkered"></i>
+                    <span>${destinationAddress}</span>
+                `;
+                
+                // Show navigation button
+                document.getElementById('navigationBtn').style.display = 'block';
+                
+                showCurrentPositionIndicator();
+                updateCurrentPositionIndicator('Destino selecionado!');
+            }
+        }
+
+        // Start navigation between origin and destination
+        function startNavigation() {
+            if (!userLocation || !destinationLocation) {
+                alert('Origem e destino devem estar definidos para iniciar navegação.');
+                return;
+            }
+
             showLoading();
             
-            setTimeout(() => {
+            // Calculate and display route
+            const request = {
+                origin: userLocation,
+                destination: destinationLocation,
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+                avoidHighways: false,
+                avoidTolls: false
+            };
+
+            directionsService.route(request, function(result, status) {
                 hideLoading();
-                alert(`Localização confirmada para ${serviceNames[selectedService]}!\n\nPróximo passo: Definir preço e solicitar atendimento.`);
-                // Here you would redirect to the next step
-                // window.location.href = 'price-selection.html?service=' + selectedService;
-            }, 1500);
+                
+                if (status === 'OK') {
+                    // Store route steps for navigation
+                    routeSteps = result.routes[0].legs[0].steps;
+                    currentStepIndex = 0;
+                    
+                    // Set directions renderer to map (without default markers)
+                    directionsRenderer.setOptions({
+                        suppressMarkers: true,
+                        polylineOptions: {
+                            strokeColor: '#4285F4',
+                            strokeWeight: 6,
+                            strokeOpacity: 0.8
+                        }
+                    });
+                    directionsRenderer.setMap(map);
+                    directionsRenderer.setDirections(result);
+                    
+                    // Hide center pin during navigation
+                    document.getElementById('centerPin').style.display = 'none';
+                    
+                    // Enter navigation mode
+                    enterNavigationMode();
+                    
+                    // Update UI for navigation mode
+                    updateNavigationUI(result);
+                    
+                    // Start GPS tracking
+                    startGPSTracking();
+                    
+                    // Collapse panel to show route
+                    if (!panelCollapsed) {
+                        collapsePanel();
+                    }
+                } else {
+                    alert('Não foi possível calcular a rota. Tente novamente.');
+                    console.error('Directions request failed due to ' + status);
+                }
+            });
+        }
+
+        // Enter navigation mode with 3D view
+        function enterNavigationMode() {
+            isNavigating = true;
+            
+            // Add navigation mode class to body
+            document.body.classList.add('navigation-mode');
+            
+            // Show navigation header, hide regular header
+            document.querySelector('.header').style.display = 'none';
+            document.getElementById('navigationHeader').classList.add('active');
+            
+            // Create navigation marker (arrow that follows user)
+            createNavigationMarker();
+            
+            // Switch to 3D navigation view
+            map.setOptions({
+                tilt: 45, // 3D tilt view like Uber
+                heading: currentHeading,
+                zoom: 19, // Close zoom for navigation
+                disableDefaultUI: true,
+                zoomControl: false,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                gestureHandling: 'cooperative' // Allow rotation gestures
+            });
+            
+            // Center on user location
+            if (userLocation) {
+                map.setCenter(userLocation);
+            }
+        }
+
+        // Create navigation marker (arrow icon)
+        function createNavigationMarker() {
+            if (navigationMarker) {
+                navigationMarker.setMap(null);
+            }
+            
+            navigationMarker = new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                icon: {
+                    path: 'M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z',
+                    fillColor: '#4285F4',
+                    fillOpacity: 1,
+                    strokeColor: '#FFFFFF',
+                    strokeWeight: 2,
+                    scale: 1.5,
+                    anchor: new google.maps.Point(12, 12),
+                    rotation: currentHeading
+                },
+                zIndex: 1000
+            });
+        }
+
+        // Start GPS tracking for navigation
+        function startGPSTracking() {
+            if (!navigator.geolocation) {
+                alert('Geolocalização não suportada neste dispositivo.');
+                return;
+            }
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            };
+
+            watchId = navigator.geolocation.watchPosition(
+                updateNavigationPosition,
+                handleGPSError,
+                options
+            );
+        }
+
+        // Update position during navigation
+        function updateNavigationPosition(position) {
+            if (!isNavigating) return;
+
+            const newPosition = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            // Calculate heading if we have a previous position
+            if (lastPosition) {
+                currentHeading = calculateHeading(lastPosition, newPosition);
+            }
+
+            // Update user location
+            userLocation = newPosition;
+            lastPosition = newPosition;
+
+            // Update navigation marker position and rotation
+            if (navigationMarker) {
+                navigationMarker.setPosition(newPosition);
+                navigationMarker.setIcon({
+                    path: 'M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z',
+                    fillColor: '#4285F4',
+                    fillOpacity: 1,
+                    strokeColor: '#FFFFFF',
+                    strokeWeight: 2,
+                    scale: 1.8,
+                    anchor: new google.maps.Point(12, 12),
+                    rotation: currentHeading
+                });
+            }
+
+            // Update map center and rotation to follow user (smooth transition)
+            map.panTo(newPosition);
+            map.setHeading(currentHeading);
+
+            // Update navigation UI with current distance
+            const distanceToDestination = calculateDistance(newPosition, destinationLocation);
+            updateNavigationDistance(distanceToDestination);
+
+            // Check if we've reached destination
+            if (distanceToDestination < 50) { // Within 50 meters
+                arrivedAtDestination();
+            }
+        }
+
+        // Update navigation distance display
+        function updateNavigationDistance(distance) {
+            const distanceElement = document.getElementById('navigationDistance');
+            if (distanceElement) {
+                if (distance < 1000) {
+                    distanceElement.textContent = `${Math.round(distance)}m restantes`;
+                } else {
+                    distanceElement.textContent = `${(distance / 1000).toFixed(1)}km restantes`;
+                }
+            }
+        }
+
+        // Calculate heading between two points
+        function calculateHeading(from, to) {
+            const fromLat = from.lat * Math.PI / 180;
+            const fromLng = from.lng * Math.PI / 180;
+            const toLat = to.lat * Math.PI / 180;
+            const toLng = to.lng * Math.PI / 180;
+
+            const dLng = toLng - fromLng;
+            const y = Math.sin(dLng) * Math.cos(toLat);
+            const x = Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(dLng);
+
+            let heading = Math.atan2(y, x) * 180 / Math.PI;
+            heading = (heading + 360) % 360;
+
+            return heading;
+        }
+
+        // Calculate distance between two points (in meters)
+        function calculateDistance(pos1, pos2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = pos1.lat * Math.PI/180;
+            const φ2 = pos2.lat * Math.PI/180;
+            const Δφ = (pos2.lat-pos1.lat) * Math.PI/180;
+            const Δλ = (pos2.lng-pos1.lng) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c;
+        }
+
+        // Handle GPS errors
+        function handleGPSError(error) {
+            console.error('GPS Error:', error);
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert('Permissão de localização negada. Ative para continuar navegação.');
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert('Localização indisponível. Verifique sua conexão GPS.');
+                    break;
+                case error.TIMEOUT:
+                    console.log('GPS timeout, tentando novamente...');
+                    break;
+            }
+        }
+
+        // Arrived at destination
+        function arrivedAtDestination() {
+            alert('Chegou ao destino!');
+            stopNavigation();
+        }
+
+        // Update UI for navigation mode
+        function updateNavigationUI(result) {
+            const route = result.routes[0];
+            const leg = route.legs[0];
+            
+            // Update location info with route details
+            const locationInfo = document.querySelector('.location-info');
+            locationInfo.innerHTML = `
+                <div class="location-label">Navegação Ativa</div>
+                <div class="location-value">
+                    <i class="fas fa-route"></i>
+                    <span>Distância: ${leg.distance.text}</span>
+                </div>
+                <div class="location-accuracy">
+                    Tempo estimado: ${leg.duration.text}
+                </div>
+            `;
+            
+            // Update destination info
+            const destinationInfo = document.querySelector('.location-info:nth-child(3)');
+            destinationInfo.innerHTML = `
+                <div class="location-label">Status</div>
+                <div class="location-value">
+                    <i class="fas fa-navigation"></i>
+                    <span>Siga as instruções do mapa</span>
+                </div>
+            `;
+            
+            // Hide navigation button and show stop button
+            document.getElementById('navigationBtn').style.display = 'none';
+            
+            const actionButtons = document.querySelector('.action-buttons');
+            actionButtons.innerHTML = `
+                <button class="action-btn btn-secondary" onclick="stopNavigation()">
+                    <i class="fas fa-stop"></i>
+                    Parar Navegação
+                </button>
+            `;
+        }
+
+        // Stop navigation and return to selection mode
+        function stopNavigation() {
+            // Stop GPS tracking
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            // Reset navigation state
+            isNavigating = false;
+            
+            // Clear navigation marker
+            if (navigationMarker) {
+                navigationMarker.setMap(null);
+                navigationMarker = null;
+            }
+            
+            // Clear directions
+            directionsRenderer.setMap(null);
+            
+            // Reset map to normal view
+            map.setOptions({
+                tilt: 0,
+                heading: 0,
+                zoom: 18,
+                disableDefaultUI: false,
+                zoomControl: true,
+                gestureHandling: 'greedy'
+            });
+            
+            // Show center pin again
+            document.getElementById('centerPin').style.display = 'block';
+            
+            // Reset UI
+            location.reload(); // Simple way to reset everything
         }
 
         // Manual location entry - open modal
@@ -1345,41 +1929,7 @@
             if (map && userLocation) {
                 map.setCenter(userLocation);
                 map.setZoom(17);
-                
-                if (marker) marker.setMap(null);
-                
-                marker = new google.maps.Marker({
-                    position: userLocation,
-                    map: map,
-                    title: 'Arraste para ajustar sua localização',
-                    draggable: true,
-                    icon: {
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-                                <circle cx="16" cy="16" r="12" fill="#007bff" stroke="white" stroke-width="3"/>
-                                <circle cx="16" cy="16" r="6" fill="white"/>
-                                <circle cx="16" cy="16" r="2" fill="#007bff"/>
-                            </svg>
-                        `),
-                        anchor: new google.maps.Point(16, 16)
-                    }
-                });
-                
-                // Add drag listeners
-                marker.addListener('dragend', function(event) {
-                    const newPosition = {
-                        lat: event.latLng.lat(),
-                        lng: event.latLng.lng()
-                    };
-                    
-                    userLocation = newPosition;
-                    updateAddressFromPosition(newPosition);
-                    showCurrentPositionIndicator();
-                });
-
-                marker.addListener('dragstart', function() {
-                    showCurrentPositionIndicator();
-                });
+                showCurrentPositionIndicator();
             }
         }
 
