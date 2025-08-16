@@ -923,6 +923,9 @@
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 18,
                 center: defaultLocation,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                tilt: 0, // Start with normal view
+                heading: 0,
                 styles: [
                     {
                         featureType: 'poi',
@@ -938,7 +941,10 @@
                 zoomControl: true,
                 zoomControlOptions: {
                     position: google.maps.ControlPosition.RIGHT_BOTTOM
-                }
+                },
+                // Enable 3D features
+                minZoom: 10,
+                maxZoom: 20
             });
 
             // Initialize geocoder
@@ -1524,29 +1530,46 @@
             document.querySelector('.header').style.display = 'none';
             document.getElementById('navigationHeader').classList.add('active');
             
-            // Create navigation marker (arrow that follows user)
-            createNavigationMarker();
-            
-            // Switch to 3D navigation view
-            map.setOptions({
-                tilt: 45, // 3D tilt view like Uber
-                heading: currentHeading,
-                zoom: 19, // Close zoom for navigation
-                disableDefaultUI: true,
-                zoomControl: false,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
-                gestureHandling: 'cooperative' // Allow rotation gestures
-            });
-            
-            // Center on user location
+            // Center on user location first
             if (userLocation) {
                 map.setCenter(userLocation);
             }
+            
+            // Wait a moment then switch to 3D navigation view
+            setTimeout(() => {
+                // First set zoom to enable 3D features
+                map.setZoom(20);
+                
+                setTimeout(() => {
+                    // Then apply 3D options
+                    map.setTilt(45); // 3D tilt view like Waze
+                    map.setHeading(currentHeading);
+                    
+                    map.setOptions({
+                        disableDefaultUI: true,
+                        zoomControl: false,
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        fullscreenControl: false,
+                        gestureHandling: 'cooperative', // Allow rotation gestures
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
+                    
+                    // Force map refresh after setting 3D options
+                    google.maps.event.trigger(map, 'resize');
+                    
+                    // Create navigation marker after 3D mode is set
+                    createNavigationMarker();
+                    
+                    // Debug: Check if tilt was applied
+                    console.log('Navigation mode activated. Tilt:', map.getTilt(), 'Zoom:', map.getZoom());
+                    
+                }, 200);
+                
+            }, 500); // Small delay to ensure map is ready
         }
 
-        // Create navigation marker (arrow icon)
+        // Create navigation marker (arrow icon like Waze)
         function createNavigationMarker() {
             if (navigationMarker) {
                 navigationMarker.setMap(null);
@@ -1556,16 +1579,18 @@
                 position: userLocation,
                 map: map,
                 icon: {
-                    path: 'M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z',
-                    fillColor: '#4285F4',
+                    // Better Waze-style navigation arrow
+                    path: 'M0,-20 L-6,-8 L-3,-8 L-3,8 L3,8 L3,-8 L6,-8 Z',
+                    fillColor: '#1E90FF',
                     fillOpacity: 1,
-                    strokeColor: '#FFFFFF',
+                    strokeColor: '#000000',
                     strokeWeight: 2,
-                    scale: 1.5,
-                    anchor: new google.maps.Point(12, 12),
+                    scale: 1.8,
+                    anchor: new google.maps.Point(0, 0),
                     rotation: currentHeading
                 },
-                zIndex: 1000
+                zIndex: 1000,
+                optimized: false // Better for rotation animations
             });
         }
 
@@ -1600,7 +1625,11 @@
 
             // Calculate heading if we have a previous position
             if (lastPosition) {
-                currentHeading = calculateHeading(lastPosition, newPosition);
+                const distance = calculateDistance(lastPosition, newPosition);
+                // Only update heading if moved significantly (reduces jitter)
+                if (distance > 5) {
+                    currentHeading = calculateHeading(lastPosition, newPosition);
+                }
             }
 
             // Update user location
@@ -1610,21 +1639,34 @@
             // Update navigation marker position and rotation
             if (navigationMarker) {
                 navigationMarker.setPosition(newPosition);
-                navigationMarker.setIcon({
-                    path: 'M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z',
-                    fillColor: '#4285F4',
+                
+                // Update the icon with new rotation
+                const newIcon = {
+                    // Better Waze-style navigation arrow
+                    path: 'M0,-20 L-6,-8 L-3,-8 L-3,8 L3,8 L3,-8 L6,-8 Z',
+                    fillColor: '#1E90FF',
                     fillOpacity: 1,
-                    strokeColor: '#FFFFFF',
+                    strokeColor: '#000000',
                     strokeWeight: 2,
                     scale: 1.8,
-                    anchor: new google.maps.Point(12, 12),
+                    anchor: new google.maps.Point(0, 0),
                     rotation: currentHeading
-                });
+                };
+                
+                navigationMarker.setIcon(newIcon);
             }
 
             // Update map center and rotation to follow user (smooth transition)
             map.panTo(newPosition);
-            map.setHeading(currentHeading);
+            
+            // Smoothly update map heading
+            const currentMapHeading = map.getHeading() || 0;
+            const headingDiff = Math.abs(currentHeading - currentMapHeading);
+            
+            // Only update heading if significant change to avoid jitter
+            if (headingDiff > 10) {
+                map.setHeading(currentHeading);
+            }
 
             // Update navigation UI with current distance
             const distanceToDestination = calculateDistance(newPosition, destinationLocation);
@@ -1753,6 +1795,15 @@
             
             // Reset navigation state
             isNavigating = false;
+            currentHeading = 0;
+            lastPosition = null;
+            
+            // Remove navigation mode class
+            document.body.classList.remove('navigation-mode');
+            
+            // Show regular header, hide navigation header
+            document.querySelector('.header').style.display = 'block';
+            document.getElementById('navigationHeader').classList.remove('active');
             
             // Clear navigation marker
             if (navigationMarker) {
@@ -1763,18 +1814,26 @@
             // Clear directions
             directionsRenderer.setMap(null);
             
-            // Reset map to normal view
+            // Reset map to normal view with smooth transition
             map.setOptions({
                 tilt: 0,
                 heading: 0,
                 zoom: 18,
                 disableDefaultUI: false,
                 zoomControl: true,
-                gestureHandling: 'greedy'
+                gestureHandling: 'greedy',
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
             });
             
             // Show center pin again
             document.getElementById('centerPin').style.display = 'block';
+            
+            // Force map refresh
+            setTimeout(() => {
+                google.maps.event.trigger(map, 'resize');
+            }, 100);
             
             // Reset UI
             location.reload(); // Simple way to reset everything
