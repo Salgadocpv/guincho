@@ -314,6 +314,97 @@
             opacity: 1;
             transform: translateX(-50%) translateY(8px);
         }
+
+        /* Orientation Controls */
+        .orientation-controls {
+            position: fixed;
+            top: 80px;
+            right: 12px;
+            z-index: 160;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .orientation-btn {
+            width: 44px;
+            height: 44px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 22px;
+            color: white;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .orientation-btn:hover {
+            background: rgba(0,0,0,0.9);
+            border-color: rgba(255,255,255,0.5);
+            transform: scale(1.05);
+        }
+
+        .orientation-btn.active {
+            background: rgba(30,144,255,0.8);
+            border-color: rgba(30,144,255,1);
+            box-shadow: 0 0 12px rgba(30,144,255,0.5);
+        }
+
+        /* GPS Precision Indicator */
+        .gps-indicator {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: #28a745;
+            box-shadow: 0 0 6px rgba(40,167,69,0.6);
+        }
+
+        .gps-indicator.medium { background: #ffc107; }
+        .gps-indicator.low { background: #dc3545; }
+
+        /* Enhanced Triangle with Shadow */
+        .navigation-marker-enhanced {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+        }
+
+        /* Mini Compass */
+        .mini-compass {
+            position: fixed;
+            bottom: 120px;
+            right: 12px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            z-index: 150;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .mini-compass.visible {
+            display: flex;
+        }
+
+        .compass-needle {
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to top, #dc3545 0%, #dc3545 50%, #28a745 50%, #28a745 100%);
+            transform-origin: center bottom;
+            transition: transform 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -376,6 +467,22 @@
         <i class="fas fa-route"></i> Rota recalculada
     </div>
 
+    <!-- Orientation Controls -->
+    <div class="orientation-controls">
+        <button class="orientation-btn active" id="orientationBtn" onclick="toggleOrientationMode()" title="Modo de Orientação">
+            <i class="fas fa-compass"></i>
+            <div class="gps-indicator" id="gpsIndicator"></div>
+        </button>
+        <button class="orientation-btn" id="recenterBtn" onclick="recenterMap()" title="Recentralizar">
+            <i class="fas fa-crosshairs"></i>
+        </button>
+    </div>
+
+    <!-- Mini Compass -->
+    <div class="mini-compass" id="miniCompass">
+        <div class="compass-needle" id="compassNeedle"></div>
+    </div>
+
     <!-- Google Maps API -->
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&callback=initNavigation&libraries=geometry,places">
@@ -404,6 +511,17 @@
         let routeDeviationThreshold = 50;
         let tiltMonitoringInterval = null;
         
+        // Adaptive Orientation System
+        let orientationMode = 'auto'; // 'auto', 'compass', 'movement', 'north'
+        let navigationState = 'initializing'; // 'initializing', 'navigating', 'arriving', 'lost'
+        let userSpeed = 0;
+        let lastOrientationUpdate = 0;
+        let smoothingLevel = 'medium'; // 'low', 'medium', 'high'
+        let rotationSensitivity = 'medium'; // 'low', 'medium', 'high'
+        let lastSignificantTurn = 0;
+        let stabilityCounter = 0;
+        let performanceMode = 'normal'; // 'normal', 'eco'
+        
         // Smoothing arrays
         let headingSmoothing = [];
         let positionSmoothing = [];
@@ -412,6 +530,370 @@
         // Locations from URL parameters
         let originAddress = '';
         let destinationAddress = '';
+
+        // ==================== ADAPTIVE ORIENTATION SYSTEM ====================
+        
+        // Get optimal smoothing settings based on context
+        function getAdaptiveSettings(speed, accuracy) {
+            if (speed < 0.5) {
+                // Stationary or very slow
+                return {
+                    threshold: 5,
+                    smoothingWindow: 5,
+                    updateDelay: 200,
+                    source: 'compass'
+                };
+            } else if (speed < 3.0) {
+                // Walking/slow movement
+                return {
+                    threshold: 3,
+                    smoothingWindow: 4,
+                    updateDelay: 150,
+                    source: 'hybrid'
+                };
+            } else {
+                // Driving/fast movement
+                return {
+                    threshold: 1,
+                    smoothingWindow: 3,
+                    updateDelay: 100,
+                    source: 'gps'
+                };
+            }
+        }
+
+        // Determine navigation state based on context
+        function updateNavigationState(speed, distanceToDestination) {
+            const previousState = navigationState;
+            
+            if (distanceToDestination < 50) {
+                navigationState = 'arriving';
+            } else if (speed < 0.2 && Date.now() - lastOrientationUpdate > 30000) {
+                navigationState = 'lost';
+            } else if (speed > 0.5) {
+                navigationState = 'navigating';
+            }
+            
+            if (previousState !== navigationState) {
+                console.log('Navigation state changed:', previousState, '->', navigationState);
+                onNavigationStateChange(navigationState);
+            }
+        }
+
+        // Enhanced navigation state management with transitions
+        function onNavigationStateChange(newState) {
+            const previousState = navigationState;
+            
+            // Update UI based on state
+            updateNavigationStateUI(newState);
+            
+            switch(newState) {
+                case 'arriving':
+                    // Precision mode for final approach
+                    smoothingLevel = 'low';
+                    rotationSensitivity = 'high';
+                    smoothingWindow = 2; // Less smoothing for responsiveness
+                    
+                    // Enhanced visual feedback
+                    showStateNotification('🎯 Chegando ao destino', 'success');
+                    
+                    // Prepare for parking assistance
+                    activateParkingMode();
+                    break;
+                    
+                case 'lost':
+                    // Recovery mode - help user reorient
+                    smoothingLevel = 'medium';
+                    rotationSensitivity = 'low';
+                    smoothingWindow = 4; // More smoothing to reduce jitter
+                    
+                    // Auto-recenter and provide guidance
+                    setTimeout(() => recenterMap(), 1000);
+                    showStateNotification('🔄 Reorientando...', 'warning');
+                    
+                    // Suggest route recalculation if lost for too long
+                    setTimeout(() => {
+                        if (navigationState === 'lost') {
+                            suggestRouteRecalculation();
+                        }
+                    }, 15000);
+                    break;
+                    
+                case 'navigating':
+                    // Standard navigation mode
+                    smoothingLevel = 'medium';
+                    rotationSensitivity = 'medium';
+                    smoothingWindow = 3;
+                    
+                    if (previousState === 'lost') {
+                        showStateNotification('✅ Navegação retomada', 'success');
+                    }
+                    break;
+                    
+                case 'paused':
+                    // User stopped - conserve battery
+                    performanceMode = 'eco';
+                    smoothingLevel = 'high';
+                    break;
+                    
+                case 'traffic':
+                    // Traffic detected - suggest alternatives
+                    showStateNotification('🚦 Trânsito detectado', 'info');
+                    setTimeout(() => suggestAlternativeRoute(), 5000);
+                    break;
+            }
+            
+            // Log state transition for debugging
+            console.log('Navigation state transition:', {
+                from: previousState,
+                to: newState,
+                timestamp: new Date().toLocaleTimeString(),
+                context: {
+                    speed: userSpeed?.toFixed(1) + 'm/s',
+                    accuracy: userLocation?.accuracy + 'm'
+                }
+            });
+        }
+        
+        // Update UI elements based on navigation state
+        function updateNavigationStateUI(state) {
+            const statusElement = document.querySelector('.nav-status span');
+            const statusDot = document.querySelector('.status-dot');
+            
+            switch(state) {
+                case 'arriving':
+                    statusElement.textContent = 'Chegando ao destino';
+                    statusDot.style.background = '#FFD700';
+                    statusDot.style.animation = 'pulse 1s infinite';
+                    break;
+                case 'lost':
+                    statusElement.textContent = 'Reorientando posição';
+                    statusDot.style.background = '#FF6B6B';
+                    statusDot.style.animation = 'pulse 0.5s infinite';
+                    break;
+                case 'navigating':
+                    statusElement.textContent = 'Navegação ativa';
+                    statusDot.style.background = '#28a745';
+                    statusDot.style.animation = 'pulse 2s infinite';
+                    break;
+                case 'paused':
+                    statusElement.textContent = 'Navegação pausada';
+                    statusDot.style.background = '#6c757d';
+                    statusDot.style.animation = 'none';
+                    break;
+                case 'traffic':
+                    statusElement.textContent = 'Trânsito detectado';
+                    statusDot.style.background = '#FFA500';
+                    statusDot.style.animation = 'pulse 1.5s infinite';
+                    break;
+            }
+        }
+        
+        // Show contextual state notifications
+        function showStateNotification(message, type = 'info') {
+            const notification = document.getElementById('recalcNotification');
+            const icon = notification.querySelector('i');
+            
+            // Update notification appearance based on type
+            notification.innerHTML = `<i class="fas ${getNotificationIcon(type)}"></i> ${message}`;
+            
+            // Style based on type
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'rgba(40,167,69,0.9)';
+                    notification.style.color = 'white';
+                    break;
+                case 'warning':
+                    notification.style.background = 'rgba(255,193,7,0.9)';
+                    notification.style.color = '#000';
+                    break;
+                case 'error':
+                    notification.style.background = 'rgba(220,53,69,0.9)';
+                    notification.style.color = 'white';
+                    break;
+                default:
+                    notification.style.background = 'rgba(23,162,184,0.9)';
+                    notification.style.color = 'white';
+            }
+            
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'fa-check-circle';
+                case 'warning': return 'fa-exclamation-triangle';
+                case 'error': return 'fa-times-circle';
+                case 'info': return 'fa-info-circle';
+                default: return 'fa-info';
+            }
+        }
+        
+        // Parking assistance mode
+        function activateParkingMode() {
+            // Increase marker sensitivity for final positioning
+            smoothingWindow = 1; // Minimal smoothing for precision
+            
+            // Enhanced visual feedback for arrival
+            if (navigationMarker) {
+                // Increase marker size and change color for arrival
+                updateNavigationMarker(userLocation);
+            }
+        }
+        
+        // Suggest route recalculation when lost
+        function suggestRouteRecalculation() {
+            const shouldRecalc = confirm('Parece que você se desviou da rota. Deseja recalcular?');
+            if (shouldRecalc && userLocation) {
+                recalculateRoute(userLocation);
+            }
+        }
+        
+        // Suggest alternative route during traffic
+        function suggestAlternativeRoute() {
+            showStateNotification('💡 Calculando rotas alternativas...', 'info');
+            // This would integrate with traffic data services
+        }
+
+        // Intelligent orientation selection
+        function getOptimalHeading(gpsHeading, compassHeading, movementHeading, speed, accuracy) {
+            const settings = getAdaptiveSettings(speed, accuracy);
+            
+            switch(orientationMode) {
+                case 'north':
+                    return 0; // Always north
+                    
+                case 'compass':
+                    return compassHeading || 0;
+                    
+                case 'movement':
+                    return movementHeading || gpsHeading || compassHeading || 0;
+                    
+                case 'auto':
+                default:
+                    // Intelligent selection based on context
+                    if (settings.source === 'gps' && gpsHeading !== null) {
+                        return gpsHeading;
+                    } else if (settings.source === 'compass' && compassHeading !== null) {
+                        return compassHeading;
+                    } else if (settings.source === 'hybrid') {
+                        // Blend GPS and compass
+                        if (gpsHeading !== null && compassHeading !== null) {
+                            const weight = Math.min(speed / 2.0, 1.0); // Weight towards GPS as speed increases
+                            return blendHeadings(gpsHeading, compassHeading, weight);
+                        }
+                        return gpsHeading || compassHeading || movementHeading || 0;
+                    }
+                    return movementHeading || 0;
+            }
+        }
+
+        // Blend two headings with weight
+        function blendHeadings(heading1, heading2, weight) {
+            // Convert to radians
+            const rad1 = heading1 * Math.PI / 180;
+            const rad2 = heading2 * Math.PI / 180;
+            
+            // Blend using circular interpolation
+            const x = (1 - weight) * Math.cos(rad1) + weight * Math.cos(rad2);
+            const y = (1 - weight) * Math.sin(rad1) + weight * Math.sin(rad2);
+            
+            // Convert back to degrees
+            let result = Math.atan2(y, x) * 180 / Math.PI;
+            return (result + 360) % 360;
+        }
+
+        // Detect significant turns for instant rotation
+        function detectSignificantTurn(newHeading, threshold = 30) {
+            const headingDiff = Math.abs(newHeading - currentHeading);
+            const normalizedDiff = Math.min(headingDiff, 360 - headingDiff);
+            
+            if (normalizedDiff > threshold) {
+                lastSignificantTurn = Date.now();
+                return true;
+            }
+            return false;
+        }
+
+        // Advanced performance optimization with debouncing and batching
+        let updateQueue = [];
+        let isProcessingUpdates = false;
+        let pendingAnimationFrame = null;
+        
+        function shouldUpdateOrientation(newHeading, speed) {
+            const timeSinceLastUpdate = Date.now() - lastOrientationUpdate;
+            const headingChange = Math.abs(newHeading - currentHeading);
+            
+            // Always update on significant turns
+            if (detectSignificantTurn(newHeading)) {
+                return true;
+            }
+            
+            // Adaptive performance based on device capabilities
+            const performanceThreshold = getPerformanceThreshold();
+            
+            // Reduce updates when driving straight at high speed
+            if (speed > 5.0 && headingChange < 2 && timeSinceLastUpdate < performanceThreshold) {
+                return false;
+            }
+            
+            // Battery optimization for low-power devices
+            if (performanceMode === 'eco' && headingChange < 1 && timeSinceLastUpdate < 300) {
+                return false;
+            }
+            
+            // Normal update frequency
+            return timeSinceLastUpdate > Math.max(100, performanceThreshold / 2);
+        }
+        
+        // Detect device performance capabilities
+        function getPerformanceThreshold() {
+            // Check device memory and connection
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const memory = navigator.deviceMemory || 4; // Default to 4GB
+            
+            if (memory < 2 || (connection && connection.effectiveType === '2g')) {
+                performanceMode = 'eco';
+                return 800; // Slower updates for low-end devices
+            } else if (memory < 4 || (connection && connection.effectiveType === '3g')) {
+                return 500; // Medium updates
+            } else {
+                return 200; // Fast updates for high-end devices
+            }
+        }
+        
+        // Batch updates using requestAnimationFrame
+        function scheduleMapUpdate(updateFn) {
+            updateQueue.push(updateFn);
+            
+            if (!pendingAnimationFrame) {
+                pendingAnimationFrame = requestAnimationFrame(() => {
+                    processBatchedUpdates();
+                    pendingAnimationFrame = null;
+                });
+            }
+        }
+        
+        function processBatchedUpdates() {
+            if (isProcessingUpdates || updateQueue.length === 0) return;
+            
+            isProcessingUpdates = true;
+            
+            try {
+                // Process all queued updates in a single animation frame
+                while (updateQueue.length > 0) {
+                    const updateFn = updateQueue.shift();
+                    updateFn();
+                }
+            } catch (error) {
+                console.error('Error processing batched updates:', error);
+            } finally {
+                isProcessingUpdates = false;
+            }
+        }
 
         // Initialize navigation from URL parameters
         function initNavigation() {
@@ -614,9 +1096,14 @@
                     // Initialize compass heading if available
                     initializeCompass();
                     
+                    // Apply contextual settings
+                    const contextSettings = getContextualSettings();
+                    console.log('Applied contextual settings:', contextSettings);
+                    
                     isNavigating = true;
                     
                     console.log('Navigation started with', routeSteps.length, 'steps');
+                    console.log('User preferences active:', userPreferences);
                 } else {
                     alert('Não foi possível calcular a rota: ' + status);
                     goBack();
@@ -753,17 +1240,20 @@
             );
         }
 
-        // Update position during navigation
+        // Update position during navigation with adaptive system
         function updateNavigationPosition(position) {
             if (!isNavigating) return;
 
             const rawPosition = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
-                accuracy: position.coords.accuracy,
+                accuracy: position.coords.accuracy || 50,
                 heading: position.coords.heading,
-                speed: position.coords.speed
+                speed: position.coords.speed || 0
             };
+
+            // Update global speed for adaptive settings
+            userSpeed = rawPosition.speed;
 
             // Apply smoothing
             const smoothedPosition = applySmoothingToPosition(rawPosition);
@@ -771,43 +1261,60 @@
             // Check for route deviation
             checkRouteDeviation(smoothedPosition);
 
-            // Calculate heading with improved accuracy for map rotation
+            // Calculate distance to destination for state management
+            const distanceToDestination = calculateDistance(smoothedPosition, destinationLocation);
+            
+            // Update navigation state
+            updateNavigationState(userSpeed, distanceToDestination);
+
+            // Calculate all possible headings
+            let gpsHeading = rawPosition.heading;
+            let compassHeading = null; // Will be set by device orientation
+            let movementHeading = null;
+
             if (lastPosition) {
                 const distance = calculateDistance(lastPosition, smoothedPosition);
-                if (distance > 1.5) {
-                    let newHeading;
+                if (distance > 1.0) {
+                    movementHeading = calculateHeading(lastPosition, smoothedPosition);
+                }
+            }
+
+            // Get optimal heading using intelligent system
+            const optimalHeading = getOptimalHeading(gpsHeading, compassHeading, movementHeading, userSpeed, rawPosition.accuracy);
+            
+            // Check if we should update orientation
+            if (shouldUpdateOrientation(optimalHeading, userSpeed)) {
+                // Apply adaptive smoothing
+                const settings = getAdaptiveSettings(userSpeed, rawPosition.accuracy);
+                smoothingWindow = settings.smoothingWindow;
+                
+                const smoothedHeading = applySmoothingToHeading(optimalHeading);
+                
+                // Update with threshold based on speed and context
+                if (Math.abs(smoothedHeading - currentHeading) > settings.threshold || detectSignificantTurn(smoothedHeading)) {
+                    currentHeading = smoothedHeading;
+                    lastOrientationUpdate = Date.now();
                     
-                    // Prefer GPS heading when moving fast, compass when stationary/slow
-                    if (rawPosition.heading !== null && rawPosition.heading !== undefined && rawPosition.speed > 1.0) {
-                        // Use GPS heading when moving - more accurate for direction of travel
-                        newHeading = rawPosition.heading;
-                        console.log('Using GPS heading for movement:', newHeading.toFixed(1), '° Speed:', rawPosition.speed?.toFixed(1), 'm/s');
-                    } else {
-                        // Calculate heading from movement when GPS heading unavailable
-                        newHeading = calculateHeading(lastPosition, smoothedPosition);
-                        console.log('Using calculated heading from movement:', newHeading.toFixed(1), '°');
-                    }
-                    
-                    // Apply smoothing for stable rotation
-                    const smoothedHeading = applySmoothingToHeading(newHeading);
-                    
-                    // Only update map if heading changed significantly
-                    if (Math.abs(smoothedHeading - currentHeading) > 1) {
-                        currentHeading = smoothedHeading;
-                        console.log('Heading updated for map rotation:', currentHeading.toFixed(1), '°');
-                    }
+                    console.log('Adaptive heading update:', {
+                        heading: currentHeading.toFixed(1) + '°',
+                        source: settings.source,
+                        speed: userSpeed?.toFixed(1) + 'm/s',
+                        threshold: settings.threshold + '°',
+                        state: navigationState
+                    });
                 }
             }
 
             userLocation = smoothedPosition;
             lastPosition = smoothedPosition;
 
-            // Update marker and map
+            // Update visual elements
             updateNavigationMarker(smoothedPosition);
             updateMapFollowing(smoothedPosition);
+            updateGPSIndicator(rawPosition.accuracy);
+            updateMiniCompass(currentHeading);
 
             // Update distance display
-            const distanceToDestination = calculateDistance(smoothedPosition, destinationLocation);
             updateDistanceDisplay(distanceToDestination);
 
             // Check arrival
@@ -921,14 +1428,47 @@
         function updateNavigationMarker(position) {
             if (!navigationMarker) return;
             navigationMarker.setPosition(position);
+            
+            // Enhanced triangle with GPS accuracy indication
+            let fillColor = '#1E90FF'; // Default blue
+            let strokeColor = '#FFFFFF';
+            let scale = 1.2;
+            
+            // Adjust color based on GPS accuracy
+            if (userLocation && userLocation.accuracy) {
+                if (userLocation.accuracy < 10) {
+                    fillColor = '#00FF41'; // High accuracy - green
+                } else if (userLocation.accuracy < 25) {
+                    fillColor = '#FFD700'; // Medium accuracy - yellow
+                } else {
+                    fillColor = '#FF6B6B'; // Low accuracy - red
+                }
+            }
+            
+            // Adjust size based on speed and navigation state
+            switch(navigationState) {
+                case 'arriving':
+                    scale = 1.4; // Larger when arriving
+                    break;
+                case 'navigating':
+                    scale = userSpeed > 10 ? 1.3 : 1.2; // Slightly larger when moving fast
+                    break;
+                case 'lost':
+                    scale = 1.1; // Smaller when lost
+                    fillColor = '#FF4444'; // Red when lost
+                    break;
+                default:
+                    scale = 1.2;
+            }
+            
             navigationMarker.setIcon({
-                // Simple blue triangle pointing in user direction
+                // Enhanced triangle with shadow effect
                 path: 'M0,-20 L-10,10 L0,5 L10,10 Z',
-                fillColor: '#1E90FF',
-                fillOpacity: 1.0,
-                strokeColor: '#FFFFFF',
-                strokeWeight: 2,
-                scale: 1.2,
+                fillColor: fillColor,
+                fillOpacity: 0.9,
+                strokeColor: strokeColor,
+                strokeWeight: 2.5,
+                scale: scale,
                 anchor: new google.maps.Point(0, 0),
                 rotation: currentHeading
             });
@@ -937,40 +1477,71 @@
         function updateMapFollowing(position) {
             if (!map || !position) return;
             
-            // Smooth pan to new position
-            map.panTo(position);
-            
-            // Gently maintain tilt without being too aggressive
-            const currentTilt = map.getTilt();
-            if (currentTilt < 35) {
-                console.log('Gentle tilt maintenance:', currentTilt, '-> 45');
-                map.setTilt(45);
-            }
-            
-            // Rotate map to match user's orientation (triangle direction)
-            // The map should rotate so the top of the map points in the direction the user is facing
-            const currentMapHeading = map.getHeading() || 0;
-            let headingDiff = currentHeading - currentMapHeading;
-            
-            // Normalize heading difference to shortest rotation
-            if (headingDiff > 180) headingDiff -= 360;
-            if (headingDiff < -180) headingDiff += 360;
-            
-            // More responsive rotation for better navigation experience
-            if (Math.abs(headingDiff) > 1) {
-                // The map bearing should match the user's heading direction
-                // So when user points north (0°), map shows north at top
-                // When user points east (90°), map rotates so east is at top
-                const targetHeading = normalizeHeading(currentHeading);
-                map.setHeading(targetHeading);
+            // Use batched updates for performance
+            scheduleMapUpdate(() => {
+                // Smooth pan to new position
+                map.panTo(position);
                 
-                console.log('Map rotated to match user direction - User heading:', currentHeading, '° Map heading:', targetHeading, '°');
-            }
+                // Maintain 3D tilt based on navigation state
+                const currentTilt = map.getTilt();
+                if (currentTilt < 35) {
+                    map.setTilt(45);
+                }
+                
+                // Skip rotation if in north-fixed mode
+                if (orientationMode === 'north') {
+                    map.setHeading(0);
+                    return;
+                }
+                
+                // Get adaptive settings for rotation
+                const settings = getAdaptiveSettings(userSpeed, 10);
+                const currentMapHeading = map.getHeading() || 0;
+                let headingDiff = currentHeading - currentMapHeading;
+                
+                // Normalize heading difference to shortest rotation
+                if (headingDiff > 180) headingDiff -= 360;
+                if (headingDiff < -180) headingDiff += 360;
+                
+                // Use adaptive threshold for rotation
+                if (Math.abs(headingDiff) > settings.threshold) {
+                    const targetHeading = normalizeHeading(currentHeading);
+                    map.setHeading(targetHeading);
+                    
+                    console.log('Adaptive map rotation:', {
+                        mode: orientationMode,
+                        heading: currentHeading.toFixed(1) + '°',
+                        threshold: settings.threshold + '°',
+                        state: navigationState
+                    });
+                }
+                
+                // Adaptive zoom based on navigation state
+                const currentZoom = map.getZoom();
+                let targetZoom = getAdaptiveZoom();
+                
+                if (Math.abs(currentZoom - targetZoom) > 0.5) {
+                    map.setZoom(targetZoom);
+                }
+            });
+        }
+        
+        // Intelligent zoom calculation
+        function getAdaptiveZoom() {
+            let baseZoom = 20;
             
-            // Keep optimal zoom level for navigation
-            const currentZoom = map.getZoom();
-            if (currentZoom < 19 || currentZoom > 21) {
-                map.setZoom(20);
+            switch(navigationState) {
+                case 'arriving':
+                    return 21; // High detail for parking/arrival
+                case 'lost':
+                    return 18; // Wider view to help reorient
+                case 'navigating':
+                    // Speed-based zoom adjustment
+                    if (userSpeed > 20) return 18; // Highway speed - wider view
+                    if (userSpeed > 10) return 19; // City driving
+                    return 20; // Slow/urban navigation
+                default:
+                    return baseZoom;
             }
         }
         
@@ -1133,6 +1704,101 @@
             if (!document.querySelector('.map-container').classList.contains('css-3d')) {
                 document.querySelector('.map-container').classList.add('css-3d');
                 console.log('CSS 3D fallback activated for maintenance');
+            }
+        }
+
+        // ==================== INTERFACE CONTROLS ====================
+        
+        // Toggle orientation mode
+        function toggleOrientationMode() {
+            const modes = ['auto', 'compass', 'movement', 'north'];
+            const currentIndex = modes.indexOf(orientationMode);
+            const nextIndex = (currentIndex + 1) % modes.length;
+            orientationMode = modes[nextIndex];
+            
+            updateOrientationButton();
+            console.log('Orientation mode changed to:', orientationMode);
+            
+            // Update map immediately
+            if (userLocation) {
+                updateMapFollowing(userLocation);
+            }
+        }
+
+        // Update orientation button appearance
+        function updateOrientationButton() {
+            const btn = document.getElementById('orientationBtn');
+            const icon = btn.querySelector('i');
+            
+            // Remove all classes
+            icon.className = 'fas';
+            
+            switch(orientationMode) {
+                case 'auto':
+                    icon.classList.add('fa-compass');
+                    btn.title = 'Modo Automático';
+                    btn.classList.add('active');
+                    break;
+                case 'compass':
+                    icon.classList.add('fa-location-arrow');
+                    btn.title = 'Seguir Bússola';
+                    btn.classList.add('active');
+                    break;
+                case 'movement':
+                    icon.classList.add('fa-route');
+                    btn.title = 'Seguir Movimento';
+                    btn.classList.add('active');
+                    break;
+                case 'north':
+                    icon.classList.add('fa-arrow-up');
+                    btn.title = 'Norte Fixo';
+                    btn.classList.remove('active');
+                    break;
+            }
+        }
+
+        // Recenter map on user location
+        function recenterMap() {
+            if (userLocation && map) {
+                map.panTo(userLocation);
+                map.setZoom(20);
+                
+                // Add visual feedback
+                const btn = document.getElementById('recenterBtn');
+                btn.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 150);
+                
+                console.log('Map recentered on user location');
+            }
+        }
+
+        // Update GPS accuracy indicator
+        function updateGPSIndicator(accuracy) {
+            const indicator = document.getElementById('gpsIndicator');
+            
+            indicator.className = 'gps-indicator';
+            
+            if (accuracy < 10) {
+                indicator.classList.add('high');
+            } else if (accuracy < 25) {
+                indicator.classList.add('medium');
+            } else {
+                indicator.classList.add('low');
+            }
+        }
+
+        // Update mini compass
+        function updateMiniCompass(heading) {
+            const compass = document.getElementById('miniCompass');
+            const needle = document.getElementById('compassNeedle');
+            
+            if (orientationMode === 'compass' || orientationMode === 'auto') {
+                compass.classList.add('visible');
+                needle.style.transform = `rotate(${heading}deg)`;
+            } else {
+                compass.classList.remove('visible');
             }
         }
 
