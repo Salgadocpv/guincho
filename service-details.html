@@ -364,6 +364,54 @@
             transform: translateX(2px);
         }
 
+        /* Trip Input Styles */
+        .trip-input-container {
+            margin-top: 8px;
+        }
+
+        .trip-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .trip-input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(40,167,69,0.6);
+            box-shadow: 0 0 0 3px rgba(40,167,69,0.2);
+        }
+
+        .trip-input::placeholder {
+            color: rgba(255,255,255,0.6);
+            font-weight: 400;
+        }
+
+        .trip-input:disabled {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.4);
+            cursor: not-allowed;
+        }
+
+        /* Remove arrows from number input */
+        .trip-input::-webkit-outer-spin-button,
+        .trip-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .trip-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         /* Location Method Choice Modal */
         .location-modal-overlay {
             position: fixed;
@@ -525,6 +573,8 @@
             transition: all 0.3s ease;
             box-sizing: border-box;
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .address-input:focus {
@@ -592,6 +642,34 @@
 
         .location-modal .address-btn-primary * {
             color: #ffffff !important;
+        }
+
+        /* Google Places Autocomplete Styling */
+        .pac-container {
+            z-index: 99999 !important;
+            border-radius: 12px !important;
+            border: 2px solid rgba(0,123,255,0.3) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+            margin-top: 2px !important;
+        }
+
+        .pac-item {
+            padding: 12px 16px !important;
+            border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+            cursor: pointer !important;
+            font-size: 14px !important;
+        }
+
+        .pac-item:hover {
+            background-color: rgba(0,123,255,0.1) !important;
+        }
+
+        .pac-item:last-child {
+            border-bottom: none !important;
+        }
+
+        .pac-item-query {
+            font-weight: 600 !important;
         }
 
         /* Map selection mode styles */
@@ -751,6 +829,27 @@
                 </div>
                 <div class="trip-arrow">
                     <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+
+            <!-- Oferta de Valor -->
+            <div class="trip-item disabled" id="offerItem">
+                <div class="trip-icon">
+                    <i class="fas fa-dollar-sign" style="color: #28a745;"></i>
+                </div>
+                <div class="trip-content">
+                    <div class="trip-label">Sua Oferta</div>
+                    <div class="trip-input-container">
+                        <input 
+                            type="number" 
+                            id="offerInput" 
+                            class="trip-input" 
+                            placeholder="R$ 0,00"
+                            min="0"
+                            step="0.01"
+                            disabled
+                        >
+                    </div>
                 </div>
             </div>
 
@@ -955,6 +1054,20 @@
                     confirmAddressNew();
                 }
             });
+            
+            // Initialize offer input
+            const offerInput = document.getElementById('offerInput');
+            offerInput.addEventListener('input', function() {
+                updateOfferValue();
+            });
+            
+            // Format offer input on focus out
+            offerInput.addEventListener('blur', function() {
+                const value = parseFloat(this.value);
+                if (value > 0) {
+                    this.value = value.toFixed(2);
+                }
+            });
         });
 
         // ===== NEW SELECTION SYSTEM =====
@@ -1097,25 +1210,41 @@
         }
         
         // Inicializar Google Places Autocomplete
+        let currentAutocomplete = null;
+        
         function initializeAutocomplete(input) {
+            // Limpar autocomplete anterior se existir
+            if (currentAutocomplete) {
+                google.maps.event.clearInstanceListeners(currentAutocomplete);
+            }
+            
             if (!window.google || !google.maps.places) {
                 console.warn('Google Places API não disponível');
                 return;
             }
             
             // Criar autocomplete
-            const autocomplete = new google.maps.places.Autocomplete(input, {
+            currentAutocomplete = new google.maps.places.Autocomplete(input, {
                 types: ['establishment', 'geocode'],
                 componentRestrictions: { country: 'BR' },
-                fields: ['place_id', 'formatted_address', 'geometry', 'name']
+                fields: ['place_id', 'formatted_address', 'geometry', 'name', 'types']
             });
             
+            // Configurar o bias para a região do mapa se disponível
+            if (map && map.getBounds) {
+                try {
+                    currentAutocomplete.setBounds(map.getBounds());
+                } catch (e) {
+                    console.log('Não foi possível definir bounds do autocomplete');
+                }
+            }
+            
             // Listener para quando um local é selecionado
-            autocomplete.addListener('place_changed', function() {
-                const place = autocomplete.getPlace();
+            currentAutocomplete.addListener('place_changed', function() {
+                const place = currentAutocomplete.getPlace();
                 
                 if (!place.geometry) {
-                    console.log('Local não encontrado: ' + place.name);
+                    console.log('Local não encontrado: ' + (place.name || 'local desconhecido'));
                     return;
                 }
                 
@@ -1130,6 +1259,8 @@
                 closeAddressModalNew();
                 processSelectedLocation(location, address);
             });
+            
+            console.log('Autocomplete inicializado com sucesso');
         }
         
         // Processar local selecionado (do autocomplete ou geocoding)
@@ -1284,10 +1415,14 @@
             destinationText.textContent = destinationAddress;
             destinationItem.classList.add('completed');
             
-            // Enable confirm trip
-            const confirmItem = document.getElementById('confirmTripItem');
-            confirmItem.classList.remove('disabled');
-            confirmItem.querySelector('.trip-value').textContent = 'Confirmar e iniciar viagem';
+            // Enable offer input
+            const offerItem = document.getElementById('offerItem');
+            const offerInput = document.getElementById('offerInput');
+            offerItem.classList.remove('disabled');
+            offerInput.disabled = false;
+            
+            // Enable confirm trip only after offer is entered
+            checkIfCanConfirmTrip();
         }
 
         // Route drawing function
@@ -1318,9 +1453,49 @@
             });
         }
 
+        // Offer management functions
+        function updateOfferValue() {
+            const offerInput = document.getElementById('offerInput');
+            const value = parseFloat(offerInput.value);
+            
+            if (value > 0) {
+                const offerItem = document.getElementById('offerItem');
+                offerItem.classList.add('completed');
+                
+                // Update placeholder to show formatted value
+                offerInput.placeholder = `R$ ${value.toFixed(2)}`;
+            } else {
+                const offerItem = document.getElementById('offerItem');
+                offerItem.classList.remove('completed');
+                offerInput.placeholder = 'R$ 0,00';
+            }
+            
+            checkIfCanConfirmTrip();
+        }
+        
+        function checkIfCanConfirmTrip() {
+            const confirmItem = document.getElementById('confirmTripItem');
+            const offerInput = document.getElementById('offerInput');
+            const offerValue = parseFloat(offerInput.value);
+            
+            if (originLocation && destinationLocation && offerValue > 0) {
+                confirmItem.classList.remove('disabled');
+                confirmItem.querySelector('.trip-value').textContent = `Confirmar viagem - R$ ${offerValue.toFixed(2)}`;
+            } else {
+                confirmItem.classList.add('disabled');
+                confirmItem.querySelector('.trip-value').textContent = 'Defina origem, destino e oferta';
+            }
+        }
+
         // Navigation function
         function startNavigation() {
-            if (!originLocation || !destinationLocation) return;
+            const offerInput = document.getElementById('offerInput');
+            const offerValue = parseFloat(offerInput.value);
+            
+            if (!originLocation || !destinationLocation || !offerValue || offerValue <= 0) {
+                alert('Complete todos os campos antes de confirmar a viagem');
+                return;
+            }
             
             // Create navigation parameters
             const params = new URLSearchParams();
@@ -1331,6 +1506,7 @@
             params.set('destLng', destinationLocation.lng);
             params.set('destAddress', destinationAddress);
             params.set('service', selectedService);
+            params.set('offerValue', offerValue.toFixed(2));
             
             // Redirect to navigation page
             window.location.href = `navigation.html?${params.toString()}`;
