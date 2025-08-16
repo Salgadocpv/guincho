@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Guincho App - Navegação</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* Navigation Header */
+        .navigation-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 150;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 70%, transparent 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .back-button {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .stop-navigation {
+            background: rgba(220, 53, 69, 0.8);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stop-navigation:hover {
+            background: rgba(220, 53, 69, 1);
+        }
+
+        .navigation-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .navigation-subtitle {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .navigation-distance {
+            font-size: 0.8rem;
+            color: rgba(40,167,69,1);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* Map Container */
+        .map-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        /* Loading for map */
+        .map-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 10;
+            color: white;
+        }
+
+        .map-loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top: 3px solid #1E90FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        .map-loading-text {
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Bottom Info Panel */
+        .bottom-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .route-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .route-stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .route-stat-label {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 2px;
+        }
+
+        .route-stat-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .current-instruction {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Navigation Status */
+        .nav-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(40,167,69,0.3);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .navigation-header {
+                padding: 16px;
+            }
+            
+            .bottom-info {
+                margin: 0 12px 12px 12px;
+                padding: 12px;
+            }
+        }
+
+        /* Recalculation notification */
+        .recalc-notification {
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,193,7,0.9);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .recalc-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Map Container -->
+    <div class="map-container">
+        <div class="map-loading" id="mapLoading">
+            <div class="map-loading-spinner"></div>
+            <div class="map-loading-text">
+                Iniciando navegação...<br>
+                <small>Carregando rota e GPS</small>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <div class="navigation-header">
+        <div class="header-top">
+            <button class="back-button" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <button class="stop-navigation" onclick="stopNavigation()">
+                <i class="fas fa-stop"></i> Parar
+            </button>
+        </div>
+        <div class="navigation-title">Navegando para destino</div>
+        <div class="navigation-subtitle" id="navigationSubtitle">Siga as instruções do mapa</div>
+        <div class="navigation-distance" id="navigationDistance">Calculando rota...</div>
+    </div>
+
+    <!-- Bottom Info Panel -->
+    <div class="bottom-info">
+        <div class="route-info">
+            <div class="route-stat">
+                <div class="route-stat-label">Distância</div>
+                <div class="route-stat-value" id="totalDistance">-</div>
+            </div>
+            <div class="route-stat">
+                <div class="route-stat-label">Tempo</div>
+                <div class="route-stat-value" id="totalTime">-</div>
+            </div>
+            <div class="route-stat">
+                <div class="route-stat-label">Chegada</div>
+                <div class="route-stat-value" id="arrivalTime">-</div>
+            </div>
+        </div>
+        
+        <div class="current-instruction" id="currentInstruction">
+            Inicializando navegação...
+        </div>
+        
+        <div class="nav-status">
+            <div class="status-dot"></div>
+            <span>Navegação ativa</span>
+        </div>
+    </div>
+
+    <!-- Recalculation notification -->
+    <div class="recalc-notification" id="recalcNotification">
+        <i class="fas fa-route"></i> Rota recalculada
+    </div>
+
+    <!-- Google Maps API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&callback=initNavigation&libraries=geometry,places">
+    </script>
+
+    <script>
+        // Global variables
+        let map;
+        let directionsService;
+        let directionsRenderer;
+        let navigationMarker = null;
+        let destinationMarker = null;
+        let watchId = null;
+        let currentRoute = null;
+        let routeSteps = [];
+        let currentStepIndex = 0;
+        
+        // Navigation state
+        let isNavigating = false;
+        let currentHeading = 0;
+        let lastPosition = null;
+        let userLocation = null;
+        let destinationLocation = null;
+        let isRecalculating = false;
+        let lastRecalculationTime = 0;
+        let routeDeviationThreshold = 50;
+        
+        // Smoothing arrays
+        let headingSmoothing = [];
+        let positionSmoothing = [];
+        let smoothingWindow = 3;
+        
+        // Locations from URL parameters
+        let originAddress = '';
+        let destinationAddress = '';
+
+        // Initialize navigation from URL parameters
+        function initNavigation() {
+            // Get parameters from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Parse origin coordinates
+            const originLat = parseFloat(urlParams.get('originLat'));
+            const originLng = parseFloat(urlParams.get('originLng'));
+            
+            // Safe decode addresses with fallback
+            try {
+                originAddress = decodeURIComponent(urlParams.get('originAddress') || 'Origem');
+            } catch (e) {
+                originAddress = urlParams.get('originAddress') || 'Origem';
+            }
+            
+            // Parse destination coordinates  
+            const destLat = parseFloat(urlParams.get('destLat'));
+            const destLng = parseFloat(urlParams.get('destLng'));
+            
+            try {
+                destinationAddress = decodeURIComponent(urlParams.get('destAddress') || 'Destino');
+            } catch (e) {
+                destinationAddress = urlParams.get('destAddress') || 'Destino';
+            }
+            
+            // Validate parameters
+            if (isNaN(originLat) || isNaN(originLng) || isNaN(destLat) || isNaN(destLng)) {
+                alert('Parâmetros de navegação inválidos. Retornando...');
+                goBack();
+                return;
+            }
+            
+            userLocation = { lat: originLat, lng: originLng };
+            destinationLocation = { lat: destLat, lng: destLng };
+            
+            console.log('Navigation initialized:', { userLocation, destinationLocation });
+            
+            // Update page title with destination
+            const shortDestination = formatAddressForDisplay(destinationAddress);
+            document.getElementById('navigationSubtitle').textContent = `Para: ${shortDestination}`;
+            
+            // Initialize map
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 19,
+                center: userLocation,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                tilt: 45,
+                heading: 0,
+                disableDefaultUI: true,
+                gestureHandling: 'cooperative'
+            });
+
+            // Initialize directions service
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#1E90FF',
+                    strokeWeight: 10,
+                    strokeOpacity: 1.0,
+                    zIndex: 200
+                }
+            });
+            
+            directionsRenderer.setMap(map);
+            
+            // Hide loading and start navigation
+            document.getElementById('mapLoading').style.display = 'none';
+            
+            // Start navigation immediately
+            startNavigation();
+        }
+
+        // Start navigation with route calculation
+        function startNavigation() {
+            const request = {
+                origin: userLocation,
+                destination: destinationLocation,
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+                avoidHighways: false,
+                avoidTolls: false
+            };
+
+            directionsService.route(request, function(result, status) {
+                if (status === 'OK') {
+                    currentRoute = result;
+                    routeSteps = result.routes[0].legs[0].steps;
+                    currentStepIndex = 0;
+                    
+                    // Display route
+                    directionsRenderer.setDirections(result);
+                    
+                    // Create markers
+                    createNavigationMarker();
+                    createDestinationMarker();
+                    
+                    // Update UI
+                    updateNavigationInfo(result);
+                    
+                    // Start GPS tracking
+                    startGPSTracking();
+                    
+                    isNavigating = true;
+                    
+                    console.log('Navigation started with', routeSteps.length, 'steps');
+                } else {
+                    alert('Não foi possível calcular a rota: ' + status);
+                    goBack();
+                }
+            });
+        }
+
+        // Create navigation arrow marker
+        function createNavigationMarker() {
+            if (navigationMarker) {
+                navigationMarker.setMap(null);
+            }
+            
+            navigationMarker = new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                icon: {
+                    path: 'M0,-20 L-6,-8 L-3,-8 L-3,8 L3,8 L3,-8 L6,-8 Z',
+                    fillColor: '#1E90FF',
+                    fillOpacity: 1,
+                    strokeColor: '#000000',
+                    strokeWeight: 2,
+                    scale: 1.8,
+                    anchor: new google.maps.Point(0, 0),
+                    rotation: currentHeading
+                },
+                zIndex: 1000,
+                optimized: false
+            });
+        }
+
+        // Create destination marker
+        function createDestinationMarker() {
+            if (destinationMarker) {
+                destinationMarker.setMap(null);
+            }
+            
+            destinationMarker = new google.maps.Marker({
+                position: destinationLocation,
+                map: map,
+                icon: {
+                    path: 'M12,2C8.13,2 5,5.13 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9C19,5.13 15.87,2 12,2Z',
+                    fillColor: '#DC143C',
+                    fillOpacity: 1,
+                    strokeColor: '#FFFFFF',
+                    strokeWeight: 2,
+                    scale: 1.2,
+                    anchor: new google.maps.Point(12, 22)
+                },
+                title: 'Destino',
+                zIndex: 999
+            });
+        }
+
+        // Start GPS tracking
+        function startGPSTracking() {
+            if (!navigator.geolocation) {
+                console.error('Geolocation not supported');
+                return;
+            }
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 3000,
+                maximumAge: 1000
+            };
+
+            watchId = navigator.geolocation.watchPosition(
+                updateNavigationPosition,
+                handleGPSError,
+                options
+            );
+        }
+
+        // Update position during navigation
+        function updateNavigationPosition(position) {
+            if (!isNavigating) return;
+
+            const rawPosition = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                heading: position.coords.heading,
+                speed: position.coords.speed
+            };
+
+            // Apply smoothing
+            const smoothedPosition = applySmoothingToPosition(rawPosition);
+            
+            // Check for route deviation
+            checkRouteDeviation(smoothedPosition);
+
+            // Calculate heading
+            if (lastPosition) {
+                const distance = calculateDistance(lastPosition, smoothedPosition);
+                if (distance > 3) {
+                    let newHeading;
+                    if (rawPosition.heading !== null && rawPosition.speed > 1) {
+                        newHeading = rawPosition.heading;
+                    } else {
+                        newHeading = calculateHeading(lastPosition, smoothedPosition);
+                    }
+                    currentHeading = applySmoothingToHeading(newHeading);
+                }
+            }
+
+            userLocation = smoothedPosition;
+            lastPosition = smoothedPosition;
+
+            // Update marker and map
+            updateNavigationMarker(smoothedPosition);
+            updateMapFollowing(smoothedPosition);
+
+            // Update distance display
+            const distanceToDestination = calculateDistance(smoothedPosition, destinationLocation);
+            updateDistanceDisplay(distanceToDestination);
+
+            // Check arrival
+            if (distanceToDestination < 30) {
+                arrivedAtDestination();
+            }
+        }
+
+        // Update navigation info in UI
+        function updateNavigationInfo(result) {
+            const route = result.routes[0];
+            const leg = route.legs[0];
+            
+            document.getElementById('totalDistance').textContent = leg.distance.text;
+            document.getElementById('totalTime').textContent = leg.duration.text;
+            
+            // Calculate arrival time
+            const now = new Date();
+            const arrivalTime = new Date(now.getTime() + leg.duration.value * 1000);
+            document.getElementById('arrivalTime').textContent = arrivalTime.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Format destination address for better display
+            const shortDestinationAddress = formatAddressForDisplay(destinationAddress);
+            document.getElementById('currentInstruction').textContent = 
+                `Siga para ${shortDestinationAddress}`;
+        }
+
+        // Format address for better display (shorter version)
+        function formatAddressForDisplay(fullAddress) {
+            if (!fullAddress || fullAddress === 'Origem' || fullAddress === 'Destino') {
+                return fullAddress;
+            }
+            
+            // Split address into parts
+            const parts = fullAddress.split(',');
+            
+            if (parts.length >= 2) {
+                // Take first two parts (street and number, neighborhood)
+                return parts.slice(0, 2).join(',').trim();
+            }
+            
+            // If address is too long, truncate it
+            if (fullAddress.length > 40) {
+                return fullAddress.substring(0, 37) + '...';
+            }
+            
+            return fullAddress;
+        }
+
+        // Update distance display
+        function updateDistanceDisplay(distance) {
+            const distanceElement = document.getElementById('navigationDistance');
+            if (distance < 1000) {
+                distanceElement.textContent = `${Math.round(distance)}m restantes`;
+            } else {
+                distanceElement.textContent = `${(distance / 1000).toFixed(1)}km restantes`;
+            }
+        }
+
+        // Navigation utility functions (smoothing, calculations, etc.)
+        function applySmoothingToPosition(newPosition) {
+            positionSmoothing.push(newPosition);
+            if (positionSmoothing.length > smoothingWindow) {
+                positionSmoothing.shift();
+            }
+
+            let totalWeight = 0, weightedLat = 0, weightedLng = 0;
+            for (let i = 0; i < positionSmoothing.length; i++) {
+                const weight = (i + 1);
+                totalWeight += weight;
+                weightedLat += positionSmoothing[i].lat * weight;
+                weightedLng += positionSmoothing[i].lng * weight;
+            }
+
+            return {
+                lat: weightedLat / totalWeight,
+                lng: weightedLng / totalWeight,
+                accuracy: newPosition.accuracy
+            };
+        }
+
+        function applySmoothingToHeading(newHeading) {
+            headingSmoothing.push(newHeading);
+            if (headingSmoothing.length > smoothingWindow) {
+                headingSmoothing.shift();
+            }
+
+            let x = 0, y = 0;
+            for (let heading of headingSmoothing) {
+                x += Math.cos(heading * Math.PI / 180);
+                y += Math.sin(heading * Math.PI / 180);
+            }
+
+            return Math.atan2(y, x) * 180 / Math.PI;
+        }
+
+        function updateNavigationMarker(position) {
+            if (!navigationMarker) return;
+            navigationMarker.setPosition(position);
+            navigationMarker.setIcon({
+                path: 'M0,-20 L-6,-8 L-3,-8 L-3,8 L3,8 L3,-8 L6,-8 Z',
+                fillColor: '#1E90FF',
+                fillOpacity: 1,
+                strokeColor: '#000000',
+                strokeWeight: 2,
+                scale: 1.8,
+                anchor: new google.maps.Point(0, 0),
+                rotation: currentHeading
+            });
+        }
+
+        function updateMapFollowing(position) {
+            map.panTo(position);
+            const currentMapHeading = map.getHeading() || 0;
+            let headingDiff = currentHeading - currentMapHeading;
+            if (headingDiff > 180) headingDiff -= 360;
+            if (headingDiff < -180) headingDiff += 360;
+            if (Math.abs(headingDiff) > 5) {
+                map.setHeading(currentHeading);
+            }
+        }
+
+        function calculateDistance(pos1, pos2) {
+            const R = 6371e3;
+            const φ1 = pos1.lat * Math.PI/180;
+            const φ2 = pos2.lat * Math.PI/180;
+            const Δφ = (pos2.lat-pos1.lat) * Math.PI/180;
+            const Δλ = (pos2.lng-pos1.lng) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c;
+        }
+
+        function calculateHeading(from, to) {
+            const fromLat = from.lat * Math.PI / 180;
+            const fromLng = from.lng * Math.PI / 180;
+            const toLat = to.lat * Math.PI / 180;
+            const toLng = to.lng * Math.PI / 180;
+
+            const dLng = toLng - fromLng;
+            const y = Math.sin(dLng) * Math.cos(toLat);
+            const x = Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(dLng);
+
+            let heading = Math.atan2(y, x) * 180 / Math.PI;
+            heading = (heading + 360) % 360;
+            return heading;
+        }
+
+        // Route deviation and recalculation
+        function checkRouteDeviation(currentPosition) {
+            if (!currentRoute || isRecalculating) return;
+            
+            const now = Date.now();
+            if (now - lastRecalculationTime < 10000) return;
+
+            const distanceToRoute = calculateDistanceToRoute(currentPosition, currentRoute);
+            
+            if (distanceToRoute > routeDeviationThreshold) {
+                recalculateRoute(currentPosition);
+            }
+        }
+
+        function calculateDistanceToRoute(position, route) {
+            if (!route || !route.routes[0]) return 0;
+            
+            const path = route.routes[0].overview_path;
+            let minDistance = Infinity;
+            
+            for (let i = 0; i < path.length; i++) {
+                const pathPoint = {
+                    lat: path[i].lat(),
+                    lng: path[i].lng()
+                };
+                const distance = calculateDistance(position, pathPoint);
+                minDistance = Math.min(minDistance, distance);
+            }
+            
+            return minDistance;
+        }
+
+        function recalculateRoute(fromPosition) {
+            if (isRecalculating) return;
+            
+            isRecalculating = true;
+            lastRecalculationTime = Date.now();
+            
+            const request = {
+                origin: fromPosition,
+                destination: destinationLocation,
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC
+            };
+
+            directionsService.route(request, function(result, status) {
+                isRecalculating = false;
+                
+                if (status === 'OK') {
+                    currentRoute = result;
+                    routeSteps = result.routes[0].legs[0].steps;
+                    directionsRenderer.setDirections(result);
+                    updateNavigationInfo(result);
+                    showRecalculationNotification();
+                }
+            });
+        }
+
+        function showRecalculationNotification() {
+            const notification = document.getElementById('recalcNotification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function handleGPSError(error) {
+            console.error('GPS Error:', error);
+        }
+
+        function arrivedAtDestination() {
+            alert('Chegou ao destino!');
+            stopNavigation();
+        }
+
+        // Navigation controls
+        function stopNavigation() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            isNavigating = false;
+            goBack();
+        }
+
+        function goBack() {
+            window.location.href = 'service-details.html';
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            if (typeof google === 'undefined') {
+                setTimeout(() => {
+                    document.getElementById('mapLoading').innerHTML = `
+                        <div style="color: white; text-align: center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i><br>
+                            Erro ao carregar mapa<br>
+                            <button onclick="goBack()" style="margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Voltar</button>
+                        </div>
+                    `;
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

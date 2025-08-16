@@ -304,6 +304,12 @@
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Highlight panel when destination is selected */
+        .bottom-panel.destination-selected {
+            border: 2px solid rgba(40,167,69,0.8);
+            box-shadow: 0 -8px 32px rgba(40,167,69,0.2);
+        }
+
         /* Center Crosshair/Pin */
         .center-pin {
             position: fixed;
@@ -892,6 +898,13 @@
         let lastPosition = null;
         let routeSteps = [];
         let currentStepIndex = 0;
+        let currentRoute = null;
+        let isRecalculating = false;
+        let lastRecalculationTime = 0;
+        let routeDeviationThreshold = 50; // meters
+        let headingSmoothing = [];
+        let positionSmoothing = [];
+        let smoothingWindow = 3;
 
         // Service names mapping
         const serviceNames = {
@@ -953,8 +966,15 @@
             // Initialize directions service and renderer
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({
-                suppressMarkers: false,
-                draggable: false
+                suppressMarkers: true, // We'll use custom markers
+                draggable: false,
+                preserveViewport: false,
+                polylineOptions: {
+                    strokeColor: '#4285F4',
+                    strokeWeight: 8,
+                    strokeOpacity: 0.9,
+                    zIndex: 100
+                }
             });
 
             // Hide map loading
@@ -1214,6 +1234,24 @@
                     
                     isSelectingDestination = false;
                     updateDestinationDisplay();
+                    
+                    // Open info panel after destination selection with delay for better UX
+                    setTimeout(() => {
+                        if (panelCollapsed) {
+                            expandPanel();
+                        }
+                        
+                        // Highlight panel briefly to draw attention
+                        const bottomPanel = document.getElementById('bottomPanel');
+                        bottomPanel.classList.add('destination-selected');
+                        
+                        // Remove highlight after 3 seconds
+                        setTimeout(() => {
+                            bottomPanel.classList.remove('destination-selected');
+                        }, 3000);
+                        
+                    }, 800); // Small delay to let user see the destination marker first
+                    
                     return;
                 }
 
@@ -1404,15 +1442,19 @@
                 <span>Toque no mapa para selecionar</span>
             `;
             destinationValue.style.background = 'rgba(255,193,7,0.6)';
+            destinationValue.style.transition = 'all 0.3s ease';
             
-            // Show instruction
+            // Show instruction with enhanced visibility
             showCurrentPositionIndicator();
-            updateCurrentPositionIndicator('Toque no mapa para selecionar destino');
+            updateCurrentPositionIndicator('👆 Toque no mapa para selecionar destino');
             
             // Collapse panel to show more of the map
             if (!panelCollapsed) {
                 collapsePanel();
             }
+            
+            // Add visual cue to the map cursor
+            document.getElementById('map').style.cursor = 'crosshair';
         }
 
         // Update destination display
@@ -1421,6 +1463,10 @@
             
             const destinationValue = document.getElementById('destinationValue');
             destinationValue.style.background = '';
+            destinationValue.style.transition = 'all 0.3s ease';
+            
+            // Reset map cursor
+            document.getElementById('map').style.cursor = '';
             
             // Get address for destination
             if (geocoder) {
@@ -1436,8 +1482,10 @@
                         <span>${destinationAddress}</span>
                     `;
                     
-                    // Show navigation button
-                    document.getElementById('navigationBtn').style.display = 'block';
+                    // Show navigation button with animation
+                    const navBtn = document.getElementById('navigationBtn');
+                    navBtn.style.display = 'block';
+                    navBtn.style.animation = 'fadeInUp 0.6s ease-out';
                     
                     showCurrentPositionIndicator();
                     updateCurrentPositionIndicator('Destino selecionado!');
@@ -1449,8 +1497,10 @@
                     <span>${destinationAddress}</span>
                 `;
                 
-                // Show navigation button
-                document.getElementById('navigationBtn').style.display = 'block';
+                // Show navigation button with animation
+                const navBtn = document.getElementById('navigationBtn');
+                navBtn.style.display = 'block';
+                navBtn.style.animation = 'fadeInUp 0.6s ease-out';
                 
                 showCurrentPositionIndicator();
                 updateCurrentPositionIndicator('Destino selecionado!');
@@ -1464,59 +1514,26 @@
                 return;
             }
 
+            // Show loading briefly
             showLoading();
             
-            // Calculate and display route
-            const request = {
-                origin: userLocation,
-                destination: destinationLocation,
-                travelMode: google.maps.TravelMode.DRIVING,
-                unitSystem: google.maps.UnitSystem.METRIC,
-                avoidHighways: false,
-                avoidTolls: false
-            };
-
-            directionsService.route(request, function(result, status) {
+            // Prepare navigation parameters
+            const navigationParams = new URLSearchParams();
+            navigationParams.set('originLat', userLocation.lat.toString());
+            navigationParams.set('originLng', userLocation.lng.toString());
+            navigationParams.set('originAddress', currentAddress);
+            navigationParams.set('destLat', destinationLocation.lat.toString());
+            navigationParams.set('destLng', destinationLocation.lng.toString());
+            navigationParams.set('destAddress', destinationAddress);
+            navigationParams.set('service', selectedService);
+            
+            // Brief delay to show loading, then redirect
+            setTimeout(() => {
                 hideLoading();
                 
-                if (status === 'OK') {
-                    // Store route steps for navigation
-                    routeSteps = result.routes[0].legs[0].steps;
-                    currentStepIndex = 0;
-                    
-                    // Set directions renderer to map (without default markers)
-                    directionsRenderer.setOptions({
-                        suppressMarkers: true,
-                        polylineOptions: {
-                            strokeColor: '#4285F4',
-                            strokeWeight: 6,
-                            strokeOpacity: 0.8
-                        }
-                    });
-                    directionsRenderer.setMap(map);
-                    directionsRenderer.setDirections(result);
-                    
-                    // Hide center pin during navigation
-                    document.getElementById('centerPin').style.display = 'none';
-                    
-                    // Enter navigation mode
-                    enterNavigationMode();
-                    
-                    // Update UI for navigation mode
-                    updateNavigationUI(result);
-                    
-                    // Start GPS tracking
-                    startGPSTracking();
-                    
-                    // Collapse panel to show route
-                    if (!panelCollapsed) {
-                        collapsePanel();
-                    }
-                } else {
-                    alert('Não foi possível calcular a rota. Tente novamente.');
-                    console.error('Directions request failed due to ' + status);
-                }
-            });
+                // Redirect to navigation page with parameters
+                window.location.href = `navigation.html?${navigationParams.toString()}`;
+            }, 500);
         }
 
         // Enter navigation mode with 3D view
@@ -1538,7 +1555,7 @@
             // Wait a moment then switch to 3D navigation view
             setTimeout(() => {
                 // First set zoom to enable 3D features
-                map.setZoom(20);
+                map.setZoom(19); // Reduced zoom for better route visibility
                 
                 setTimeout(() => {
                     // Then apply 3D options
@@ -1558,6 +1575,9 @@
                     // Force map refresh after setting 3D options
                     google.maps.event.trigger(map, 'resize');
                     
+                    // Ensure route line is still visible after 3D transition
+                    ensureRouteVisibility();
+                    
                     // Create navigation marker after 3D mode is set
                     createNavigationMarker();
                     
@@ -1567,6 +1587,55 @@
                 }, 200);
                 
             }, 500); // Small delay to ensure map is ready
+        }
+
+        // Ensure route line is visible and properly configured
+        function ensureRouteVisibility() {
+            if (currentRoute && directionsRenderer) {
+                // Re-apply directions with enhanced visibility
+                directionsRenderer.setOptions({
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: '#1E90FF',
+                        strokeWeight: 10, // Thicker line for better visibility in 3D
+                        strokeOpacity: 1.0, // Full opacity
+                        zIndex: 200 // Higher z-index to stay above other elements
+                    }
+                });
+                
+                // Re-set the directions to ensure they're rendered
+                directionsRenderer.setDirections(currentRoute);
+                
+                console.log('Route visibility ensured - line weight: 10px, opacity: 100%');
+            }
+        }
+
+        // Add destination marker
+        let destinationMarker = null;
+        function addDestinationMarker() {
+            if (destinationMarker) {
+                destinationMarker.setMap(null);
+            }
+            
+            if (destinationLocation) {
+                destinationMarker = new google.maps.Marker({
+                    position: destinationLocation,
+                    map: map,
+                    icon: {
+                        path: 'M12,2C8.13,2 5,5.13 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9C19,5.13 15.87,2 12,2Z',
+                        fillColor: '#DC143C',
+                        fillOpacity: 1,
+                        strokeColor: '#FFFFFF',
+                        strokeWeight: 2,
+                        scale: 1.2,
+                        anchor: new google.maps.Point(12, 22)
+                    },
+                    title: 'Destino',
+                    zIndex: 999
+                });
+                
+                console.log('Destination marker added at:', destinationLocation);
+            }
         }
 
         // Create navigation marker (arrow icon like Waze)
@@ -1594,7 +1663,7 @@
             });
         }
 
-        // Start GPS tracking for navigation
+        // Start GPS tracking for navigation with high frequency
         function startGPSTracking() {
             if (!navigator.geolocation) {
                 alert('Geolocalização não suportada neste dispositivo.');
@@ -1603,8 +1672,8 @@
 
             const options = {
                 enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
+                timeout: 3000, // Reduced timeout for faster updates
+                maximumAge: 1000 // Allow 1 second old positions for smoother experience
             };
 
             watchId = navigator.geolocation.watchPosition(
@@ -1618,64 +1687,244 @@
         function updateNavigationPosition(position) {
             if (!isNavigating) return;
 
-            const newPosition = {
+            const rawPosition = {
                 lat: position.coords.latitude,
-                lng: position.coords.longitude
+                lng: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                heading: position.coords.heading,
+                speed: position.coords.speed
             };
 
-            // Calculate heading if we have a previous position
+            // Apply position smoothing
+            const smoothedPosition = applySmoothingToPosition(rawPosition);
+            
+            // Check if we're still on route or need recalculation
+            checkRouteDeviation(smoothedPosition);
+
+            // Calculate heading with smoothing
             if (lastPosition) {
-                const distance = calculateDistance(lastPosition, newPosition);
-                // Only update heading if moved significantly (reduces jitter)
-                if (distance > 5) {
-                    currentHeading = calculateHeading(lastPosition, newPosition);
+                const distance = calculateDistance(lastPosition, smoothedPosition);
+                // Update heading if moved significantly or use GPS heading if available
+                if (distance > 3) {
+                    let newHeading;
+                    if (rawPosition.heading !== null && rawPosition.heading !== undefined && rawPosition.speed > 1) {
+                        // Use GPS heading if available and moving
+                        newHeading = rawPosition.heading;
+                    } else {
+                        // Calculate from movement
+                        newHeading = calculateHeading(lastPosition, smoothedPosition);
+                    }
+                    
+                    // Apply heading smoothing
+                    currentHeading = applySmoothingToHeading(newHeading);
                 }
             }
 
             // Update user location
-            userLocation = newPosition;
-            lastPosition = newPosition;
+            userLocation = smoothedPosition;
+            lastPosition = smoothedPosition;
 
-            // Update navigation marker position and rotation
-            if (navigationMarker) {
-                navigationMarker.setPosition(newPosition);
-                
-                // Update the icon with new rotation
-                const newIcon = {
-                    // Better Waze-style navigation arrow
-                    path: 'M0,-20 L-6,-8 L-3,-8 L-3,8 L3,8 L3,-8 L6,-8 Z',
-                    fillColor: '#1E90FF',
-                    fillOpacity: 1,
-                    strokeColor: '#000000',
-                    strokeWeight: 2,
-                    scale: 1.8,
-                    anchor: new google.maps.Point(0, 0),
-                    rotation: currentHeading
-                };
-                
-                navigationMarker.setIcon(newIcon);
-            }
+            // Update navigation marker position and rotation with smooth animation
+            updateNavigationMarker(smoothedPosition);
 
-            // Update map center and rotation to follow user (smooth transition)
-            map.panTo(newPosition);
-            
-            // Smoothly update map heading
-            const currentMapHeading = map.getHeading() || 0;
-            const headingDiff = Math.abs(currentHeading - currentMapHeading);
-            
-            // Only update heading if significant change to avoid jitter
-            if (headingDiff > 10) {
-                map.setHeading(currentHeading);
-            }
+            // Update map center and rotation to follow user
+            updateMapFollowing(smoothedPosition);
 
-            // Update navigation UI with current distance
-            const distanceToDestination = calculateDistance(newPosition, destinationLocation);
-            updateNavigationDistance(distanceToDestination);
+            // Update navigation UI with current distance (throttled for performance)
+            const distanceToDestination = calculateDistance(smoothedPosition, destinationLocation);
+            throttledUIUpdate(() => {
+                updateNavigationDistance(distanceToDestination);
+            });
 
             // Check if we've reached destination
-            if (distanceToDestination < 50) { // Within 50 meters
+            if (distanceToDestination < 30) { // Within 30 meters
                 arrivedAtDestination();
             }
+        }
+
+        // Apply smoothing to position to reduce GPS jitter
+        function applySmoothingToPosition(newPosition) {
+            positionSmoothing.push(newPosition);
+            
+            // Keep only recent positions for smoothing
+            if (positionSmoothing.length > smoothingWindow) {
+                positionSmoothing.shift();
+            }
+
+            // Calculate weighted average (recent positions have more weight)
+            let totalWeight = 0;
+            let weightedLat = 0;
+            let weightedLng = 0;
+
+            for (let i = 0; i < positionSmoothing.length; i++) {
+                const weight = (i + 1); // Recent positions get higher weight
+                totalWeight += weight;
+                weightedLat += positionSmoothing[i].lat * weight;
+                weightedLng += positionSmoothing[i].lng * weight;
+            }
+
+            return {
+                lat: weightedLat / totalWeight,
+                lng: weightedLng / totalWeight,
+                accuracy: newPosition.accuracy
+            };
+        }
+
+        // Apply smoothing to heading to reduce rotation jitter
+        function applySmoothingToHeading(newHeading) {
+            headingSmoothing.push(newHeading);
+            
+            if (headingSmoothing.length > smoothingWindow) {
+                headingSmoothing.shift();
+            }
+
+            // Calculate average heading (handling circular nature of angles)
+            let x = 0, y = 0;
+            for (let heading of headingSmoothing) {
+                x += Math.cos(heading * Math.PI / 180);
+                y += Math.sin(heading * Math.PI / 180);
+            }
+
+            return Math.atan2(y, x) * 180 / Math.PI;
+        }
+
+        // Update navigation marker with smooth animation
+        function updateNavigationMarker(position) {
+            if (!navigationMarker) return;
+
+            // Smooth position update
+            navigationMarker.setPosition(position);
+            
+            // Update the icon with smooth rotation
+            const newIcon = {
+                path: 'M0,-20 L-6,-8 L-3,-8 L-3,8 L3,8 L3,-8 L6,-8 Z',
+                fillColor: '#1E90FF',
+                fillOpacity: 1,
+                strokeColor: '#000000',
+                strokeWeight: 2,
+                scale: 1.8,
+                anchor: new google.maps.Point(0, 0),
+                rotation: currentHeading
+            };
+            
+            navigationMarker.setIcon(newIcon);
+        }
+
+        // Update map following with smooth transitions
+        function updateMapFollowing(position) {
+            // Smooth map center update
+            map.panTo(position);
+            
+            // Smooth heading update
+            const currentMapHeading = map.getHeading() || 0;
+            let headingDiff = currentHeading - currentMapHeading;
+            
+            // Handle wrap-around for angles
+            if (headingDiff > 180) headingDiff -= 360;
+            if (headingDiff < -180) headingDiff += 360;
+            
+            // Only update heading if significant change
+            if (Math.abs(headingDiff) > 5) {
+                map.setHeading(currentHeading);
+            }
+        }
+
+        // Check if user has deviated from route and needs recalculation
+        function checkRouteDeviation(currentPosition) {
+            if (!currentRoute || isRecalculating) return;
+            
+            // Don't recalculate too frequently
+            const now = Date.now();
+            if (now - lastRecalculationTime < 10000) return; // Wait 10 seconds between recalculations
+
+            // Check distance to route path
+            const distanceToRoute = calculateDistanceToRoute(currentPosition, currentRoute);
+            
+            if (distanceToRoute > routeDeviationThreshold) {
+                console.log('Route deviation detected:', distanceToRoute, 'meters');
+                recalculateRoute(currentPosition);
+            }
+        }
+
+        // Calculate distance from current position to the route
+        function calculateDistanceToRoute(position, route) {
+            if (!route || !route.routes[0]) return 0;
+            
+            const path = route.routes[0].overview_path;
+            let minDistance = Infinity;
+            
+            // Find closest point on route
+            for (let i = 0; i < path.length; i++) {
+                const pathPoint = {
+                    lat: path[i].lat(),
+                    lng: path[i].lng()
+                };
+                const distance = calculateDistance(position, pathPoint);
+                minDistance = Math.min(minDistance, distance);
+            }
+            
+            return minDistance;
+        }
+
+        // Recalculate route from current position
+        function recalculateRoute(fromPosition) {
+            if (isRecalculating) return;
+            
+            isRecalculating = true;
+            lastRecalculationTime = Date.now();
+            
+            console.log('Recalculating route...');
+            
+            const request = {
+                origin: fromPosition,
+                destination: destinationLocation,
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+                avoidHighways: false,
+                avoidTolls: false
+            };
+
+            directionsService.route(request, function(result, status) {
+                isRecalculating = false;
+                
+                if (status === 'OK') {
+                    // Update current route
+                    currentRoute = result;
+                    routeSteps = result.routes[0].legs[0].steps;
+                    currentStepIndex = 0;
+                    
+                    // Ensure directions renderer is properly configured
+                    directionsRenderer.setOptions({
+                        suppressMarkers: true,
+                        polylineOptions: {
+                            strokeColor: '#1E90FF',
+                            strokeWeight: 8,
+                            strokeOpacity: 0.9,
+                            zIndex: 100
+                        }
+                    });
+                    
+                    // Update directions on map
+                    directionsRenderer.setDirections(result);
+                    
+                    // Update UI with new route info
+                    updateNavigationUI(result);
+                    
+                    console.log('Route recalculated successfully with', routeSteps.length, 'steps');
+                    
+                    // Show brief notification
+                    showRecalculationNotification();
+                } else {
+                    console.error('Route recalculation failed:', status);
+                }
+            });
+        }
+
+        // Show notification that route was recalculated
+        function showRecalculationNotification() {
+            const currentPositionElement = document.getElementById('currentPosition');
+            updateCurrentPositionIndicator('Rota recalculada');
+            showCurrentPositionIndicator();
         }
 
         // Update navigation distance display
@@ -1723,19 +1972,34 @@
             return R * c;
         }
 
-        // Handle GPS errors
+        // Handle GPS errors with retry logic
         function handleGPSError(error) {
             console.error('GPS Error:', error);
             switch(error.code) {
                 case error.PERMISSION_DENIED:
                     alert('Permissão de localização negada. Ative para continuar navegação.');
+                    stopNavigation();
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    alert('Localização indisponível. Verifique sua conexão GPS.');
+                    console.log('GPS temporarily unavailable, retrying...');
+                    // Don't stop navigation, just log and continue
                     break;
                 case error.TIMEOUT:
-                    console.log('GPS timeout, tentando novamente...');
+                    console.log('GPS timeout, continuing with last known position...');
+                    // Continue with last known position
                     break;
+            }
+        }
+
+        // Optimize performance by throttling less critical updates
+        let lastUIUpdate = 0;
+        const UI_UPDATE_INTERVAL = 1000; // Update UI every 1 second
+        
+        function throttledUIUpdate(callback) {
+            const now = Date.now();
+            if (now - lastUIUpdate >= UI_UPDATE_INTERVAL) {
+                lastUIUpdate = now;
+                callback();
             }
         }
 
@@ -1797,6 +2061,13 @@
             isNavigating = false;
             currentHeading = 0;
             lastPosition = null;
+            currentRoute = null;
+            isRecalculating = false;
+            lastRecalculationTime = 0;
+            
+            // Clear smoothing arrays
+            headingSmoothing = [];
+            positionSmoothing = [];
             
             // Remove navigation mode class
             document.body.classList.remove('navigation-mode');
@@ -1809,6 +2080,12 @@
             if (navigationMarker) {
                 navigationMarker.setMap(null);
                 navigationMarker = null;
+            }
+            
+            // Clear destination marker
+            if (destinationMarker) {
+                destinationMarker.setMap(null);
+                destinationMarker = null;
             }
             
             // Clear directions
