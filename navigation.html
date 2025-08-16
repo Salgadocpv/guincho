@@ -115,9 +115,9 @@
             touch-action: none;
         }
 
-        /* CSS-based 3D perspective as fallback - subtle navigation view */
+        /* CSS-based 3D perspective as fallback - increased to 60 degrees equivalent */
         .map-container.css-3d #map {
-            transform: perspective(800px) rotateX(15deg) scale(1.1);
+            transform: perspective(800px) rotateX(25deg) scale(1.1);
             transform-origin: center bottom;
             transition: transform 0.5s ease;
         }
@@ -289,7 +289,7 @@
 
             /* Extra safety for mobile devices */
             .map-container.css-3d #map {
-                transform: perspective(800px) rotateX(15deg) scale(1.15);
+                transform: perspective(800px) rotateX(25deg) scale(1.15);
             }
         }
 
@@ -943,7 +943,7 @@
                 center: userLocation,
                 mapTypeId: 'roadmap',
                 mapId: 'DEMO_MAP_ID', // Required for advanced features
-                tilt: 45,
+                tilt: 60, // Aumentado para 60 graus
                 heading: currentHeading,
                 disableDefaultUI: true,
                 gestureHandling: 'greedy',
@@ -974,7 +974,7 @@
                         
                         // Apply tilt gradually
                         let currentTilt = 0;
-                        const targetTilt = 45;
+                        const targetTilt = 60; // Aumentado para 60 graus
                         const tiltStep = 5;
                         
                         function increaseTilt() {
@@ -999,7 +999,7 @@
                                 console.log('3D navigation configured! Final tilt:', finalTilt);
                                 
                                 // If tilt still didn't work, use CSS fallback
-                                if (finalTilt < 10) {
+                                if (finalTilt < 30) { // Ajustado threshold para 60 graus
                                     console.log('Google Maps tilt not supported, using CSS 3D fallback');
                                     document.querySelector('.map-container').classList.add('css-3d');
                                 }
@@ -1485,8 +1485,8 @@
                 
                 // Maintain 3D tilt based on navigation state
                 const currentTilt = map.getTilt();
-                if (currentTilt < 35) {
-                    map.setTilt(45);
+                if (currentTilt < 50) { // Ajustado para 60 graus
+                    map.setTilt(60);
                 }
                 
                 // Skip rotation if in north-fixed mode
@@ -1688,9 +1688,9 @@
             tiltMonitoringInterval = setInterval(() => {
                 if (isNavigating && map) {
                     const currentTilt = map.getTilt();
-                    if (currentTilt < 30) {
+                    if (currentTilt < 50) { // Ajustado para 60 graus
                         console.log(`Gentle tilt correction needed (${currentTilt})`);
-                        map.setTilt(45);
+                        map.setTilt(60); // Aumentado para 60 graus
                         
                         // Verify it worked
                         setTimeout(() => {
