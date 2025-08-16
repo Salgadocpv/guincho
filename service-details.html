@@ -146,130 +146,14 @@
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.5);
             backdrop-filter: blur(20px);
             margin: 0 20px 20px 20px;
             border-radius: 16px;
             padding: 16px 24px 24px;
-            box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.3);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .location-info {
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .location-label {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 6px;
-            font-weight: 500;
-            background: rgba(0,0,0,0.3);
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-block;
-        }
-
-        .location-value {
-            font-size: 1rem;
-            color: white;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0,0,0,0.4);
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-top: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .location-value:hover {
-            background: rgba(0,0,0,0.6);
-            transform: translateY(-1px);
-        }
-
-        .location-value:active {
-            transform: translateY(0);
-        }
-
-        .location-accuracy {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.8);
-            margin-top: 8px;
-            background: rgba(40,167,69,0.3);
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-block;
-        }
-
-        /* Action Buttons */
-        .action-buttons {
-            display: grid;
-            gap: 12px;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-primary {
-            background: rgba(0,123,255,0.8);
-            color: white;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 4px 20px rgba(0,123,255,0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            background: rgba(0,123,255,0.9);
-            box-shadow: 0 6px 25px rgba(0,123,255,0.4);
-        }
-
-        .btn-success {
-            background: rgba(40,167,69,0.8);
-            color: white;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 4px 20px rgba(40,167,69,0.3);
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            background: rgba(40,167,69,0.9);
-            box-shadow: 0 6px 25px rgba(40,167,69,0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(0,0,0,0.4);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 12px;
-            backdrop-filter: blur(15px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(0,0,0,0.6);
-            border-color: rgba(255,255,255,0.3);
-            transform: translateY(-1px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         /* Drag Handle */
@@ -300,14 +184,9 @@
             transform: translateY(calc(100% - 60px));
         }
 
-        .bottom-panel {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Highlight panel when destination is selected */
-        .bottom-panel.destination-selected {
-            border: 2px solid rgba(40,167,69,0.8);
-            box-shadow: 0 -8px 32px rgba(40,167,69,0.2);
+        .bottom-panel.collapsed .trip-selection {
+            opacity: 0;
+            pointer-events: none;
         }
 
         /* Center Crosshair/Pin */
@@ -384,192 +263,6 @@
             font-size: 1rem;
         }
 
-        /* Address Modal */
-        .address-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 200;
-            background: rgba(0,0,0,0);
-            backdrop-filter: blur(0px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .address-modal.show {
-            display: flex;
-            opacity: 1;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(15px);
-        }
-
-        .modal-content {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(25px);
-            border-radius: 20px;
-            padding: 32px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            transform: scale(0.7) translateY(-50px) rotateX(15deg);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0;
-        }
-
-        .address-modal.show .modal-content {
-            transform: scale(1) translateY(0) rotateX(0deg);
-            opacity: 1;
-            filter: blur(0px);
-        }
-
-        /* Modal Opening Animation */
-        @keyframes modalRipple {
-            0% {
-                transform: scale(0);
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        .modal-ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(0,123,255,0.3);
-            pointer-events: none;
-            animation: modalRipple 0.6s ease-out;
-        }
-
-        /* Glow effect on opening */
-        .address-modal.opening .modal-content {
-            box-shadow: 
-                0 20px 60px rgba(0,0,0,0.3),
-                0 0 0 1px rgba(0,123,255,0.3),
-                0 0 50px rgba(0,123,255,0.2);
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 8px;
-        }
-
-        .modal-subtitle {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.7);
-        }
-
-        .modal-input-group {
-            margin-bottom: 24px;
-        }
-
-        .modal-label {
-            display: block;
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 16px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .modal-input:focus {
-            outline: none;
-            border-color: rgba(0,123,255,0.8);
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
-            background: rgba(255,255,255,0.15);
-        }
-
-        .modal-input::placeholder {
-            color: rgba(255,255,255,0.5);
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal-btn-primary {
-            background: rgba(0,123,255,0.8);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .modal-btn-primary:hover {
-            background: rgba(0,123,255,0.9);
-            transform: translateY(-1px);
-        }
-
-        .modal-btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .modal-btn-secondary:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-1px);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255,255,255,0.7);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: rgba(255,255,255,0.2);
-            color: white;
-        }
 
         /* Loading Overlay */
         .loading-overlay {
@@ -595,158 +288,80 @@
             animation: spin 1s linear infinite;
         }
 
-        /* Responsive Design */
-        @media (max-width: 480px) {
-            .header {
-                padding: 16px;
-            }
-
-            .map-container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                margin: 0;
-                z-index: 1;
-            }
-
-            .bottom-panel {
-                margin: 0 12px 12px 12px;
-                padding: 20px;
-                border-radius: 16px;
-            }
-
-            #map {
-                width: 100%;
-                height: 100%;
-            }
-
-            .service-title {
-                font-size: 1.1rem;
-            }
-
-            .location-info {
-                padding: 12px;
-            }
-
-            .action-btn {
-                padding: 14px;
-                font-size: 0.9rem;
-            }
+        /* Trip Selection Styles */
+        .trip-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px 0;
         }
 
-        /* Touch improvements */
-        @media (max-width: 768px) {
-            body {
-                -webkit-overflow-scrolling: touch;
-                touch-action: manipulation;
-            }
-            
-            .action-btn, .back-button {
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation;
-            }
-
-            .map-container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                margin: 0;
-                z-index: 1;
-            }
-
-            .bottom-panel {
-                margin: 0 16px 16px 16px;
-            }
+        .trip-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
         }
 
-        /* Navigation Mode Styles */
-        .navigation-mode {
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        .trip-item:hover {
+            background: rgba(0,0,0,0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
 
-        .navigation-mode .bottom-panel {
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(20px);
+        .trip-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
         }
 
-        .navigation-mode .location-info {
-            background: rgba(40,167,69,0.2);
-            border: 1px solid rgba(40,167,69,0.4);
+        .trip-item.completed {
+            background: rgba(40,167,69,0.3);
+            border-color: rgba(40,167,69,0.5);
         }
 
-        .navigation-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 150;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 70%, transparent 100%);
-            padding: 20px;
-            text-align: center;
-            color: white;
-            display: none;
+        .trip-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 1.2rem;
         }
 
-        .navigation-header.active {
-            display: block;
+        .trip-content {
+            flex: 1;
         }
 
-        .navigation-title {
-            font-size: 1.1rem;
+        .trip-label {
+            font-size: 0.9rem;
             font-weight: 600;
+            color: white;
             margin-bottom: 4px;
         }
 
-        .navigation-subtitle {
-            font-size: 0.9rem;
+        .trip-value {
+            font-size: 0.85rem;
             color: rgba(255,255,255,0.8);
+            line-height: 1.3;
         }
 
-        .navigation-distance {
-            font-size: 0.8rem;
-            color: rgba(40,167,69,1);
-            margin-top: 4px;
+        .trip-arrow {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            margin-left: 12px;
         }
 
-        /* Enhanced Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes navigationPulse {
-            0%, 100% { 
-                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
-            }
-            50% { 
-                box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
-            }
-        }
-
-        .navigation-marker {
-            animation: navigationPulse 2s infinite;
-        }
-
-        .header, .map-container, .bottom-panel {
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .map-container {
-            animation-delay: 0.1s;
-        }
-
-        .bottom-panel {
-            animation-delay: 0.2s;
+        .trip-item:hover .trip-arrow {
+            color: white;
+            transform: translateX(2px);
         }
 
         /* Location Method Choice Modal */
@@ -894,6 +509,76 @@
             }
         }
 
+        /* Address Input Styles */
+        .address-input-container {
+            margin-top: 20px;
+        }
+
+        .address-input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255,255,255,0.9);
+            border: 2px solid rgba(0,123,255,0.3);
+            border-radius: 12px;
+            color: #000;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        .address-input:focus {
+            outline: none;
+            border-color: rgba(0,123,255,0.8);
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+            background: rgba(255,255,255,1);
+        }
+
+        .address-input::placeholder {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .address-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .address-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .address-btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .address-btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+
+        .address-btn-secondary {
+            background: rgba(255,255,255,0.8);
+            color: #333;
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .address-btn-secondary:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
         /* Force visibility for modal content */
         .location-modal * {
             color: #000 !important;
@@ -903,6 +588,32 @@
         
         .location-modal .option-icon * {
             color: #ffffff !important;
+        }
+
+        .location-modal .address-btn-primary * {
+            color: #ffffff !important;
+        }
+
+        /* Map selection mode styles */
+        .map-selection-mode .center-pin {
+            animation: mapSelectionPulse 1.5s ease-in-out infinite;
+        }
+        
+        .map-selection-mode .center-pin i {
+            color: #ffc107 !important;
+            text-shadow: 
+                0 0 15px rgba(255, 193, 7, 1),
+                0 2px 12px rgba(0, 0, 0, 0.8),
+                0 0 0 3px white;
+        }
+        
+        @keyframes mapSelectionPulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.2);
+            }
         }
 
         /* Mobile responsive */
@@ -929,6 +640,12 @@
                 height: 40px;
                 margin-right: 12px;
             }
+
+            .bottom-panel {
+                margin: 0 12px 12px 12px;
+                padding: 20px;
+                border-radius: 16px;
+            }
         }
     </style>
 </head>
@@ -945,13 +662,6 @@
         </button>
         <div class="service-title" id="serviceTitle">Carregando serviço...</div>
         <div class="service-subtitle">Confirme sua localização</div>
-    </div>
-
-    <!-- Navigation Header -->
-    <div class="navigation-header" id="navigationHeader">
-        <div class="navigation-title">Navegando para o destino</div>
-        <div class="navigation-subtitle" id="navigationSubtitle">Siga as instruções do mapa</div>
-        <div class="navigation-distance" id="navigationDistance"></div>
     </div>
 
     <!-- Map Container -->
@@ -975,35 +685,36 @@
     </div>
 
     <!-- Address Modal -->
-    <div class="address-modal" id="addressModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeAddressModal()">
-                <i class="fas fa-times"></i>
-            </button>
-            
+    <div class="location-modal-overlay" id="addressModalOverlay" style="display: none;">
+        <div class="location-modal">
             <div class="modal-header">
-                <h3 class="modal-title">Inserir Endereço</h3>
-                <p class="modal-subtitle">Digite o endereço completo da sua localização</p>
+                <h3 id="addressModalTitle">Inserir Endereço</h3>
+                <button class="modal-close" onclick="closeAddressModalNew()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
-            <div class="modal-input-group">
-                <label class="modal-label" for="manualAddress">Endereço</label>
-                <input 
-                    type="text" 
-                    id="manualAddress" 
-                    class="modal-input" 
-                    placeholder="Ex: Rua das Flores, 123 - Centro, São Paulo - SP"
-                    autocomplete="street-address"
-                >
-            </div>
-            
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-secondary" onclick="closeAddressModal()">
-                    Cancelar
-                </button>
-                <button class="modal-btn modal-btn-primary" onclick="confirmManualAddress()">
-                    <i class="fas fa-check"></i> Confirmar
-                </button>
+            <div class="modal-content">
+                <p id="addressModalSubtitle">Digite o endereço ou nome do local</p>
+                
+                <div class="address-input-container">
+                    <input 
+                        type="text" 
+                        id="addressInput" 
+                        class="address-input" 
+                        placeholder="Ex: Shopping Center Norte, McDonald's, Rua das Flores 123..."
+                        autocomplete="off"
+                    >
+                    
+                    <div class="address-buttons">
+                        <button class="address-btn address-btn-secondary" onclick="closeAddressModalNew()">
+                            Cancelar
+                        </button>
+                        <button class="address-btn address-btn-primary" onclick="confirmAddressNew()">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1011,43 +722,51 @@
     <!-- Bottom Panel -->
     <div class="bottom-panel" id="bottomPanel">
         <!-- Drag Handle -->
-        <div class="drag-handle" id="dragHandle"></div>
+        <div class="drag-handle" id="dragHandle" onclick="togglePanel()"></div>
 
-        <!-- Origin Info -->
-        <div class="location-info">
-            <div class="location-label">Origem</div>
-            <div class="location-value" id="locationValue" onclick="chooseOriginMethod()" style="cursor: pointer;">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Toque para definir origem</span>
+        <!-- Trip Selection Items -->
+        <div class="trip-selection">
+            <!-- Origem -->
+            <div class="trip-item" id="originItem" onclick="selectOrigin()">
+                <div class="trip-icon">
+                    <i class="fas fa-circle" style="color: #28a745;"></i>
+                </div>
+                <div class="trip-content">
+                    <div class="trip-label">Origem</div>
+                    <div class="trip-value" id="originText">Selecionar ponto de partida</div>
+                </div>
+                <div class="trip-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
             </div>
-            <div class="location-accuracy" id="locationAccuracy"></div>
-        </div>
 
-        <!-- Destination Info -->
-        <div class="location-info" style="margin-top: 16px;">
-            <div class="location-label">Destino</div>
-            <div class="location-value" id="destinationValue" onclick="chooseDestinationMethod()" style="cursor: pointer;">
-                <i class="fas fa-flag-checkered"></i>
-                <span>Toque para definir destino</span>
+            <!-- Destino -->
+            <div class="trip-item disabled" id="destinationItem" onclick="selectDestination()">
+                <div class="trip-icon">
+                    <i class="fas fa-map-marker-alt" style="color: #dc3545;"></i>
+                </div>
+                <div class="trip-content">
+                    <div class="trip-label">Destino</div>
+                    <div class="trip-value" id="destinationText">Selecionar destino</div>
+                </div>
+                <div class="trip-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
             </div>
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button class="action-btn btn-primary" onclick="confirmLocation()" id="confirmBtn" disabled>
-                <i class="fas fa-check"></i>
-                Confirmar Localização
-            </button>
-            
-            <button class="action-btn btn-success" onclick="startNavigation()" id="navigationBtn" style="display: none;">
-                <i class="fas fa-navigation"></i>
-                Iniciar Navegação
-            </button>
-            
-            <button class="action-btn btn-secondary" onclick="manualLocation()">
-                <i class="fas fa-edit"></i>
-                Inserir Endereço Manualmente
-            </button>
+            <!-- Confirmar Viagem -->
+            <div class="trip-item disabled" id="confirmTripItem" onclick="confirmTrip()">
+                <div class="trip-icon">
+                    <i class="fas fa-check-circle" style="color: #007bff;"></i>
+                </div>
+                <div class="trip-content">
+                    <div class="trip-label">Confirmar Viagem</div>
+                    <div class="trip-value">Defina origem e destino primeiro</div>
+                </div>
+                <div class="trip-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1056,7 +775,7 @@
         <div class="location-modal">
             <div class="modal-header">
                 <h3 id="modalTitle">Definir Origem</h3>
-                <button class="modal-close" onclick="closeLocationModal()">
+                <button class="modal-close" onclick="cancelLocationModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -1064,8 +783,8 @@
             <div class="modal-content">
                 <p id="modalDescription">Como você quer definir sua origem?</p>
                 
-                <div class="method-options">
-                    <button class="method-option" onclick="useCurrentLocation()">
+                <div class="method-options" id="methodOptions">
+                    <button class="method-option" onclick="useCurrentLocationNew()" id="currentLocationOption">
                         <div class="option-icon">
                             <i class="fas fa-crosshairs"></i>
                         </div>
@@ -1075,7 +794,7 @@
                         </div>
                     </button>
                     
-                    <button class="method-option" onclick="selectOnMap()">
+                    <button class="method-option" onclick="selectOnMapNew()">
                         <div class="option-icon">
                             <i class="fas fa-map-marked-alt"></i>
                         </div>
@@ -1085,7 +804,7 @@
                         </div>
                     </button>
                     
-                    <button class="method-option" onclick="typeManually()">
+                    <button class="method-option" onclick="typeAddressNew()">
                         <div class="option-icon">
                             <i class="fas fa-keyboard"></i>
                         </div>
@@ -1105,39 +824,25 @@
     </script>
 
     <script>
-        // Global variables
+        // Global variables - New System
         let map;
-        let userLocation = null;
-        let destinationLocation = null;
-        let selectedService = '';
         let geocoder;
         let directionsService;
         let directionsRenderer;
-        let currentAddress = 'Detectando localização...';
-        let destinationAddress = '';
-        let lastManualAddress = '';
-        let mapInitialized = false;
-        let isSelectingDestination = false;
         
-        // Navigation mode variables
-        let isNavigating = false;
-        let navigationMarker = null;
-        let watchId = null;
-        let currentHeading = 0;
-        let lastPosition = null;
-        let routeSteps = [];
-        let currentStepIndex = 0;
-        let currentRoute = null;
-        let isRecalculating = false;
-        let lastRecalculationTime = 0;
-        let routeDeviationThreshold = 50; // meters
-        let headingSmoothing = [];
-        let positionSmoothing = [];
-        let smoothingWindow = 3;
+        // Trip data
+        let originLocation = null;
+        let destinationLocation = null;
+        let originAddress = '';
+        let destinationAddress = '';
+        let selectedService = '';
         
         // Modal state
-        let currentModalType = ''; // 'origin' or 'destination'
-        let isSelectingLocation = false;
+        let currentSelectionType = ''; // 'origin' or 'destination'
+        let isSelectingOnMap = false;
+        
+        // Map state
+        let mapInitialized = false;
 
         // Service names mapping
         const serviceNames = {
@@ -1160,18 +865,16 @@
             document.getElementById('serviceTitle').textContent = serviceName;
         }
 
-        // Initialize Google Maps (fallback for demo)
+        // Initialize Google Maps - New System
         function initMap() {
             // Default location (São Paulo center)
             const defaultLocation = { lat: -23.5505, lng: -46.6333 };
             
             // Initialize map
             map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 18,
+                zoom: 15,
                 center: defaultLocation,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
-                tilt: 0, // Start with normal view
-                heading: 0,
                 styles: [
                     {
                         featureType: 'poi',
@@ -1187,49 +890,33 @@
                 zoomControl: true,
                 zoomControlOptions: {
                     position: google.maps.ControlPosition.RIGHT_BOTTOM
-                },
-                // Enable 3D features
-                minZoom: 10,
-                maxZoom: 20
-            });
-
-            // Initialize geocoder
-            geocoder = new google.maps.Geocoder();
-
-            // Initialize directions service and renderer
-            directionsService = new google.maps.DirectionsService();
-            directionsRenderer = new google.maps.DirectionsRenderer({
-                suppressMarkers: true, // We'll use custom markers
-                draggable: false,
-                preserveViewport: false,
-                polylineOptions: {
-                    strokeColor: '#4285F4',
-                    strokeWeight: 8,
-                    strokeOpacity: 0.9,
-                    zIndex: 100
                 }
             });
+
+            // Initialize services
+            geocoder = new google.maps.Geocoder();
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#007bff',
+                    strokeWeight: 6,
+                    strokeOpacity: 0.8
+                }
+            });
+            directionsRenderer.setMap(map);
 
             // Hide map loading
             document.getElementById('mapLoading').style.display = 'none';
 
-            // Enable single finger navigation
-            setupSingleFingerNavigation();
-
-            // Set up map event listeners for center tracking
-            setupCenterTracking();
-
-            // Set up map click listener to hide panel
+            // Set up map click listener for selection
             setupMapClickListener();
-
-            // Don't get user location automatically - let user choose method
-            // User will select method via chooseOriginMethod()
 
             mapInitialized = true;
             
             // Auto-open origin selection modal after map loads
             setTimeout(() => {
-                chooseOriginMethod();
+                selectOrigin();
             }, 500);
         }
 
@@ -1240,1414 +927,9 @@
                 <div class="map-loading-text" style="color: #dc3545;">
                     <i class="fas fa-exclamation-triangle"></i><br>
                     Mapa indisponível<br>
-                    <small style="font-size: 0.8rem;">Usando localização de teste...</small>
+                    <small style="font-size: 0.8rem;">Recarregue a página...</small>
                 </div>
             `;
-
-            // Use test location when map is not available
-            setTimeout(() => {
-                useDefaultLocation();
-            }, 2000);
-        }
-
-        // Check if location access is supported and allowed
-        async function checkLocationPermission() {
-            if (!navigator.geolocation) {
-                return 'not_supported';
-            }
-
-            // For modern browsers with permission API
-            if (navigator.permissions) {
-                try {
-                    const permission = await navigator.permissions.query({name: 'geolocation'});
-                    return permission.state; // 'granted', 'denied', or 'prompt'
-                } catch (error) {
-                    console.log('Permission API not supported');
-                }
-            }
-
-            return 'unknown';
-        }
-
-        // Get user's current location with iPhone-specific optimizations
-        async function getUserLocation() {
-            // Check permission first
-            const permissionStatus = await checkLocationPermission();
-            
-            if (permissionStatus === 'denied') {
-                showLocationInstructions();
-                return;
-            }
-
-            if (!navigator.geolocation) {
-                useDefaultLocation();
-                return;
-            }
-
-            // iPhone-specific: Use multiple attempts for better success rate
-            let attempts = 0;
-            const maxAttempts = 3;
-
-            function tryGetLocation() {
-                attempts++;
-                
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        userLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        
-                        currentAddress = 'Obtendo endereço...';
-                        updateLocationDisplay();
-                        displayUserLocation();
-                    },
-                    function(error) {
-                        console.error(`Location attempt ${attempts}:`, error);
-                        
-                        let errorMessage = '';
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMessage = 'Permissão de localização negada. Ative nas configurações.';
-                                showLocationInstructions();
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMessage = 'Localização indisponível. Verifique sua conexão.';
-                                break;
-                            case error.TIMEOUT:
-                                errorMessage = `Tempo esgotado (tentativa ${attempts}/${maxAttempts})`;
-                                break;
-                            default:
-                                errorMessage = 'Erro desconhecido ao obter localização.';
-                                break;
-                        }
-                        
-                        if (attempts < maxAttempts && error.code === error.TIMEOUT) {
-                            // Try again with less strict settings
-                            setTimeout(() => tryGetLocation(), 2000);
-                            return;
-                        }
-                        
-                        // Use default location as fallback only after all attempts
-                        if (attempts >= maxAttempts) {
-                            useDefaultLocation();
-                        }
-                    },
-                    {
-                        enableHighAccuracy: attempts <= 1, // First attempt high accuracy, then standard
-                        timeout: attempts === 1 ? 20000 : 10000, // More time for first attempt
-                        maximumAge: 0 // Always get fresh location
-                    }
-                );
-            }
-
-            tryGetLocation();
-        }
-
-        // Use default location only as last resort
-        function useDefaultLocation() {
-            // Coordenadas aproximadas de Araras - SP (para teste)
-            userLocation = { lat: -22.3586, lng: -47.3844 };
-            
-            // Try to get real address for default coordinates
-            if (geocoder) {
-                geocoder.geocode({ location: userLocation }, function(results, status) {
-                    if (status === 'OK' && results[0]) {
-                        currentAddress = results[0].formatted_address;
-                        updateLocationDisplay();
-                    } else {
-                        // Simulação para teste
-                        currentAddress = 'Rua Rio Grande do Sul, 885 - Araras, SP';
-                        updateLocationDisplay();
-                    }
-                });
-            } else {
-                // Simulação para teste quando não há geocoder
-                currentAddress = 'Rua Rio Grande do Sul, 885 - Araras, SP';
-                updateLocationDisplay();
-            }
-            
-            document.getElementById('confirmBtn').disabled = false;
-        }
-
-        // Update location display in UI
-        function updateLocationDisplay() {
-            const locationValueElement = document.getElementById('locationValue');
-            locationValueElement.innerHTML = `
-                <i class="fas fa-map-marker-alt"></i>
-                <span>${currentAddress}</span>
-            `;
-            
-            // Add click listener to center map on address
-            locationValueElement.onclick = function() {
-                centerMapOnCurrentLocation();
-            };
-            
-            // Hide accuracy display - not needed for user
-            document.getElementById('locationAccuracy').style.display = 'none';
-        }
-
-        // Center map on current location when address is clicked
-        function centerMapOnCurrentLocation() {
-            if (!map || !userLocation) return;
-            
-            // Smooth zoom and center to current location
-            map.panTo(userLocation);
-            map.setZoom(17);
-            
-            // Show position indicator briefly
-            showCurrentPositionIndicator();
-            
-            // Collapse panel to show more of the map
-            if (!panelCollapsed) {
-                collapsePanel();
-            }
-        }
-
-        // Update origin display when location is set
-        function updateOriginDisplay() {
-            if (!userLocation) return;
-            
-            // Center map on user location
-            map.setCenter(userLocation);
-            
-            // Update address from position
-            updateAddressFromPosition(userLocation);
-            
-            // Enable confirm button if destination is also set
-            checkIfReadyToNavigate();
-        }
-
-        // Display user location on map
-        function displayUserLocation() {
-            if (!map || !userLocation) return;
-
-            // Center map on user location
-            map.setCenter(userLocation);
-            
-            // Reverse geocode to get address
-            updateAddressFromPosition(userLocation);
-
-            // Enable confirm button
-            document.getElementById('confirmBtn').disabled = false;
-        }
-
-        // Check if both origin and destination are set
-        function checkIfReadyToNavigate() {
-            if (userLocation && destinationLocation) {
-                document.getElementById('confirmBtn').disabled = false;
-                document.getElementById('navigationBtn').style.display = 'block';
-            } else {
-                document.getElementById('confirmBtn').disabled = true;
-                document.getElementById('navigationBtn').style.display = 'none';
-            }
-        }
-
-        // Setup center tracking for the map
-        function setupCenterTracking() {
-            if (!map) return;
-
-            // Listen for map center changes (when user drags/moves the map)
-            google.maps.event.addListener(map, 'center_changed', function() {
-                // Debounce the center change event to avoid too many API calls
-                clearTimeout(window.centerChangeTimeout);
-                window.centerChangeTimeout = setTimeout(() => {
-                    const center = map.getCenter();
-                    if (center) {
-                        userLocation = {
-                            lat: center.lat(),
-                            lng: center.lng()
-                        };
-                        
-                        // Update address for the new center position
-                        updateAddressFromPosition(userLocation);
-                    }
-                }, 1000); // Wait 1 second after user stops moving the map
-            });
-
-            // Show position indicator when map starts moving
-            google.maps.event.addListener(map, 'dragstart', function() {
-                showCurrentPositionIndicator();
-            });
-
-            // Also show when map stops moving
-            google.maps.event.addListener(map, 'dragend', function() {
-                showCurrentPositionIndicator();
-            });
-        }
-
-        // Setup map click listener to hide panel automatically
-        function setupMapClickListener() {
-            if (!map) return;
-
-            // Listen for clicks on the map
-            google.maps.event.addListener(map, 'click', function(event) {
-                // If selecting origin from map
-                if (isSelectingLocation && currentModalType === 'origin') {
-                    userLocation = {
-                        lat: event.latLng.lat(),
-                        lng: event.latLng.lng()
-                    };
-                    
-                    isSelectingLocation = false;
-                    updateOriginDisplay();
-                    
-                    // Reset UI
-                    document.getElementById('map').style.cursor = '';
-                    const locationValue = document.getElementById('locationValue');
-                    locationValue.style.background = '';
-                    
-                    // Auto-open destination modal after origin is selected
-                    setTimeout(() => {
-                        chooseDestinationMethod();
-                    }, 1000);
-                    
-                    return;
-                }
-                
-                // If selecting destination, set destination location
-                if (isSelectingDestination) {
-                    destinationLocation = {
-                        lat: event.latLng.lat(),
-                        lng: event.latLng.lng()
-                    };
-                    
-                    isSelectingDestination = false;
-                    updateDestinationDisplay();
-                    
-                    // Open info panel after destination selection with delay for better UX
-                    setTimeout(() => {
-                        if (panelCollapsed) {
-                            expandPanel();
-                        }
-                        
-                        // Highlight panel briefly to draw attention
-                        const bottomPanel = document.getElementById('bottomPanel');
-                        bottomPanel.classList.add('destination-selected');
-                        
-                        // Remove highlight after 3 seconds
-                        setTimeout(() => {
-                            bottomPanel.classList.remove('destination-selected');
-                        }, 3000);
-                        
-                    }, 800); // Small delay to let user see the destination marker first
-                    
-                    return;
-                }
-
-                // Otherwise, collapse panel when map is clicked
-                if (!panelCollapsed) {
-                    collapsePanel();
-                }
-            });
-
-            // Also listen for double clicks
-            google.maps.event.addListener(map, 'dblclick', function() {
-                if (!panelCollapsed) {
-                    collapsePanel();
-                }
-            });
-        }
-
-        // Update address from coordinates
-        function updateAddressFromPosition(position) {
-            if (geocoder) {
-                geocoder.geocode({ location: position }, function(results, status) {
-                    if (status === 'OK' && results[0]) {
-                        currentAddress = results[0].formatted_address;
-                        updateLocationDisplay();
-                        updateCurrentPositionIndicator(currentAddress);
-                    } else {
-                        currentAddress = 'Endereço não encontrado';
-                        updateLocationDisplay();
-                        updateCurrentPositionIndicator(currentAddress);
-                    }
-                });
-            } else {
-                // Fallback when no geocoder available
-                currentAddress = `Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`;
-                updateLocationDisplay();
-                updateCurrentPositionIndicator(currentAddress);
-            }
-        }
-
-        // Show current position indicator
-        function showCurrentPositionIndicator() {
-            const indicator = document.getElementById('currentPosition');
-            indicator.classList.add('show');
-            
-            // Hide after 3 seconds
-            setTimeout(() => {
-                indicator.classList.remove('show');
-            }, 3000);
-        }
-
-        // Update current position indicator text
-        function updateCurrentPositionIndicator(address) {
-            const indicator = document.getElementById('currentPositionText');
-            const shortAddress = address.length > 40 ? address.substring(0, 40) + '...' : address;
-            indicator.textContent = shortAddress;
-        }
-
-        // Show location permission instructions for iPhone
-        function showLocationInstructions() {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            
-            if (isIOS) {
-                const instructions = `
-                    <div style="margin-top: 12px; padding: 12px; background: rgba(255,193,7,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,193,7,0.4); border-radius: 12px; font-size: 0.8rem; color: white;">
-                        <div style="background: rgba(255,193,7,0.3); padding: 6px 10px; border-radius: 8px; margin-bottom: 8px;"><strong>iPhone:</strong></div>
-                        <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 8px; line-height: 1.4;">
-                        1. Vá em Configurações > Privacidade > Localização<br>
-                        2. Ative "Serviços de Localização"<br>
-                        3. Encontre seu navegador (Safari/Chrome)<br>
-                        4. Selecione "Ao Usar o App"<br>
-                        5. Recarregue esta página
-                        </div>
-                    </div>
-                `;
-                // Instructions can be shown elsewhere if needed
-            }
-        }
-
-        // Panel toggle functionality
-        let panelCollapsed = false;
-
-        function initPanelToggle() {
-            const dragHandle = document.getElementById('dragHandle');
-            
-            // Click/touch to toggle
-            dragHandle.addEventListener('click', togglePanel);
-            dragHandle.addEventListener('touchend', function(e) {
-                e.preventDefault();
-                togglePanel();
-            });
-        }
-
-        function togglePanel() {
-            if (panelCollapsed) {
-                expandPanel();
-            } else {
-                collapsePanel();
-            }
-        }
-
-        function collapsePanel() {
-            const bottomPanel = document.getElementById('bottomPanel');
-            bottomPanel.classList.add('collapsed');
-            panelCollapsed = true;
-        }
-
-        function expandPanel() {
-            const bottomPanel = document.getElementById('bottomPanel');
-            bottomPanel.classList.remove('collapsed');
-            panelCollapsed = false;
-        }
-
-        // Setup single finger navigation for map
-        function setupSingleFingerNavigation() {
-            const mapDiv = document.getElementById('map');
-            const mapContainer = document.querySelector('.map-container');
-            
-            if (!mapDiv || !mapContainer) return;
-
-            // Prevent default touch behaviors on map container
-            mapContainer.addEventListener('touchstart', function(e) {
-                e.stopPropagation();
-            }, { passive: false });
-
-            mapContainer.addEventListener('touchmove', function(e) {
-                e.stopPropagation();
-            }, { passive: false });
-
-            mapContainer.addEventListener('touchend', function(e) {
-                e.stopPropagation();
-            }, { passive: false });
-
-            // Enable all gestures on map
-            mapDiv.addEventListener('touchstart', function(e) {
-                // Allow map to handle all touch events
-                e.stopPropagation();
-            }, { passive: true });
-
-            mapDiv.addEventListener('touchmove', function(e) {
-                // Prevent page scroll when touching map
-                e.preventDefault();
-                e.stopPropagation();
-            }, { passive: false });
-
-            mapDiv.addEventListener('touchend', function(e) {
-                e.stopPropagation();
-            }, { passive: true });
-
-            // Add event listeners to map once it's loaded
-            if (map) {
-                // Ensure map handles single finger gestures
-                google.maps.event.addListener(map, 'tilesloaded', function() {
-                    // Map is fully loaded, ensure gesture handling
-                    const mapCanvas = mapDiv.querySelector('[role="button"]');
-                    if (mapCanvas) {
-                        mapCanvas.style.touchAction = 'none';
-                    }
-                });
-            }
-        }
-
-        // Confirm location and proceed
-        function confirmLocation() {
-            if (!userLocation) {
-                alert('Localização não disponível. Tente inserir manualmente.');
-                return;
-            }
-
-            // Hide confirm button and show navigation setup
-            document.getElementById('confirmBtn').style.display = 'none';
-            
-            // Expand panel if collapsed to show destination options
-            if (panelCollapsed) {
-                expandPanel();
-            }
-            
-            showCurrentPositionIndicator();
-        }
-
-        // Select destination function
-        function selectDestination() {
-            isSelectingDestination = true;
-            
-            // Change destination display to indicate selection mode
-            const destinationValue = document.getElementById('destinationValue');
-            destinationValue.innerHTML = `
-                <i class="fas fa-crosshairs"></i>
-                <span>Toque no mapa para selecionar</span>
-            `;
-            destinationValue.style.background = 'rgba(255,193,7,0.6)';
-            destinationValue.style.transition = 'all 0.3s ease';
-            
-            // Show instruction with enhanced visibility
-            showCurrentPositionIndicator();
-            updateCurrentPositionIndicator('👆 Toque no mapa para selecionar destino');
-            
-            // Collapse panel to show more of the map
-            if (!panelCollapsed) {
-                collapsePanel();
-            }
-            
-            // Add visual cue to the map cursor
-            document.getElementById('map').style.cursor = 'crosshair';
-        }
-
-        // Update destination display
-        function updateDestinationDisplay() {
-            if (!destinationLocation) return;
-            
-            const destinationValue = document.getElementById('destinationValue');
-            destinationValue.style.background = '';
-            destinationValue.style.transition = 'all 0.3s ease';
-            
-            // Reset map cursor
-            document.getElementById('map').style.cursor = '';
-            
-            // Get address for destination
-            if (geocoder) {
-                geocoder.geocode({ location: destinationLocation }, function(results, status) {
-                    if (status === 'OK' && results[0]) {
-                        destinationAddress = results[0].formatted_address;
-                    } else {
-                        destinationAddress = `Lat: ${destinationLocation.lat.toFixed(6)}, Lng: ${destinationLocation.lng.toFixed(6)}`;
-                    }
-                    
-                    destinationValue.innerHTML = `
-                        <i class="fas fa-flag-checkered"></i>
-                        <span>${destinationAddress}</span>
-                    `;
-                    
-                    // Check if ready to navigate
-                    checkIfReadyToNavigate();
-                    
-                    showCurrentPositionIndicator();
-                    updateCurrentPositionIndicator('Destino selecionado!');
-                });
-            } else {
-                destinationAddress = `Lat: ${destinationLocation.lat.toFixed(6)}, Lng: ${destinationLocation.lng.toFixed(6)}`;
-                destinationValue.innerHTML = `
-                    <i class="fas fa-flag-checkered"></i>
-                    <span>${destinationAddress}</span>
-                `;
-                
-                // Check if ready to navigate
-                checkIfReadyToNavigate();
-                
-                showCurrentPositionIndicator();
-                updateCurrentPositionIndicator('Destino selecionado!');
-            }
-        }
-
-        // Start navigation between origin and destination
-        function startNavigation() {
-            if (!userLocation || !destinationLocation) {
-                alert('Origem e destino devem estar definidos para iniciar navegação.');
-                return;
-            }
-
-            // Show loading briefly
-            showLoading();
-            
-            // Prepare navigation parameters
-            const navigationParams = new URLSearchParams();
-            navigationParams.set('originLat', userLocation.lat.toString());
-            navigationParams.set('originLng', userLocation.lng.toString());
-            navigationParams.set('originAddress', currentAddress);
-            navigationParams.set('destLat', destinationLocation.lat.toString());
-            navigationParams.set('destLng', destinationLocation.lng.toString());
-            navigationParams.set('destAddress', destinationAddress);
-            navigationParams.set('service', selectedService);
-            
-            // Brief delay to show loading, then redirect
-            setTimeout(() => {
-                hideLoading();
-                
-                // Redirect to navigation page with parameters
-                window.location.href = `navigation.html?${navigationParams.toString()}`;
-            }, 500);
-        }
-
-        // Enter navigation mode with 3D view
-        function enterNavigationMode() {
-            isNavigating = true;
-            
-            // Add navigation mode class to body
-            document.body.classList.add('navigation-mode');
-            
-            // Show navigation header, hide regular header
-            document.querySelector('.header').style.display = 'none';
-            document.getElementById('navigationHeader').classList.add('active');
-            
-            // Center on user location first
-            if (userLocation) {
-                map.setCenter(userLocation);
-            }
-            
-            // Wait a moment then switch to 3D navigation view
-            setTimeout(() => {
-                // First set zoom to enable 3D features
-                map.setZoom(19); // Reduced zoom for better route visibility
-                
-                setTimeout(() => {
-                    // Then apply 3D options
-                    map.setTilt(45); // 3D tilt view like Waze
-                    map.setHeading(currentHeading);
-                    
-                    map.setOptions({
-                        disableDefaultUI: true,
-                        zoomControl: false,
-                        mapTypeControl: false,
-                        streetViewControl: false,
-                        fullscreenControl: false,
-                        gestureHandling: 'cooperative', // Allow rotation gestures
-                        mapTypeId: google.maps.MapTypeId.ROADMAP
-                    });
-                    
-                    // Force map refresh after setting 3D options
-                    google.maps.event.trigger(map, 'resize');
-                    
-                    // Ensure route line is still visible after 3D transition
-                    ensureRouteVisibility();
-                    
-                    // Create navigation marker after 3D mode is set
-                    createNavigationMarker();
-                    
-                    // Debug: Check if tilt was applied
-                    console.log('Navigation mode activated. Tilt:', map.getTilt(), 'Zoom:', map.getZoom());
-                    
-                }, 200);
-                
-            }, 500); // Small delay to ensure map is ready
-        }
-
-        // Ensure route line is visible and properly configured
-        function ensureRouteVisibility() {
-            if (currentRoute && directionsRenderer) {
-                // Re-apply directions with enhanced visibility
-                directionsRenderer.setOptions({
-                    suppressMarkers: true,
-                    polylineOptions: {
-                        strokeColor: '#1E90FF',
-                        strokeWeight: 10, // Thicker line for better visibility in 3D
-                        strokeOpacity: 1.0, // Full opacity
-                        zIndex: 200 // Higher z-index to stay above other elements
-                    }
-                });
-                
-                // Re-set the directions to ensure they're rendered
-                directionsRenderer.setDirections(currentRoute);
-                
-                console.log('Route visibility ensured - line weight: 10px, opacity: 100%');
-            }
-        }
-
-        // Add destination marker
-        let destinationMarker = null;
-        function addDestinationMarker() {
-            if (destinationMarker) {
-                destinationMarker.setMap(null);
-            }
-            
-            if (destinationLocation) {
-                destinationMarker = new google.maps.Marker({
-                    position: destinationLocation,
-                    map: map,
-                    icon: {
-                        path: 'M12,2C8.13,2 5,5.13 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9C19,5.13 15.87,2 12,2Z',
-                        fillColor: '#DC143C',
-                        fillOpacity: 1,
-                        strokeColor: '#FFFFFF',
-                        strokeWeight: 2,
-                        scale: 1.2,
-                        anchor: new google.maps.Point(12, 22)
-                    },
-                    title: 'Destino',
-                    zIndex: 999
-                });
-                
-                console.log('Destination marker added at:', destinationLocation);
-            }
-        }
-
-        // Create navigation marker (modern Waze-style arrow)
-        function createNavigationMarker() {
-            if (navigationMarker) {
-                navigationMarker.setMap(null);
-            }
-            
-            navigationMarker = new google.maps.Marker({
-                position: userLocation,
-                map: map,
-                icon: {
-                    // Modern Waze-style cursor - sleek rounded design
-                    path: 'M0,-28 C-3,-28 -6,-25 -6,-22 L-6,-18 C-6,-15 -8,-12 -10,-9 C-11,-7 -10,-5 -8,-5 L-3,-5 C-1,-5 -1,-3 -1,2 L-1,8 C-1,11 1,11 1,8 L1,2 C1,-3 1,-5 3,-5 L8,-5 C10,-5 11,-7 10,-9 C8,-12 6,-15 6,-18 L6,-22 C6,-25 3,-28 0,-28 Z',
-                    fillColor: '#00BFFF',
-                    fillOpacity: 0.95,
-                    strokeColor: '#FFFFFF',
-                    strokeWeight: 2.5,
-                    scale: 1.0,
-                    anchor: new google.maps.Point(0, -2),
-                    rotation: currentHeading
-                },
-                zIndex: 1000,
-                optimized: false // Better for rotation animations
-            });
-        }
-
-        // Start GPS tracking for navigation with high frequency
-        function startGPSTracking() {
-            if (!navigator.geolocation) {
-                alert('Geolocalização não suportada neste dispositivo.');
-                return;
-            }
-
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 3000, // Reduced timeout for faster updates
-                maximumAge: 1000 // Allow 1 second old positions for smoother experience
-            };
-
-            watchId = navigator.geolocation.watchPosition(
-                updateNavigationPosition,
-                handleGPSError,
-                options
-            );
-        }
-
-        // Update position during navigation
-        function updateNavigationPosition(position) {
-            if (!isNavigating) return;
-
-            const rawPosition = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-                accuracy: position.coords.accuracy,
-                heading: position.coords.heading,
-                speed: position.coords.speed
-            };
-
-            // Apply position smoothing
-            const smoothedPosition = applySmoothingToPosition(rawPosition);
-            
-            // Check if we're still on route or need recalculation
-            checkRouteDeviation(smoothedPosition);
-
-            // Calculate heading with smoothing
-            if (lastPosition) {
-                const distance = calculateDistance(lastPosition, smoothedPosition);
-                // Update heading if moved significantly or use GPS heading if available
-                if (distance > 3) {
-                    let newHeading;
-                    if (rawPosition.heading !== null && rawPosition.heading !== undefined && rawPosition.speed > 1) {
-                        // Use GPS heading if available and moving
-                        newHeading = rawPosition.heading;
-                    } else {
-                        // Calculate from movement
-                        newHeading = calculateHeading(lastPosition, smoothedPosition);
-                    }
-                    
-                    // Apply heading smoothing
-                    currentHeading = applySmoothingToHeading(newHeading);
-                }
-            }
-
-            // Update user location
-            userLocation = smoothedPosition;
-            lastPosition = smoothedPosition;
-
-            // Update navigation marker position and rotation with smooth animation
-            updateNavigationMarker(smoothedPosition);
-
-            // Update map center and rotation to follow user
-            updateMapFollowing(smoothedPosition);
-
-            // Update navigation UI with current distance (throttled for performance)
-            const distanceToDestination = calculateDistance(smoothedPosition, destinationLocation);
-            throttledUIUpdate(() => {
-                updateNavigationDistance(distanceToDestination);
-            });
-
-            // Check if we've reached destination
-            if (distanceToDestination < 30) { // Within 30 meters
-                arrivedAtDestination();
-            }
-        }
-
-        // Apply smoothing to position to reduce GPS jitter
-        function applySmoothingToPosition(newPosition) {
-            positionSmoothing.push(newPosition);
-            
-            // Keep only recent positions for smoothing
-            if (positionSmoothing.length > smoothingWindow) {
-                positionSmoothing.shift();
-            }
-
-            // Calculate weighted average (recent positions have more weight)
-            let totalWeight = 0;
-            let weightedLat = 0;
-            let weightedLng = 0;
-
-            for (let i = 0; i < positionSmoothing.length; i++) {
-                const weight = (i + 1); // Recent positions get higher weight
-                totalWeight += weight;
-                weightedLat += positionSmoothing[i].lat * weight;
-                weightedLng += positionSmoothing[i].lng * weight;
-            }
-
-            return {
-                lat: weightedLat / totalWeight,
-                lng: weightedLng / totalWeight,
-                accuracy: newPosition.accuracy
-            };
-        }
-
-        // Apply smoothing to heading to reduce rotation jitter
-        function applySmoothingToHeading(newHeading) {
-            headingSmoothing.push(newHeading);
-            
-            if (headingSmoothing.length > smoothingWindow) {
-                headingSmoothing.shift();
-            }
-
-            // Calculate average heading (handling circular nature of angles)
-            let x = 0, y = 0;
-            for (let heading of headingSmoothing) {
-                x += Math.cos(heading * Math.PI / 180);
-                y += Math.sin(heading * Math.PI / 180);
-            }
-
-            return Math.atan2(y, x) * 180 / Math.PI;
-        }
-
-        // Update navigation marker with smooth animation
-        function updateNavigationMarker(position) {
-            if (!navigationMarker) return;
-
-            // Smooth position update
-            navigationMarker.setPosition(position);
-            
-            // Update the icon with smooth rotation
-            const newIcon = {
-                // Modern Waze-style cursor - sleek rounded design
-                path: 'M0,-28 C-3,-28 -6,-25 -6,-22 L-6,-18 C-6,-15 -8,-12 -10,-9 C-11,-7 -10,-5 -8,-5 L-3,-5 C-1,-5 -1,-3 -1,2 L-1,8 C-1,11 1,11 1,8 L1,2 C1,-3 1,-5 3,-5 L8,-5 C10,-5 11,-7 10,-9 C8,-12 6,-15 6,-18 L6,-22 C6,-25 3,-28 0,-28 Z',
-                fillColor: '#00BFFF',
-                fillOpacity: 0.95,
-                strokeColor: '#FFFFFF',
-                strokeWeight: 2.5,
-                scale: 1.0,
-                anchor: new google.maps.Point(0, -2),
-                rotation: currentHeading
-            };
-            
-            navigationMarker.setIcon(newIcon);
-        }
-
-        // Update map following with smooth transitions
-        function updateMapFollowing(position) {
-            // Smooth map center update
-            map.panTo(position);
-            
-            // Smooth heading update
-            const currentMapHeading = map.getHeading() || 0;
-            let headingDiff = currentHeading - currentMapHeading;
-            
-            // Handle wrap-around for angles
-            if (headingDiff > 180) headingDiff -= 360;
-            if (headingDiff < -180) headingDiff += 360;
-            
-            // Only update heading if significant change
-            if (Math.abs(headingDiff) > 5) {
-                map.setHeading(currentHeading);
-            }
-        }
-
-        // Check if user has deviated from route and needs recalculation
-        function checkRouteDeviation(currentPosition) {
-            if (!currentRoute || isRecalculating) return;
-            
-            // Don't recalculate too frequently
-            const now = Date.now();
-            if (now - lastRecalculationTime < 10000) return; // Wait 10 seconds between recalculations
-
-            // Check distance to route path
-            const distanceToRoute = calculateDistanceToRoute(currentPosition, currentRoute);
-            
-            if (distanceToRoute > routeDeviationThreshold) {
-                console.log('Route deviation detected:', distanceToRoute, 'meters');
-                recalculateRoute(currentPosition);
-            }
-        }
-
-        // Calculate distance from current position to the route
-        function calculateDistanceToRoute(position, route) {
-            if (!route || !route.routes[0]) return 0;
-            
-            const path = route.routes[0].overview_path;
-            let minDistance = Infinity;
-            
-            // Find closest point on route
-            for (let i = 0; i < path.length; i++) {
-                const pathPoint = {
-                    lat: path[i].lat(),
-                    lng: path[i].lng()
-                };
-                const distance = calculateDistance(position, pathPoint);
-                minDistance = Math.min(minDistance, distance);
-            }
-            
-            return minDistance;
-        }
-
-        // Recalculate route from current position
-        function recalculateRoute(fromPosition) {
-            if (isRecalculating) return;
-            
-            isRecalculating = true;
-            lastRecalculationTime = Date.now();
-            
-            console.log('Recalculating route...');
-            
-            const request = {
-                origin: fromPosition,
-                destination: destinationLocation,
-                travelMode: google.maps.TravelMode.DRIVING,
-                unitSystem: google.maps.UnitSystem.METRIC,
-                avoidHighways: false,
-                avoidTolls: false
-            };
-
-            directionsService.route(request, function(result, status) {
-                isRecalculating = false;
-                
-                if (status === 'OK') {
-                    // Update current route
-                    currentRoute = result;
-                    routeSteps = result.routes[0].legs[0].steps;
-                    currentStepIndex = 0;
-                    
-                    // Ensure directions renderer is properly configured
-                    directionsRenderer.setOptions({
-                        suppressMarkers: true,
-                        polylineOptions: {
-                            strokeColor: '#1E90FF',
-                            strokeWeight: 8,
-                            strokeOpacity: 0.9,
-                            zIndex: 100
-                        }
-                    });
-                    
-                    // Update directions on map
-                    directionsRenderer.setDirections(result);
-                    
-                    // Update UI with new route info
-                    updateNavigationUI(result);
-                    
-                    console.log('Route recalculated successfully with', routeSteps.length, 'steps');
-                    
-                    // Show brief notification
-                    showRecalculationNotification();
-                } else {
-                    console.error('Route recalculation failed:', status);
-                }
-            });
-        }
-
-        // Show notification that route was recalculated
-        function showRecalculationNotification() {
-            const currentPositionElement = document.getElementById('currentPosition');
-            updateCurrentPositionIndicator('Rota recalculada');
-            showCurrentPositionIndicator();
-        }
-
-        // Update navigation distance display
-        function updateNavigationDistance(distance) {
-            const distanceElement = document.getElementById('navigationDistance');
-            if (distanceElement) {
-                if (distance < 1000) {
-                    distanceElement.textContent = `${Math.round(distance)}m restantes`;
-                } else {
-                    distanceElement.textContent = `${(distance / 1000).toFixed(1)}km restantes`;
-                }
-            }
-        }
-
-        // Calculate heading between two points
-        function calculateHeading(from, to) {
-            const fromLat = from.lat * Math.PI / 180;
-            const fromLng = from.lng * Math.PI / 180;
-            const toLat = to.lat * Math.PI / 180;
-            const toLng = to.lng * Math.PI / 180;
-
-            const dLng = toLng - fromLng;
-            const y = Math.sin(dLng) * Math.cos(toLat);
-            const x = Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(dLng);
-
-            let heading = Math.atan2(y, x) * 180 / Math.PI;
-            heading = (heading + 360) % 360;
-
-            return heading;
-        }
-
-        // Calculate distance between two points (in meters)
-        function calculateDistance(pos1, pos2) {
-            const R = 6371e3; // Earth's radius in meters
-            const φ1 = pos1.lat * Math.PI/180;
-            const φ2 = pos2.lat * Math.PI/180;
-            const Δφ = (pos2.lat-pos1.lat) * Math.PI/180;
-            const Δλ = (pos2.lng-pos1.lng) * Math.PI/180;
-
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-            return R * c;
-        }
-
-        // Handle GPS errors with retry logic
-        function handleGPSError(error) {
-            console.error('GPS Error:', error);
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    alert('Permissão de localização negada. Ative para continuar navegação.');
-                    stopNavigation();
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    console.log('GPS temporarily unavailable, retrying...');
-                    // Don't stop navigation, just log and continue
-                    break;
-                case error.TIMEOUT:
-                    console.log('GPS timeout, continuing with last known position...');
-                    // Continue with last known position
-                    break;
-            }
-        }
-
-        // Optimize performance by throttling less critical updates
-        let lastUIUpdate = 0;
-        const UI_UPDATE_INTERVAL = 1000; // Update UI every 1 second
-        
-        function throttledUIUpdate(callback) {
-            const now = Date.now();
-            if (now - lastUIUpdate >= UI_UPDATE_INTERVAL) {
-                lastUIUpdate = now;
-                callback();
-            }
-        }
-
-        // Arrived at destination
-        function arrivedAtDestination() {
-            alert('Chegou ao destino!');
-            stopNavigation();
-        }
-
-        // Update UI for navigation mode
-        function updateNavigationUI(result) {
-            const route = result.routes[0];
-            const leg = route.legs[0];
-            
-            // Update location info with route details
-            const locationInfo = document.querySelector('.location-info');
-            locationInfo.innerHTML = `
-                <div class="location-label">Navegação Ativa</div>
-                <div class="location-value">
-                    <i class="fas fa-route"></i>
-                    <span>Distância: ${leg.distance.text}</span>
-                </div>
-                <div class="location-accuracy">
-                    Tempo estimado: ${leg.duration.text}
-                </div>
-            `;
-            
-            // Update destination info
-            const destinationInfo = document.querySelector('.location-info:nth-child(3)');
-            destinationInfo.innerHTML = `
-                <div class="location-label">Status</div>
-                <div class="location-value">
-                    <i class="fas fa-navigation"></i>
-                    <span>Siga as instruções do mapa</span>
-                </div>
-            `;
-            
-            // Hide navigation button and show stop button
-            document.getElementById('navigationBtn').style.display = 'none';
-            
-            const actionButtons = document.querySelector('.action-buttons');
-            actionButtons.innerHTML = `
-                <button class="action-btn btn-secondary" onclick="stopNavigation()">
-                    <i class="fas fa-stop"></i>
-                    Parar Navegação
-                </button>
-            `;
-        }
-
-        // Stop navigation and return to selection mode
-        function stopNavigation() {
-            // Stop GPS tracking
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-            }
-            
-            // Reset navigation state
-            isNavigating = false;
-            currentHeading = 0;
-            lastPosition = null;
-            currentRoute = null;
-            isRecalculating = false;
-            lastRecalculationTime = 0;
-            
-            // Clear smoothing arrays
-            headingSmoothing = [];
-            positionSmoothing = [];
-            
-            // Remove navigation mode class
-            document.body.classList.remove('navigation-mode');
-            
-            // Show regular header, hide navigation header
-            document.querySelector('.header').style.display = 'block';
-            document.getElementById('navigationHeader').classList.remove('active');
-            
-            // Clear navigation marker
-            if (navigationMarker) {
-                navigationMarker.setMap(null);
-                navigationMarker = null;
-            }
-            
-            // Clear destination marker
-            if (destinationMarker) {
-                destinationMarker.setMap(null);
-                destinationMarker = null;
-            }
-            
-            // Clear directions
-            directionsRenderer.setMap(null);
-            
-            // Reset map to normal view with smooth transition
-            map.setOptions({
-                tilt: 0,
-                heading: 0,
-                zoom: 18,
-                disableDefaultUI: false,
-                zoomControl: true,
-                gestureHandling: 'greedy',
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false
-            });
-            
-            // Show center pin again
-            document.getElementById('centerPin').style.display = 'block';
-            
-            // Force map refresh
-            setTimeout(() => {
-                google.maps.event.trigger(map, 'resize');
-            }, 100);
-            
-            // Reset UI
-            location.reload(); // Simple way to reset everything
-        }
-
-        // Manual location entry - open modal
-        function manualLocation() {
-            openAddressModal();
-        }
-
-        // Open address modal
-        function openAddressModal() {
-            const modal = document.getElementById('addressModal');
-            const input = document.getElementById('manualAddress');
-            
-            // Pre-fill with last manual address or current address
-            const prefillAddress = lastManualAddress || currentAddress;
-            if (prefillAddress && prefillAddress !== 'Detectando localização...') {
-                input.value = prefillAddress;
-            }
-            
-            // Create ripple effect from button position
-            createModalRipple();
-            
-            // Add opening class for glow effect
-            modal.classList.add('opening');
-            
-            // Show modal with delay for ripple effect
-            setTimeout(() => {
-                modal.classList.add('show');
-            }, 50);
-            
-            // Remove opening class and focus input after animation
-            setTimeout(() => {
-                modal.classList.remove('opening');
-                input.focus();
-                input.select();
-            }, 650);
-            
-            // Close on escape key
-            document.addEventListener('keydown', closeModalOnEscape);
-        }
-
-        // Create ripple effect for modal opening
-        function createModalRipple() {
-            const button = document.querySelector('.btn-secondary');
-            if (!button) return;
-            
-            const rect = button.getBoundingClientRect();
-            const ripple = document.createElement('div');
-            
-            ripple.classList.add('modal-ripple');
-            ripple.style.left = (rect.left + rect.width / 2) + 'px';
-            ripple.style.top = (rect.top + rect.height / 2) + 'px';
-            ripple.style.width = '20px';
-            ripple.style.height = '20px';
-            ripple.style.marginLeft = '-10px';
-            ripple.style.marginTop = '-10px';
-            
-            document.body.appendChild(ripple);
-            
-            // Remove ripple after animation
-            setTimeout(() => {
-                if (ripple.parentNode) {
-                    ripple.parentNode.removeChild(ripple);
-                }
-            }, 600);
-        }
-
-        // Close address modal
-        function closeAddressModal() {
-            const modal = document.getElementById('addressModal');
-            
-            // Add closing animation
-            modal.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.6, 1)';
-            modal.querySelector('.modal-content').style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.6, 1)';
-            modal.querySelector('.modal-content').style.transform = 'scale(0.95) translateY(20px)';
-            modal.querySelector('.modal-content').style.opacity = '0';
-            
-            setTimeout(() => {
-                modal.classList.remove('show');
-                // Reset styles
-                modal.style.transition = '';
-                modal.querySelector('.modal-content').style.transition = '';
-                modal.querySelector('.modal-content').style.transform = '';
-                modal.querySelector('.modal-content').style.opacity = '';
-            }, 300);
-            
-            document.removeEventListener('keydown', closeModalOnEscape);
-        }
-
-        // Close modal on escape key
-        function closeModalOnEscape(e) {
-            if (e.key === 'Escape') {
-                closeAddressModal();
-            }
-        }
-
-        // Confirm manual address from modal
-        function confirmManualAddress() {
-            const input = document.getElementById('manualAddress');
-            const address = input.value.trim();
-            
-            if (!address) {
-                input.focus();
-                return;
-            }
-            
-            // Save for next time
-            lastManualAddress = address;
-            
-            closeAddressModal();
-            showLoading();
-            
-            // Try to geocode the manual address
-            if (geocoder) {
-                geocoder.geocode({ address: address }, function(results, status) {
-                    hideLoading();
-                    if (status === 'OK' && results[0]) {
-                        userLocation = {
-                            lat: results[0].geometry.location.lat(),
-                            lng: results[0].geometry.location.lng()
-                        };
-                        currentAddress = results[0].formatted_address;
-                        
-                        // Update map to show manual location
-                        updateMapWithNewLocation();
-                        
-                        updateLocationDisplay();
-                        document.getElementById('confirmBtn').disabled = false;
-                        
-                        // Auto-open destination modal after origin is set via manual input
-                        setTimeout(() => {
-                            chooseDestinationMethod();
-                        }, 1000);
-                        showCurrentPositionIndicator();
-                    } else {
-                        // If geocoding fails, still save the typed address
-                        currentAddress = address;
-                        updateLocationDisplay();
-                        document.getElementById('confirmBtn').disabled = false;
-                    }
-                });
-            } else {
-                // Fallback when no geocoder
-                setTimeout(() => {
-                    hideLoading();
-                    currentAddress = address;
-                    updateLocationDisplay();
-                    document.getElementById('confirmBtn').disabled = false;
-                }, 1000);
-            }
-        }
-
-        // Update map with new location
-        function updateMapWithNewLocation() {
-            if (map && userLocation) {
-                map.setCenter(userLocation);
-                map.setZoom(17);
-                showCurrentPositionIndicator();
-            }
-        }
-
-        // Modal functions for choosing location method
-        function chooseOriginMethod() {
-            currentModalType = 'origin';
-            document.getElementById('modalTitle').textContent = 'Definir Origem';
-            document.getElementById('modalDescription').textContent = 'Como você quer definir sua origem?';
-            document.getElementById('locationModalOverlay').style.display = 'flex';
-        }
-
-        function chooseDestinationMethod() {
-            currentModalType = 'destination';
-            document.getElementById('modalTitle').textContent = 'Definir Destino';
-            document.getElementById('modalDescription').textContent = 'Como você quer definir seu destino?';
-            document.getElementById('locationModalOverlay').style.display = 'flex';
-        }
-
-        function closeLocationModal() {
-            document.getElementById('locationModalOverlay').style.display = 'none';
-            currentModalType = '';
-            isSelectingLocation = false;
-            document.getElementById('map').style.cursor = '';
-        }
-
-        // Method 1: Use current location (GPS)
-        function useCurrentLocation() {
-            closeLocationModal();
-            
-            if (currentModalType === 'origin') {
-                // Use GPS for origin
-                getUserLocation();
-                // Auto-open destination modal after origin is set
-                setTimeout(() => {
-                    if (userLocation) {
-                        chooseDestinationMethod();
-                    }
-                }, 2000);
-            } else if (currentModalType === 'destination') {
-                alert('Destino deve ser diferente da origem. Use "Escolher no mapa" ou "Digitar endereço".');
-            }
-        }
-
-        // Method 2: Select on map
-        function selectOnMap() {
-            closeLocationModal();
-            isSelectingLocation = true;
-            
-            if (currentModalType === 'origin') {
-                // Set mode for selecting origin
-                isSelectingDestination = false;
-                showCurrentPositionIndicator();
-                updateCurrentPositionIndicator('👆 Toque no mapa para definir origem');
-                
-                // Change origin display
-                const locationValue = document.getElementById('locationValue');
-                locationValue.innerHTML = `
-                    <i class="fas fa-crosshairs"></i>
-                    <span>Toque no mapa para selecionar</span>
-                `;
-                locationValue.style.background = 'rgba(255,193,7,0.6)';
-                
-            } else if (currentModalType === 'destination') {
-                // Use existing destination selection logic
-                selectDestination();
-            }
-            
-            // Collapse panel and show crosshair cursor
-            if (!panelCollapsed) {
-                collapsePanel();
-            }
-            document.getElementById('map').style.cursor = 'crosshair';
-        }
-
-        // Method 3: Type manually
-        function typeManually() {
-            closeLocationModal();
-            
-            if (currentModalType === 'origin') {
-                // Open address input for origin
-                openAddressModal('origin');
-            } else if (currentModalType === 'destination') {
-                // Open address input for destination
-                openAddressModal('destination');
-            }
-        }
-
-        // Go back to services
-        function goBack() {
-            window.location.href = 'services.html';
-        }
-
-        // Loading management
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
         }
 
         // Initialize page
@@ -2660,24 +942,448 @@
                 setTimeout(initMapFallback, 1000);
             }
             
-            
-            // Initialize panel toggle functionality
-            initPanelToggle();
-            
             // Close modal when clicking outside
-            document.getElementById('addressModal').addEventListener('click', function(e) {
+            document.getElementById('addressModalOverlay').addEventListener('click', function(e) {
                 if (e.target === this) {
-                    closeAddressModal();
+                    closeAddressModalNew();
                 }
             });
             
             // Enter key to confirm in modal
-            document.getElementById('manualAddress').addEventListener('keydown', function(e) {
+            document.getElementById('addressInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
-                    confirmManualAddress();
+                    confirmAddressNew();
                 }
             });
         });
+
+        // ===== NEW SELECTION SYSTEM =====
+        
+        // Main selection functions
+        function selectOrigin() {
+            currentSelectionType = 'origin';
+            showLocationModal('Definir Origem', 'Como você quer definir sua origem?', true);
+        }
+
+        function selectDestination() {
+            if (!originLocation) {
+                alert('Defina a origem primeiro');
+                return;
+            }
+            currentSelectionType = 'destination';
+            showLocationModal('Definir Destino', 'Como você quer definir seu destino?', false);
+        }
+
+        function confirmTrip() {
+            if (!originLocation || !destinationLocation) {
+                alert('Defina origem e destino primeiro');
+                return;
+            }
+            // Proceed with trip confirmation
+            startNavigation();
+        }
+
+        // Show location selection modal
+        function showLocationModal(title, description, showGPS) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDescription').textContent = description;
+            
+            // Show/hide GPS option based on parameter
+            const gpsOption = document.getElementById('currentLocationOption');
+            gpsOption.style.display = showGPS ? 'flex' : 'none';
+            
+            document.getElementById('locationModalOverlay').style.display = 'flex';
+        }
+
+        function closeLocationModal() {
+            document.getElementById('locationModalOverlay').style.display = 'none';
+            // Não limpar currentSelectionType aqui pois ainda vamos usar
+            isSelectingOnMap = false;
+            document.getElementById('map').style.cursor = '';
+        }
+        
+        function cancelLocationModal() {
+            document.getElementById('locationModalOverlay').style.display = 'none';
+            currentSelectionType = ''; // Limpar quando cancelar
+            isSelectingOnMap = false;
+            document.getElementById('map').style.cursor = '';
+        }
+
+        // Location selection methods
+        function useCurrentLocationNew() {
+            closeLocationModal();
+            showLoading();
+            
+            if (!navigator.geolocation) {
+                hideLoading();
+                alert('GPS não disponível neste dispositivo');
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    hideLoading();
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    if (currentSelectionType === 'origin') {
+                        setOriginLocation(location);
+                    }
+                    
+                    getAddressFromLocation(location, function(address) {
+                        if (currentSelectionType === 'origin') {
+                            originAddress = address;
+                            updateOriginDisplay();
+                            // Não abrir modal de destino automaticamente quando usando GPS
+                        }
+                        // Limpar o tipo de seleção após processar
+                        currentSelectionType = '';
+                    });
+                },
+                function(error) {
+                    hideLoading();
+                    alert('Não foi possível obter sua localização. Tente outro método.');
+                }
+            );
+        }
+
+        function selectOnMapNew() {
+            closeLocationModal();
+            isSelectingOnMap = true;
+            document.getElementById('map').style.cursor = 'crosshair';
+            
+            // Ocultar painel durante seleção no mapa
+            if (!panelCollapsed) {
+                collapsePanel();
+            }
+            
+            showCurrentPositionIndicator();
+            updateCurrentPositionIndicator(`👆 Toque no mapa para definir ${currentSelectionType === 'origin' ? 'origem' : 'destino'}`);
+            
+            // Add visual feedback
+            document.body.classList.add('map-selection-mode');
+        }
+
+        function typeAddressNew() {
+            closeLocationModal();
+            showAddressModal();
+        }
+
+        // Address modal functions
+        function showAddressModal() {
+            const modal = document.getElementById('addressModalOverlay');
+            const title = document.getElementById('addressModalTitle');
+            const subtitle = document.getElementById('addressModalSubtitle');
+            const input = document.getElementById('addressInput');
+            
+            if (currentSelectionType === 'origin') {
+                title.textContent = 'Inserir Origem';
+                subtitle.textContent = 'Digite o endereço ou nome do local';
+            } else {
+                title.textContent = 'Inserir Destino';
+                subtitle.textContent = 'Digite o endereço ou nome do local';
+            }
+            
+            input.value = '';
+            modal.style.display = 'flex';
+            
+            // Inicializar autocomplete do Google Places
+            setTimeout(() => {
+                initializeAutocomplete(input);
+                input.focus();
+            }, 300);
+        }
+        
+        // Inicializar Google Places Autocomplete
+        function initializeAutocomplete(input) {
+            if (!window.google || !google.maps.places) {
+                console.warn('Google Places API não disponível');
+                return;
+            }
+            
+            // Criar autocomplete
+            const autocomplete = new google.maps.places.Autocomplete(input, {
+                types: ['establishment', 'geocode'],
+                componentRestrictions: { country: 'BR' },
+                fields: ['place_id', 'formatted_address', 'geometry', 'name']
+            });
+            
+            // Listener para quando um local é selecionado
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                
+                if (!place.geometry) {
+                    console.log('Local não encontrado: ' + place.name);
+                    return;
+                }
+                
+                // Fechar modal e processar local selecionado
+                const location = {
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng()
+                };
+                
+                const address = place.formatted_address || place.name;
+                
+                closeAddressModalNew();
+                processSelectedLocation(location, address);
+            });
+        }
+        
+        // Processar local selecionado (do autocomplete ou geocoding)
+        function processSelectedLocation(location, address) {
+            if (currentSelectionType === 'origin') {
+                setOriginLocation(location);
+                originAddress = address;
+                updateOriginDisplay();
+            } else {
+                setDestinationLocation(location);
+                destinationAddress = address;
+                updateDestinationDisplay();
+                drawRoute();
+            }
+            
+            // Limpar o tipo de seleção após processar
+            currentSelectionType = '';
+        }
+
+        function closeAddressModalNew() {
+            document.getElementById('addressModalOverlay').style.display = 'none';
+            // Não limpar currentSelectionType aqui pois ainda precisamos saber o tipo
+        }
+
+        function confirmAddressNew() {
+            const input = document.getElementById('addressInput');
+            const address = input.value.trim();
+            
+            if (!address) {
+                input.focus();
+                return;
+            }
+            
+            closeAddressModalNew();
+            showLoading();
+            
+            // Geocode the address (fallback se não foi selecionado pelo autocomplete)
+            if (geocoder) {
+                geocoder.geocode({ address: address }, function(results, status) {
+                    hideLoading();
+                    if (status === 'OK' && results[0]) {
+                        const location = {
+                            lat: results[0].geometry.location.lat(),
+                            lng: results[0].geometry.location.lng()
+                        };
+                        
+                        processSelectedLocation(location, results[0].formatted_address);
+                    } else {
+                        alert('Endereço não encontrado. Tente novamente.');
+                        // Restaurar currentSelectionType em caso de erro
+                        // (não limpar para permitir tentar novamente)
+                    }
+                });
+            }
+        }
+
+        // Map click listener
+        function setupMapClickListener() {
+            google.maps.event.addListener(map, 'click', function(event) {
+                if (isSelectingOnMap) {
+                    const location = {
+                        lat: event.latLng.lat(),
+                        lng: event.latLng.lng()
+                    };
+                    
+                    isSelectingOnMap = false;
+                    document.getElementById('map').style.cursor = '';
+                    document.body.classList.remove('map-selection-mode');
+                    
+                    if (currentSelectionType === 'origin') {
+                        setOriginLocation(location);
+                        getAddressFromLocation(location, function(address) {
+                            originAddress = address;
+                            updateOriginDisplay();
+                            showCurrentPositionIndicator();
+                            updateCurrentPositionIndicator('Origem selecionada! ✓');
+                            
+                            // Expandir painel após seleção
+                            if (panelCollapsed) {
+                                expandPanel();
+                            }
+                            
+                            // Não abrir modal de destino automaticamente quando selecionando no mapa
+                            // Limpar o tipo de seleção após processar
+                            currentSelectionType = '';
+                        });
+                    } else if (currentSelectionType === 'destination') {
+                        setDestinationLocation(location);
+                        getAddressFromLocation(location, function(address) {
+                            destinationAddress = address;
+                            updateDestinationDisplay();
+                            showCurrentPositionIndicator();
+                            updateCurrentPositionIndicator('Destino selecionado! ✓');
+                            drawRoute();
+                            
+                            // Expandir painel após seleção
+                            if (panelCollapsed) {
+                                expandPanel();
+                            }
+                            
+                            // Limpar o tipo de seleção após processar
+                            currentSelectionType = '';
+                        });
+                    }
+                }
+            });
+        }
+
+        // Location setters
+        function setOriginLocation(location) {
+            originLocation = location;
+            map.setCenter(location);
+            map.setZoom(16);
+        }
+
+        function setDestinationLocation(location) {
+            destinationLocation = location;
+        }
+
+        // Address getter
+        function getAddressFromLocation(location, callback) {
+            if (geocoder) {
+                geocoder.geocode({ location: location }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        callback(results[0].formatted_address);
+                    } else {
+                        callback(`Lat: ${location.lat.toFixed(6)}, Lng: ${location.lng.toFixed(6)}`);
+                    }
+                });
+            } else {
+                callback(`Lat: ${location.lat.toFixed(6)}, Lng: ${location.lng.toFixed(6)}`);
+            }
+        }
+
+        // UI update functions
+        function updateOriginDisplay() {
+            const originItem = document.getElementById('originItem');
+            const originText = document.getElementById('originText');
+            
+            originText.textContent = originAddress;
+            originItem.classList.add('completed');
+            
+            // Enable destination if not already enabled
+            const destinationItem = document.getElementById('destinationItem');
+            destinationItem.classList.remove('disabled');
+        }
+
+        function updateDestinationDisplay() {
+            const destinationItem = document.getElementById('destinationItem');
+            const destinationText = document.getElementById('destinationText');
+            
+            destinationText.textContent = destinationAddress;
+            destinationItem.classList.add('completed');
+            
+            // Enable confirm trip
+            const confirmItem = document.getElementById('confirmTripItem');
+            confirmItem.classList.remove('disabled');
+            confirmItem.querySelector('.trip-value').textContent = 'Confirmar e iniciar viagem';
+        }
+
+        // Route drawing function
+        function drawRoute() {
+            if (!originLocation || !destinationLocation) return;
+            
+            const request = {
+                origin: originLocation,
+                destination: destinationLocation,
+                travelMode: google.maps.TravelMode.DRIVING
+            };
+            
+            directionsService.route(request, function(result, status) {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                    
+                    // Fit map to show both points
+                    const bounds = new google.maps.LatLngBounds();
+                    bounds.extend(originLocation);
+                    bounds.extend(destinationLocation);
+                    map.fitBounds(bounds);
+                    
+                    // Show route info
+                    const route = result.routes[0].legs[0];
+                    showCurrentPositionIndicator();
+                    updateCurrentPositionIndicator(`Rota traçada: ${route.distance.text}, ${route.duration.text}`);
+                }
+            });
+        }
+
+        // Navigation function
+        function startNavigation() {
+            if (!originLocation || !destinationLocation) return;
+            
+            // Create navigation parameters
+            const params = new URLSearchParams();
+            params.set('originLat', originLocation.lat);
+            params.set('originLng', originLocation.lng);
+            params.set('originAddress', originAddress);
+            params.set('destLat', destinationLocation.lat);
+            params.set('destLng', destinationLocation.lng);
+            params.set('destAddress', destinationAddress);
+            params.set('service', selectedService);
+            
+            // Redirect to navigation page
+            window.location.href = `navigation.html?${params.toString()}`;
+        }
+
+        // Utility functions
+        function showCurrentPositionIndicator() {
+            const indicator = document.getElementById('currentPosition');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 3000);
+        }
+
+        function updateCurrentPositionIndicator(text) {
+            document.getElementById('currentPositionText').textContent = text;
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Panel toggle functionality
+        let panelCollapsed = false;
+        
+        function togglePanel() {
+            const panel = document.getElementById('bottomPanel');
+            
+            if (panelCollapsed) {
+                expandPanel();
+            } else {
+                collapsePanel();
+            }
+        }
+        
+        function collapsePanel() {
+            const panel = document.getElementById('bottomPanel');
+            panel.classList.add('collapsed');
+            panelCollapsed = true;
+        }
+        
+        function expandPanel() {
+            const panel = document.getElementById('bottomPanel');
+            panel.classList.remove('collapsed');
+            panelCollapsed = false;
+        }
+
+        // Go back to services
+        function goBack() {
+            window.location.href = 'services.html';
+        }
 
         // Handle API load errors
         window.gm_authFailure = function() {
