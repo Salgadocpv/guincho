@@ -522,10 +522,9 @@
                                     document.querySelector('.map-container').classList.add('css-3d');
                                 }
                                 
-                                // Set initial heading
-                                if (currentHeading !== 0) {
-                                    map.setHeading(currentHeading);
-                                }
+                                // Set initial heading - start with north facing up
+                                map.setHeading(0);
+                                console.log('Map initialized with north facing up, will rotate as user moves/turns');
                                 
                                 // Start monitoring
                                 startTiltMonitoring();
@@ -705,20 +704,31 @@
             let compassHeading = null;
             
             if (event.webkitCompassHeading) {
-                // iOS Safari
+                // iOS Safari - already points to magnetic north
                 compassHeading = event.webkitCompassHeading;
             } else if (event.alpha !== null) {
-                // Android and other browsers
+                // Android and other browsers - alpha is rotation around z-axis
+                // Convert to compass heading (0° = North, 90° = East, 180° = South, 270° = West)
                 compassHeading = 360 - event.alpha;
             }
             
             if (compassHeading !== null) {
-                // Apply smoothing to compass heading
-                currentHeading = applySmoothingToHeading(compassHeading);
+                // Normalize to 0-360 range
+                compassHeading = ((compassHeading % 360) + 360) % 360;
                 
-                // Update map orientation immediately
-                if (map && map.getHeading() !== undefined) {
-                    updateMapFollowing(userLocation);
+                // Apply smoothing to compass heading
+                const smoothedHeading = applySmoothingToHeading(compassHeading);
+                
+                // Only update if there's a significant change
+                if (Math.abs(smoothedHeading - currentHeading) > 2) {
+                    currentHeading = smoothedHeading;
+                    
+                    // Update map orientation immediately with current position
+                    if (map && userLocation) {
+                        updateMapFollowing(userLocation);
+                    }
+                    
+                    console.log('Device orientation updated - Raw:', compassHeading.toFixed(1), '° Smoothed:', currentHeading.toFixed(1), '°');
                 }
             }
         }
@@ -761,24 +771,31 @@
             // Check for route deviation
             checkRouteDeviation(smoothedPosition);
 
-            // Calculate heading with improved accuracy
+            // Calculate heading with improved accuracy for map rotation
             if (lastPosition) {
                 const distance = calculateDistance(lastPosition, smoothedPosition);
-                if (distance > 2) {
+                if (distance > 1.5) {
                     let newHeading;
                     
-                    // Prefer device compass when available and moving
-                    if (rawPosition.heading !== null && rawPosition.heading !== undefined && rawPosition.speed > 0.5) {
+                    // Prefer GPS heading when moving fast, compass when stationary/slow
+                    if (rawPosition.heading !== null && rawPosition.heading !== undefined && rawPosition.speed > 1.0) {
+                        // Use GPS heading when moving - more accurate for direction of travel
                         newHeading = rawPosition.heading;
+                        console.log('Using GPS heading for movement:', newHeading.toFixed(1), '° Speed:', rawPosition.speed?.toFixed(1), 'm/s');
                     } else {
-                        // Calculate heading from movement
+                        // Calculate heading from movement when GPS heading unavailable
                         newHeading = calculateHeading(lastPosition, smoothedPosition);
+                        console.log('Using calculated heading from movement:', newHeading.toFixed(1), '°');
                     }
                     
                     // Apply smoothing for stable rotation
-                    currentHeading = applySmoothingToHeading(newHeading);
+                    const smoothedHeading = applySmoothingToHeading(newHeading);
                     
-                    console.log('Heading updated:', currentHeading, 'Raw heading:', rawPosition.heading, 'Speed:', rawPosition.speed);
+                    // Only update map if heading changed significantly
+                    if (Math.abs(smoothedHeading - currentHeading) > 1) {
+                        currentHeading = smoothedHeading;
+                        console.log('Heading updated for map rotation:', currentHeading.toFixed(1), '°');
+                    }
                 }
             }
 
@@ -930,7 +947,8 @@
                 map.setTilt(45);
             }
             
-            // Smooth heading rotation like Waze
+            // Rotate map to match user's orientation (triangle direction)
+            // The map should rotate so the top of the map points in the direction the user is facing
             const currentMapHeading = map.getHeading() || 0;
             let headingDiff = currentHeading - currentMapHeading;
             
@@ -938,13 +956,15 @@
             if (headingDiff > 180) headingDiff -= 360;
             if (headingDiff < -180) headingDiff += 360;
             
-            // More sensitive rotation for better navigation experience
-            if (Math.abs(headingDiff) > 3) {
-                // Smooth rotation instead of instant snap
+            // More responsive rotation for better navigation experience
+            if (Math.abs(headingDiff) > 1) {
+                // The map bearing should match the user's heading direction
+                // So when user points north (0°), map shows north at top
+                // When user points east (90°), map rotates so east is at top
                 const targetHeading = normalizeHeading(currentHeading);
                 map.setHeading(targetHeading);
                 
-                console.log('Map heading updated:', targetHeading, 'User heading:', currentHeading);
+                console.log('Map rotated to match user direction - User heading:', currentHeading, '° Map heading:', targetHeading, '°');
             }
             
             // Keep optimal zoom level for navigation
