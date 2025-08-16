@@ -1448,10 +1448,21 @@
                     map.setCenter(destinationLocation);
                     map.setZoom(15);
                     
-                    // Show route info
+                    // Show route info and calculate suggested price
                     const route = result.routes[0].legs[0];
+                    const distanceInKm = route.distance.value / 1000; // Convert meters to km
+                    const suggestedPrice = Math.max(10, Math.round(distanceInKm * 3)); // Min R$ 10, R$ 3 por km
+                    
+                    // Update offer input with suggested value
+                    const offerInput = document.getElementById('offerInput');
+                    offerInput.value = suggestedPrice;
+                    offerInput.placeholder = `Sugestão: R$ ${suggestedPrice} (R$ 3/km)`;
+                    
+                    // Trigger update to check if can confirm trip
+                    updateOfferValue();
+                    
                     showCurrentPositionIndicator();
-                    updateCurrentPositionIndicator(`Rota traçada: ${route.distance.text}, ${route.duration.text}`);
+                    updateCurrentPositionIndicator(`Rota: ${route.distance.text}, ${route.duration.text} - Sugestão: R$ ${suggestedPrice}`);
                 }
             });
         }
