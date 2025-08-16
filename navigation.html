@@ -344,6 +344,7 @@
         let isRecalculating = false;
         let lastRecalculationTime = 0;
         let routeDeviationThreshold = 50;
+        let tiltMonitoringInterval = null;
         
         // Smoothing arrays
         let headingSmoothing = [];
@@ -396,11 +397,11 @@
             const shortDestination = formatAddressForDisplay(destinationAddress);
             document.getElementById('navigationSubtitle').textContent = `Para: ${shortDestination}`;
             
-            // Initialize map with navigation optimized settings
+            // Initialize map with navigation optimized settings - use hybrid for better 3D support
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 19,
                 center: userLocation,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                mapTypeId: 'hybrid', // Hybrid supports 3D better than roadmap
                 tilt: 45,
                 heading: currentHeading,
                 disableDefaultUI: true,
@@ -409,31 +410,77 @@
                 maxZoom: 20,
                 mapTypeControl: false,
                 streetViewControl: false,
-                fullscreenControl: false
+                fullscreenControl: false,
+                styles: [
+                    // Custom styling to make hybrid look more like roadmap for navigation
+                    {
+                        elementType: 'labels',
+                        stylers: [{ visibility: 'on' }]
+                    },
+                    {
+                        featureType: 'poi',
+                        stylers: [{ visibility: 'off' }]
+                    }
+                ]
             });
             
-            // Apply 3D navigation view configuration
+            // Apply 3D navigation view configuration with multiple attempts
             google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-                setTimeout(() => {
-                    console.log('Configuring 3D navigation view...');
+                console.log('Map tiles loaded, starting 3D configuration...');
+                
+                // Force 3D view with multiple attempts
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                function force3DView() {
+                    attempts++;
+                    console.log(`3D View attempt ${attempts}: Current tilt: ${map.getTilt()}, Target: 45`);
                     
-                    // Ensure 3D tilt is always active during navigation
-                    map.setTilt(45);
-                    map.setZoom(19);
+                    // Force satellite view temporarily to enable 3D
+                    map.setMapTypeId('satellite');
                     
-                    // Set initial heading based on user orientation
-                    if (currentHeading !== 0) {
-                        map.setHeading(currentHeading);
-                    }
-                    
-                    console.log('3D navigation view configured. Tilt:', map.getTilt(), 'Heading:', map.getHeading());
-                }, 300);
+                    setTimeout(() => {
+                        // Set 3D properties
+                        map.setTilt(45);
+                        map.setZoom(19);
+                        
+                        // Return to roadmap but keep 3D
+                        setTimeout(() => {
+                            map.setMapTypeId('roadmap');
+                            
+                            // Verify tilt was applied
+                            setTimeout(() => {
+                                const currentTilt = map.getTilt();
+                                console.log(`3D attempt ${attempts} result: Tilt = ${currentTilt}`);
+                                
+                                if (currentTilt < 30 && attempts < maxAttempts) {
+                                    console.log('Tilt not applied, retrying...');
+                                    force3DView();
+                                } else {
+                                    console.log('3D navigation view configured successfully!');
+                                    
+                                    // Set initial heading
+                                    if (currentHeading !== 0) {
+                                        map.setHeading(currentHeading);
+                                    }
+                                    
+                                    // Start continuous tilt monitoring
+                                    startTiltMonitoring();
+                                }
+                            }, 100);
+                        }, 100);
+                    }, 100);
+                }
+                
+                // Start the 3D configuration process
+                setTimeout(force3DView, 500);
             });
 
             // Initialize directions service
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({
                 suppressMarkers: true,
+                preserveViewport: true, // Prevent DirectionsRenderer from changing view
                 polylineOptions: {
                     strokeColor: '#1E90FF',
                     strokeWeight: 10,
@@ -443,6 +490,14 @@
             });
             
             directionsRenderer.setMap(map);
+            
+            // Prevent DirectionsRenderer from resetting 3D view
+            google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
+                console.log('Directions changed, maintaining 3D view...');
+                setTimeout(() => {
+                    force3DViewMaintenance();
+                }, 200);
+            });
             
             // Hide loading and start navigation
             document.getElementById('mapLoading').style.display = 'none';
@@ -787,13 +842,32 @@
         }
 
         function updateMapFollowing(position) {
+            if (!map || !position) return;
+            
             // Smooth pan to new position
             map.panTo(position);
             
-            // Ensure 3D tilt is maintained during navigation
+            // Aggressively maintain 3D tilt during navigation
             const currentTilt = map.getTilt();
-            if (currentTilt < 45) {
+            console.log('Current map tilt:', currentTilt);
+            
+            if (currentTilt < 40) {
+                console.log('Forcing tilt correction...');
+                
+                // Use a more aggressive approach to maintain tilt
+                const currentType = map.getMapTypeId();
+                
+                // Quick satellite switch to force 3D
+                map.setMapTypeId('satellite');
                 map.setTilt(45);
+                map.setZoom(19);
+                
+                // Return to original type if not satellite
+                if (currentType !== 'satellite') {
+                    setTimeout(() => {
+                        map.setMapTypeId(currentType);
+                    }, 50);
+                }
             }
             
             // Smooth heading rotation like Waze
@@ -943,7 +1017,61 @@
             goBack();
         }
 
+        // Start continuous tilt monitoring
+        function startTiltMonitoring() {
+            console.log('Starting tilt monitoring...');
+            
+            // Clear any existing interval
+            if (tiltMonitoringInterval) {
+                clearInterval(tiltMonitoringInterval);
+            }
+            
+            // Monitor tilt every 2 seconds during navigation
+            tiltMonitoringInterval = setInterval(() => {
+                if (isNavigating && map) {
+                    const currentTilt = map.getTilt();
+                    if (currentTilt < 40) {
+                        console.log(`Tilt drift detected (${currentTilt}), correcting to 45°`);
+                        force3DViewMaintenance();
+                    }
+                }
+            }, 2000);
+        }
+
+        // Force 3D view maintenance function
+        function force3DViewMaintenance() {
+            if (!map) return;
+            
+            console.log('Maintaining 3D view...');
+            
+            // Temporarily switch to satellite to force 3D capability
+            const originalType = map.getMapTypeId();
+            map.setMapTypeId('satellite');
+            
+            setTimeout(() => {
+                map.setTilt(45);
+                map.setZoom(19);
+                
+                setTimeout(() => {
+                    if (originalType !== 'satellite') {
+                        map.setMapTypeId(originalType);
+                    }
+                    
+                    // Verify tilt was maintained
+                    setTimeout(() => {
+                        console.log('3D view maintenance complete. Current tilt:', map.getTilt());
+                    }, 100);
+                }, 100);
+            }, 100);
+        }
+
         function goBack() {
+            // Stop tilt monitoring
+            if (tiltMonitoringInterval) {
+                clearInterval(tiltMonitoringInterval);
+                tiltMonitoringInterval = null;
+            }
+            
             window.location.href = 'service-details.html';
         }
 
