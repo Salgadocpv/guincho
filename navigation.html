@@ -376,6 +376,12 @@
 
         // Compass and map rotation logic
         function toggleMapRotation() {
+            // First, check for a secure context (HTTPS)
+            if (!window.isSecureContext) {
+                alert('REQUISITO DE SEGURANÇA: Para ativar a bússola, esta página precisa ser acessada via HTTPS. Seu ambiente local (http://localhost) não é seguro.');
+                return;
+            }
+
             const compassBtn = document.getElementById('compassBtn');
             if (isMapRotationActive) {
                 // Deactivate rotation
@@ -394,12 +400,12 @@
                                 isMapRotationActive = true;
                                 compassBtn.classList.add('active');
                             } else {
-                                alert('Permissão para sensor de orientação negada.');
+                                alert('Permissão para sensor de orientação foi negada.');
                             }
                         })
-                        .catch(() => alert('Não foi possível ativar a bússola.'));
+                        .catch(() => alert('Não foi possível ativar a bússola. Verifique as configurações do seu navegador.'));
                 } else {
-                    // Standard devices
+                    // Standard devices (non-iOS 13+)
                     window.addEventListener('deviceorientation', handleDeviceOrientation, true);
                     isMapRotationActive = true;
                     compassBtn.classList.add('active');
