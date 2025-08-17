@@ -1066,6 +1066,8 @@
 
         // Start navigation with route calculation
         function startNavigation() {
+            addDebugLog('🚀 Iniciando navegação...');
+            
             const request = {
                 origin: userLocation,
                 destination: destinationLocation,
@@ -1074,38 +1076,49 @@
                 avoidHighways: false,
                 avoidTolls: false
             };
+            
+            addDebugLog(`🗺️ Calculando rota de ${userLocation.lat.toFixed(4)},${userLocation.lng.toFixed(4)} para ${destinationLocation.lat.toFixed(4)},${destinationLocation.lng.toFixed(4)}`);
 
             directionsService.route(request, function(result, status) {
+                addDebugLog(`🗺️ Status da rota: ${status}`);
+                
                 if (status === 'OK') {
                     currentRoute = result;
                     routeSteps = result.routes[0].legs[0].steps;
                     currentStepIndex = 0;
                     
+                    addDebugLog(`✅ Rota calculada com ${routeSteps.length} etapas`);
+                    
                     // Display route
                     directionsRenderer.setDirections(result);
+                    addDebugLog('🗺️ Rota exibida no mapa');
                     
                     // Create markers
                     createNavigationMarker();
                     createDestinationMarker();
+                    addDebugLog('📍 Marcadores criados');
                     
                     // Update UI
                     updateNavigationInfo(result);
+                    addDebugLog('📊 Interface atualizada');
                     
                     // Start GPS tracking
                     startGPSTracking();
+                    addDebugLog('📶 GPS iniciado');
                     
                     // Initialize compass heading if available
                     initializeCompass();
+                    addDebugLog('🧭 Bússola inicializada');
                     
-                    // Apply contextual settings
-                    const contextSettings = getContextualSettings();
-                    console.log('Applied contextual settings:', contextSettings);
-                    
+                    // Forçar navegação ativa
                     isNavigating = true;
+                    addDebugLog(`✅ isNavigating definido como: ${isNavigating}`);
                     
                     console.log('Navigation started with', routeSteps.length, 'steps');
-                    console.log('User preferences active:', userPreferences);
+                    addDebugLog(`🏁 NAVEGAÇÃO INICIADA! ${routeSteps.length} etapas`);
+                    
                 } else {
+                    addDebugLog(`❌ Erro ao calcular rota: ${status}`);
                     alert('Não foi possível calcular a rota: ' + status);
                     goBack();
                 }
@@ -1430,6 +1443,9 @@
             let compassHeading = null;
             let debugInfo = '';
             
+            // REMOVER DEPENDÊNCIA DE isNavigating - sempre processar eventos
+            addDebugLog(`📡 Evento de orientação recebido (isNavigating: ${isNavigating})`);
+            
             // Coletar todos os dados do evento
             const eventData = {
                 alpha: event.alpha,
@@ -1466,16 +1482,24 @@
                 γ: ${eventData.gamma?.toFixed(1) || 'null'}°<br>
                 Absoluto: ${eventData.absolute}<br>
                 WebKit: ${eventData.webkitCompassHeading?.toFixed(1) || 'null'}°<br>
-                <strong>Heading Calculado:</strong> ${compassHeading?.toFixed(1) || 'null'}°
+                <strong>Heading Calculado:</strong> ${compassHeading?.toFixed(1) || 'null'}°<br>
+                <strong>isNavigating:</strong> ${isNavigating}<br>
+                <strong>Mapa disponível:</strong> ${map ? 'Sim' : 'Não'}
             `);
             
             if (compassHeading !== null && !isNaN(compassHeading)) {
                 // Normalizar para faixa 0-360
                 compassHeading = ((compassHeading % 360) + 360) % 360;
                 
-                // TESTE DIRETO - aplicar rotação sem dependências complexas
+                // TESTE DIRETO - aplicar rotação SEMPRE (sem dependência de isNavigating)
                 if (map) {
                     try {
+                        // Forçar navegação se não estiver ativa
+                        if (!isNavigating) {
+                            addDebugLog(`⚠️ isNavigating era false, forçando para true`);
+                            isNavigating = true;
+                        }
+                        
                         // Verificar se o mapa está realmente disponível
                         const currentMapHeading = map.getHeading();
                         const currentMapTilt = map.getTilt();
@@ -1502,8 +1526,15 @@
                                 const newHeading = map.getHeading();
                                 addDebugLog(`✅ Resultado: ${newHeading?.toFixed(1)}° (esperado: ${targetMapHeading.toFixed(1)}°)`);
                                 
-                                if (Math.abs(newHeading - targetMapHeading) > 5) {
-                                    addDebugLog(`❌ ROTAÇÃO FALHOU! Diferença: ${Math.abs(newHeading - targetMapHeading).toFixed(1)}°`);
+                                if (Math.abs((newHeading || 0) - targetMapHeading) > 5) {
+                                    addDebugLog(`❌ ROTAÇÃO FALHOU! Diferença: ${Math.abs((newHeading || 0) - targetMapHeading).toFixed(1)}°`);
+                                    
+                                    // Tentar diagnóstico
+                                    addDebugLog(`🔍 Diagnóstico:`);
+                                    addDebugLog(`- MapTypeId: ${map.getMapTypeId()}`);
+                                    addDebugLog(`- Zoom: ${map.getZoom()}`);
+                                    addDebugLog(`- Tilt: ${map.getTilt()}`);
+                                    addDebugLog(`- Centro: ${map.getCenter()}`);
                                 } else {
                                     addDebugLog(`✅ ROTAÇÃO BEM-SUCEDIDA!`);
                                 }
@@ -1518,11 +1549,20 @@
                         
                     } catch (error) {
                         addDebugLog(`❌ ERRO no mapa: ${error.message}`);
+                        addDebugLog(`❌ Stack: ${error.stack}`);
                         updateDebugStatus(`❌ Erro: ${error.message}`);
                     }
                 } else {
-                    addDebugLog(`❌ Mapa não disponível!`);
-                    updateDebugStatus(`❌ Mapa null`);
+                    addDebugLog(`❌ Mapa não disponível! Tentando aguardar...`);
+                    updateDebugStatus(`❌ Mapa null - aguardando`);
+                    
+                    // Tentar aguardar o mapa ficar disponível
+                    setTimeout(() => {
+                        if (map) {
+                            addDebugLog(`✅ Mapa agora disponível, reaplicando orientação`);
+                            handleDeviceOrientation(event);
+                        }
+                    }, 1000);
                 }
             } else {
                 addDebugLog(`❌ compassHeading inválido: ${compassHeading}`);
