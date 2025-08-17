@@ -396,8 +396,8 @@
 
             setTimeout(() => {
                 hideLoading();
-                // Redirect directly to service details page
-                window.location.href = `service-details.html?service=${serviceType}`;
+                // Redirect to questionnaire page first
+                window.location.href = `questions.html?service=${serviceType}`;
             }, 1000);
         }
 

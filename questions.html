@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Iguincho - Questionário</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .service-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+            letter-spacing: -0.2px;
+        }
+
+        .service-subtitle {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            margin-top: 4px;
+        }
+
+        /* Progress Indicator */
+        .progress-container {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            right: 20px;
+            z-index: 90;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            color: white;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding-top: 140px;
+            padding-bottom: 100px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Question Container */
+        .question-container {
+            width: 90%;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .question-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+            display: none;
+        }
+
+        .question-card.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        .question-card.exit {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        .question-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* Answer Buttons */
+        .answer-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .answer-btn {
+            padding: 16px 24px;
+            border: 2px solid #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .answer-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,123,255,0.3);
+        }
+
+        .answer-btn:active {
+            transform: translateY(0);
+        }
+
+        .answer-btn.selected {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-color: #28a745;
+            transform: scale(1.02);
+        }
+
+        /* Navigation Buttons */
+        .navigation-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+        }
+
+        .nav-btn.prev {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .nav-btn.prev:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .nav-btn.next {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-btn.next:hover {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(40,167,69,0.3);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .question-card {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .answer-btn {
+                padding: 14px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .navigation-buttons {
+                bottom: 20px;
+                left: 15px;
+                right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Processando respostas...</div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <button class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </button>
+        <div class="service-title" id="serviceTitle">Carregando serviço...</div>
+        <div class="service-subtitle">Responda algumas perguntas</div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">Pergunta 1 de 5</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="question-container" id="questionContainer">
+            <!-- Questions will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="navigation-buttons">
+        <button class="nav-btn prev" id="prevBtn" onclick="previousQuestion()" disabled>
+            <i class="fas fa-chevron-left"></i> Anterior
+        </button>
+        <button class="nav-btn next" id="nextBtn" onclick="nextQuestion()" disabled>
+            Próxima <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <script>
+        // Global variables
+        let currentQuestionIndex = 0;
+        let questions = [];
+        let answers = {};
+        let selectedService = '';
+
+        // Service names mapping
+        const serviceNames = {
+            'guincho': 'Guincho',
+            'bateria': 'Socorro Bateria', 
+            'pneu': 'Troca de Pneu',
+            'chaveiro': 'Chaveiro',
+            'mecanico': 'Mecânico',
+            'eletricista': 'Eletricista'
+        };
+
+        // Questions data - images from perguntas folder
+        const questionsData = [
+            {
+                id: 1,
+                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09.jpeg',
+                text: 'Qual é a situação do seu veículo?',
+                options: [
+                    { id: 'situacao_1', text: 'Não liga' },
+                    { id: 'situacao_2', text: 'Liga mas não anda' },
+                    { id: 'situacao_3', text: 'Problema mecânico' },
+                    { id: 'situacao_4', text: 'Acidente' }
+                ]
+            },
+            {
+                id: 2,
+                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09 (1).jpeg',
+                text: 'Que tipo de veículo você possui?',
+                options: [
+                    { id: 'veiculo_1', text: 'Carro pequeno' },
+                    { id: 'veiculo_2', text: 'Carro médio/grande' },
+                    { id: 'veiculo_3', text: 'SUV/Pickup' },
+                    { id: 'veiculo_4', text: 'Moto' }
+                ]
+            },
+            {
+                id: 3,
+                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09 (2).jpeg',
+                text: 'Onde está localizado seu veículo?',
+                options: [
+                    { id: 'local_1', text: 'Na rua/estrada' },
+                    { id: 'local_2', text: 'Em garagem/estacionamento' },
+                    { id: 'local_3', text: 'Em local de difícil acesso' },
+                    { id: 'local_4', text: 'Em oficina' }
+                ]
+            },
+            {
+                id: 4,
+                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09 (3).jpeg',
+                text: 'Qual a urgência do atendimento?',
+                options: [
+                    { id: 'urgencia_1', text: 'Emergência - Preciso agora' },
+                    { id: 'urgencia_2', text: 'Urgente - Em até 1 hora' },
+                    { id: 'urgencia_3', text: 'Normal - Em até 2 horas' },
+                    { id: 'urgencia_4', text: 'Posso aguardar - Hoje' }
+                ]
+            },
+            {
+                id: 5,
+                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09 (4).jpeg',
+                text: 'Você tem seguro ou convênio?',
+                options: [
+                    { id: 'seguro_1', text: 'Sim, tenho seguro auto' },
+                    { id: 'seguro_2', text: 'Sim, tenho convênio' },
+                    { id: 'seguro_3', text: 'Não tenho' },
+                    { id: 'seguro_4', text: 'Não sei informar' }
+                ]
+            }
+        ];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            getServiceFromUrl();
+            loadQuestions();
+            showCurrentQuestion();
+        });
+
+        // Get service from URL parameter
+        function getServiceFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            selectedService = urlParams.get('service') || 'guincho';
+            
+            // Update title
+            const serviceName = serviceNames[selectedService] || 'Serviço';
+            document.getElementById('serviceTitle').textContent = serviceName;
+        }
+
+        // Load questions into DOM
+        function loadQuestions() {
+            const container = document.getElementById('questionContainer');
+            
+            questionsData.forEach((question, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.id = `question-${index}`;
+                
+                questionCard.innerHTML = `
+                    <img src="${question.image}" alt="Pergunta ${question.id}" class="question-image" onerror="this.style.display='none'">
+                    <div class="question-text">${question.text}</div>
+                    <div class="answer-buttons">
+                        ${question.options.map(option => `
+                            <button class="answer-btn" onclick="selectAnswer('${question.id}', '${option.id}', '${option.text}', this)">
+                                ${option.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(questionCard);
+            });
+            
+            questions = questionsData;
+        }
+
+        // Show current question
+        function showCurrentQuestion() {
+            // Hide all questions
+            const allQuestions = document.querySelectorAll('.question-card');
+            allQuestions.forEach(q => {
+                q.classList.remove('active');
+                q.classList.add('exit');
+            });
+            
+            // Show current question after a brief delay
+            setTimeout(() => {
+                allQuestions.forEach(q => q.classList.remove('exit'));
+                
+                if (currentQuestionIndex < questions.length) {
+                    const currentCard = document.getElementById(`question-${currentQuestionIndex}`);
+                    if (currentCard) {
+                        currentCard.classList.add('active');
+                    }
+                }
+                
+                updateProgress();
+                updateNavigationButtons();
+            }, 300);
+        }
+
+        // Select answer
+        function selectAnswer(questionId, optionId, optionText, buttonElement) {
+            // Remove selection from other buttons in this question
+            const questionCard = buttonElement.closest('.question-card');
+            const allButtons = questionCard.querySelectorAll('.answer-btn');
+            allButtons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Select this button
+            buttonElement.classList.add('selected');
+            
+            // Store answer
+            answers[questionId] = {
+                optionId: optionId,
+                optionText: optionText
+            };
+            
+            // Enable next button
+            updateNavigationButtons();
+            
+            // Auto-advance after 1 second if not last question
+            if (currentQuestionIndex < questions.length - 1) {
+                setTimeout(() => {
+                    nextQuestion();
+                }, 1000);
+            } else {
+                // Last question - show completion option
+                setTimeout(() => {
+                    completeQuestionnaire();
+                }, 1000);
+            }
+        }
+
+        // Next question
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showCurrentQuestion();
+            }
+        }
+
+        // Previous question
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showCurrentQuestion();
+            }
+        }
+
+        // Update progress
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `Pergunta ${currentQuestionIndex + 1} de ${questions.length}`;
+        }
+
+        // Update navigation buttons
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // Previous button
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            // Next button - enabled only if current question is answered
+            const currentQuestionId = questions[currentQuestionIndex]?.id;
+            const isAnswered = answers[currentQuestionId] !== undefined;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.innerHTML = 'Finalizar <i class="fas fa-check"></i>';
+                nextBtn.onclick = completeQuestionnaire;
+            } else {
+                nextBtn.innerHTML = 'Próxima <i class="fas fa-chevron-right"></i>';
+                nextBtn.onclick = nextQuestion;
+            }
+            
+            nextBtn.disabled = !isAnswered;
+        }
+
+        // Complete questionnaire
+        function completeQuestionnaire() {
+            // Check if all questions are answered
+            const allAnswered = questions.every(q => answers[q.id] !== undefined);
+            
+            if (!allAnswered) {
+                alert('Por favor, responda todas as perguntas antes de finalizar.');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // Store answers in sessionStorage
+            sessionStorage.setItem('questionnaireAnswers', JSON.stringify({
+                service: selectedService,
+                answers: answers,
+                timestamp: Date.now()
+            }));
+            
+            // Simulate processing time
+            setTimeout(() => {
+                // Redirect to service details page
+                window.location.href = `service-details.html?service=${selectedService}`;
+            }, 2000);
+        }
+
+        // Go back to services
+        function goBack() {
+            window.location.href = 'services.html';
+        }
+    </script>
+</body>
+</html>
