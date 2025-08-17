@@ -1162,21 +1162,26 @@
 
         // Initialize compass and device orientation
         function initializeCompass() {
-            console.log('Inicializando bússola e orientação do dispositivo...');
+            console.log('🧭 Inicializando bússola e orientação do dispositivo...');
+            
+            // Adicionar indicador visual de debug na tela
+            createDebugIndicator();
             
             // Verificar se o dispositivo suporta orientação
             if (!window.DeviceOrientationEvent) {
-                console.warn('DeviceOrientationEvent não suportado');
+                console.warn('❌ DeviceOrientationEvent não suportado');
+                updateDebugIndicator('❌ Orientação não suportada');
                 return;
             }
             
             // Solicitar permissão para iOS 13+
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                console.log('Solicitando permissão de orientação (iOS 13+)...');
+                console.log('📱 Detectado iOS 13+ - Solicitando permissão...');
+                updateDebugIndicator('📱 Toque para ativar bússola');
                 
                 // Criar botão para solicitar permissão (requerido pelo iOS)
                 const permissionBtn = document.createElement('button');
-                permissionBtn.textContent = 'Ativar Bússola';
+                permissionBtn.textContent = 'Ativar Bússola e Rotação';
                 permissionBtn.style.cssText = `
                     position: fixed;
                     top: 50%;
@@ -1186,25 +1191,30 @@
                     background: #007bff;
                     color: white;
                     border: none;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    font-size: 1rem;
+                    padding: 15px 30px;
+                    border-radius: 10px;
+                    font-size: 1.1rem;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
                 `;
                 
                 permissionBtn.onclick = () => {
+                    console.log('🔄 Solicitando permissão de orientação...');
                     DeviceOrientationEvent.requestPermission()
                         .then(response => {
                             permissionBtn.remove();
                             if (response === 'granted') {
-                                console.log('Permissão de orientação concedida');
+                                console.log('✅ Permissão de orientação concedida!');
+                                updateDebugIndicator('✅ Bússola ativada');
                                 startCompassTracking();
                             } else {
-                                console.warn('Permissão de orientação negada');
+                                console.warn('❌ Permissão de orientação negada');
+                                updateDebugIndicator('❌ Permissão negada');
                                 alert('Para rotação automática do mapa, permita o acesso à bússola.');
                             }
                         })
                         .catch(error => {
-                            console.error('Erro ao solicitar permissão:', error);
+                            console.error('❌ Erro ao solicitar permissão:', error);
+                            updateDebugIndicator('❌ Erro: ' + error.message);
                             permissionBtn.remove();
                         });
                 };
@@ -1212,54 +1222,108 @@
                 document.body.appendChild(permissionBtn);
             } else {
                 // Dispositivos que não precisam de permissão
-                console.log('Iniciando rastreamento de bússola (permissão não necessária)');
+                console.log('🤖 Android/outros - Iniciando bússola diretamente');
+                updateDebugIndicator('🤖 Iniciando bússola...');
                 startCompassTracking();
             }
         }
 
+        // Debug indicator for testing
+        function createDebugIndicator() {
+            const debug = document.createElement('div');
+            debug.id = 'debugIndicator';
+            debug.style.cssText = `
+                position: fixed;
+                top: 120px;
+                left: 10px;
+                right: 10px;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 8px;
+                font-size: 0.8rem;
+                border-radius: 5px;
+                z-index: 250;
+                font-family: monospace;
+                text-align: center;
+            `;
+            debug.textContent = '🔍 Inicializando debug...';
+            document.body.appendChild(debug);
+        }
+        
+        function updateDebugIndicator(text) {
+            const debug = document.getElementById('debugIndicator');
+            if (debug) {
+                debug.textContent = text;
+            }
+            console.log('DEBUG:', text);
+        }
+        
         // Start compass tracking
         function startCompassTracking() {
             if (!window.DeviceOrientationEvent) {
-                console.error('DeviceOrientationEvent não disponível');
+                console.error('❌ DeviceOrientationEvent não disponível');
+                updateDebugIndicator('❌ Orientação não disponível');
                 return;
             }
             
-            console.log('Iniciando rastreamento de bússola...');
+            console.log('🔄 Iniciando rastreamento de bússola...');
+            updateDebugIndicator('🔄 Conectando eventos...');
             
             // Remover listeners existentes
             window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
             window.removeEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
             
+            // Teste simples primeiro
+            let testReceived = false;
+            
+            function testOrientation(event) {
+                testReceived = true;
+                console.log('📡 Evento de orientação recebido!', {
+                    alpha: event.alpha,
+                    beta: event.beta, 
+                    gamma: event.gamma,
+                    absolute: event.absolute,
+                    webkitCompassHeading: event.webkitCompassHeading
+                });
+                updateDebugIndicator(`📡 α:${event.alpha?.toFixed(1)} β:${event.beta?.toFixed(1)} γ:${event.gamma?.toFixed(1)}`);
+            }
+            
             // Tentar usar deviceorientationabsolute primeiro (mais preciso)
             if ('ondeviceorientationabsolute' in window) {
+                window.addEventListener('deviceorientationabsolute', testOrientation, true);
                 window.addEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
-                console.log('Usando deviceorientationabsolute (mais preciso)');
+                console.log('🎯 Usando deviceorientationabsolute (mais preciso)');
+                updateDebugIndicator('🎯 Usando orientação absoluta');
             } else {
+                window.addEventListener('deviceorientation', testOrientation, true);
                 window.addEventListener('deviceorientation', handleDeviceOrientation, true);
-                console.log('Usando deviceorientation padrão');
+                console.log('📱 Usando deviceorientation padrão');
+                updateDebugIndicator('📱 Usando orientação padrão');
             }
             
             // Testar se está funcionando
             setTimeout(() => {
-                if (currentHeading === 0) {
-                    console.warn('Bússola pode não estar funcionando. Tentando modo GPS.');
+                if (!testReceived) {
+                    console.warn('⚠️ Nenhum evento de orientação recebido em 3s!');
+                    updateDebugIndicator('⚠️ Sem eventos - Tentando GPS');
                     orientationMode = 'movement';
                     updateOrientationButton();
+                } else {
+                    console.log('✅ Eventos de orientação funcionando!');
+                    updateDebugIndicator('✅ Orientação ativa');
                 }
-            }, 5000);
+            }, 3000);
         }
 
         // Handle device orientation changes
         function handleDeviceOrientation(event) {
-            if (!isNavigating) return;
-            
             let compassHeading = null;
             
             // Melhorada compatibilidade entre dispositivos
             if (typeof event.webkitCompassHeading !== 'undefined' && event.webkitCompassHeading !== null) {
                 // iOS Safari - valor já corrigido para norte magnético
                 compassHeading = event.webkitCompassHeading;
-                console.log('iOS compass heading:', compassHeading);
+                updateDebugIndicator(`🍎 iOS: ${compassHeading.toFixed(1)}°`);
             } else if (typeof event.alpha !== 'undefined' && event.alpha !== null) {
                 // Android e outros navegadores
                 if (event.absolute === true || typeof event.absolute === 'undefined') {
@@ -1269,29 +1333,38 @@
                     // Alpha é relativo à orientação inicial do dispositivo
                     compassHeading = event.alpha;
                 }
-                console.log('Device orientation alpha:', event.alpha, 'absolute:', event.absolute, 'calculated:', compassHeading);
+                updateDebugIndicator(`🤖 Android: α=${event.alpha.toFixed(1)}° → ${compassHeading.toFixed(1)}°`);
             }
             
             if (compassHeading !== null && !isNaN(compassHeading)) {
                 // Normalizar para faixa 0-360
                 compassHeading = ((compassHeading % 360) + 360) % 360;
                 
-                // Aplicar suavização
-                const smoothedHeading = applySmoothingToHeading(compassHeading);
-                
-                // Atualizar apenas se houver mudança significativa
-                const headingDiff = Math.abs(smoothedHeading - currentHeading);
-                const normalizedDiff = Math.min(headingDiff, 360 - headingDiff);
-                
-                if (normalizedDiff > 3) {
-                    currentHeading = smoothedHeading;
+                // TESTE DIRETO - aplicar rotação sem dependências complexas
+                if (map) {
+                    // Calcular diferença
+                    const currentMapHeading = map.getHeading() || 0;
+                    const targetMapHeading = (360 - compassHeading) % 360; // Inverter para rotação correta
+                    let headingDiff = targetMapHeading - currentMapHeading;
                     
-                    // Rotacionar o mapa para manter a seta sempre apontando para cima
-                    if (map && userLocation) {
-                        updateMapFollowing(userLocation);
+                    // Normalizar diferença
+                    if (headingDiff > 180) headingDiff -= 360;
+                    if (headingDiff < -180) headingDiff += 360;
+                    
+                    // Aplicar rotação se diferença > 5°
+                    if (Math.abs(headingDiff) > 5) {
+                        map.setHeading(targetMapHeading);
+                        console.log('🔄 ROTAÇÃO APLICADA:', {
+                            dispositivo: compassHeading.toFixed(1) + '°',
+                            mapa: targetMapHeading.toFixed(1) + '°',
+                            diferença: headingDiff.toFixed(1) + '°'
+                        });
+                        
+                        updateDebugIndicator(`🔄 Rot: ${compassHeading.toFixed(1)}° → Mapa: ${targetMapHeading.toFixed(1)}°`);
                     }
                     
-                    console.log('Orientação atualizada - Raw:', compassHeading.toFixed(1), '° Suavizado:', currentHeading.toFixed(1), '°');
+                    // Atualizar heading global
+                    currentHeading = compassHeading;
                 }
             }
         }
@@ -1553,65 +1626,17 @@
         function updateMapFollowing(position) {
             if (!map || !position) return;
             
-            // Use batched updates for performance
-            scheduleMapUpdate(() => {
-                try {
-                    // Centralizar mapa na posição do usuário (seta sempre no centro)
-                    map.panTo(position);
-                    
-                    // Maintain 3D tilt based on navigation state
-                    const currentTilt = map.getTilt();
-                    if (currentTilt < 35) { // Revertido para 45 graus
-                        map.setTilt(45);
-                    }
-                    
-                    // Skip rotation if in north-fixed mode
-                    if (orientationMode === 'north') {
-                        map.setHeading(0);
-                        return;
-                    }
-                    
-                    // Rotacionar o mapa apenas se tivermos uma orientação válida
-                    if (currentHeading !== null && !isNaN(currentHeading)) {
-                        const settings = getAdaptiveSettings(userSpeed || 0, 10);
-                        const currentMapHeading = map.getHeading() || 0;
-                        
-                        // O heading do mapa deve ser o oposto da direção do usuário
-                        // Se o usuário está olhando para 90° (leste), o mapa deve rotacionar -90°
-                        // para que o leste fique "para cima" na tela
-                        const targetMapHeading = normalizeHeading(-currentHeading);
-                        let headingDiff = targetMapHeading - currentMapHeading;
-                        
-                        // Normalize heading difference to shortest rotation
-                        if (headingDiff > 180) headingDiff -= 360;
-                        if (headingDiff < -180) headingDiff += 360;
-                        
-                        // Use adaptive threshold for rotation (mais sensível)
-                        const threshold = Math.max(settings.threshold, 5);
-                        if (Math.abs(headingDiff) > threshold) {
-                            map.setHeading(targetMapHeading);
-                            
-                            console.log('Mapa rotacionado:', {
-                                mode: orientationMode,
-                                userHeading: currentHeading.toFixed(1) + '°',
-                                mapHeading: targetMapHeading.toFixed(1) + '°',
-                                diff: headingDiff.toFixed(1) + '°',
-                                threshold: threshold + '°'
-                            });
-                        }
-                    }
-                    
-                    // Adaptive zoom based on navigation state
-                    const currentZoom = map.getZoom();
-                    let targetZoom = getAdaptiveZoom();
-                    
-                    if (Math.abs(currentZoom - targetZoom) > 0.5) {
-                        map.setZoom(targetZoom);
-                    }
-                } catch (error) {
-                    console.error('Erro ao atualizar seguimento do mapa:', error);
-                }
-            });
+            // Centralizar mapa na posição do usuário
+            map.panTo(position);
+            
+            // Manter 3D tilt
+            const currentTilt = map.getTilt();
+            if (currentTilt < 35) {
+                map.setTilt(45);
+            }
+            
+            // A rotação agora é feita diretamente no handleDeviceOrientation
+            // para ser mais responsiva e simples
         }
         
         // Intelligent zoom calculation
