@@ -1589,6 +1589,12 @@
                         if (Math.abs(headingDiff) > 3) {
                             addDebugLog(`🔄 TENTANDO ROTAÇÃO: ${compassHeading.toFixed(1)}° → ${targetMapHeading.toFixed(1)}°`);
                             
+                            // FORÇAR TILT PRIMEIRO - map.setHeading() só funciona com tilt > 0
+                            if (currentMapTilt < 10) {
+                                addDebugLog(`⚠️ Tilt muito baixo (${currentMapTilt}°), forçando para 45°`);
+                                map.setTilt(45);
+                            }
+                            
                             // Tentar aplicar rotação
                             map.setHeading(targetMapHeading);
                             
@@ -2213,10 +2219,19 @@
         window.testRotation = function(degrees) {
             if (map) {
                 addDebugLog(`🧪 TESTE MANUAL: Rotacionando para ${degrees}°`);
+                
+                // Forçar tilt primeiro
+                const currentTilt = map.getTilt();
+                if (currentTilt < 10) {
+                    addDebugLog(`⚠️ Forçando tilt para 45° (atual: ${currentTilt}°)`);
+                    map.setTilt(45);
+                }
+                
                 map.setHeading(degrees);
                 setTimeout(() => {
                     const newHeading = map.getHeading();
-                    addDebugLog(`📊 Resultado do teste: ${newHeading?.toFixed(1)}°`);
+                    const newTilt = map.getTilt();
+                    addDebugLog(`📊 Resultado: ${newHeading?.toFixed(1)}° (tilt: ${newTilt?.toFixed(1)}°)`);
                 }, 200);
             }
         };
