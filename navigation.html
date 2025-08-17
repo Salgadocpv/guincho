@@ -571,10 +571,31 @@
 
     <!-- Google Maps API -->
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&callback=initNavigation&libraries=geometry,places">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&callback=initNavigation&libraries=geometry,places"
+        onerror="handleGoogleMapsError()">
     </script>
 
     <script>
+        // Primeira coisa: inicializar sistema de debug
+        console.log('🔥 SCRIPT INICIADO - Iguincho Navigation Debug');
+        document.title = '🔥 SCRIPT INICIADO - Iguincho';
+        
+        // Inicializar array de logs imediatamente
+        let debugLogs = [];
+        
+        // Função de log simples que funciona desde o início
+        function logDebug(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            debugLogs.push(logEntry);
+            console.log('DEBUG:', message);
+            document.title = `${message} - Iguincho`;
+        }
+        
+        logDebug('🔥 Sistema de debug inicializado');
+        logDebug(`🌐 URL: ${window.location.href}`);
+        logDebug(`🔗 Params: ${window.location.search}`);
+        
         // Global variables
         let map;
         let directionsService;
@@ -1099,6 +1120,7 @@
 
         // Initialize navigation from URL parameters
         function initNavigation() {
+            logDebug('🚀 initNavigation CHAMADA!');
             addToScreenLog('🚀 initNavigation called!');
             
             // Criar painel de debug PRIMEIRO
@@ -1331,6 +1353,14 @@
                 goBack();
                 return;
             }
+        }
+        
+        // Verificar se a função foi definida corretamente
+        logDebug('✅ initNavigation definida');
+        if (typeof window.initNavigation === 'function') {
+            logDebug('✅ window.initNavigation também está disponível');
+        } else {
+            logDebug('❌ window.initNavigation NÃO está disponível');
         }
 
         // Start navigation with route calculation
@@ -1565,7 +1595,7 @@
         }
 
         // Advanced debug panel for iPhone testing
-        let debugLogs = [];
+        // debugLogs já foi inicializado no início do script
         let debugPanel = null;
         
         function createDebugIndicator() {
@@ -1610,6 +1640,11 @@
         }
         
         function addDebugLog(message) {
+            // Use a função logDebug se a caixa de debug não estiver disponível ainda
+            if (typeof logDebug === 'function') {
+                logDebug(message);
+            }
+            
             const timestamp = new Date().toLocaleTimeString();
             const logEntry = `[${timestamp}] ${message}`;
             debugLogs.push(logEntry);
@@ -1633,7 +1668,19 @@
                 logsDiv.scrollTop = logsDiv.scrollHeight;
             }
             
+            // Sempre mostrar no console
             console.log('DEBUG:', message);
+            
+            // Se é um erro crítico, mostrar na tela de loading também
+            if (message.includes('❌') || message.includes('ERRO')) {
+                const loadingDiv = document.getElementById('mapLoading');
+                if (loadingDiv && loadingDiv.style.display !== 'none') {
+                    const existingText = loadingDiv.querySelector('.map-loading-text');
+                    if (existingText) {
+                        existingText.innerHTML += `<br><small style="color: #ff6b6b;">${message}</small>`;
+                    }
+                }
+            }
         }
 
         // Funções de controle da caixa de debug
@@ -2568,10 +2615,25 @@
             return null;
         };
 
+        // Função para lidar com erro de carregamento do Google Maps
+        window.handleGoogleMapsError = function() {
+            addDebugLog('❌ ERRO: Falha ao carregar Google Maps API');
+            addToScreenLog('❌ ERRO: Falha ao carregar Google Maps API');
+            document.getElementById('mapLoading').innerHTML = `
+                <div style="color: red; text-align: center;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i><br>
+                    Erro ao carregar Google Maps<br>
+                    <small>Verifique sua conexão com a internet</small><br>
+                    <button onclick="location.reload()" style="margin-top: 1rem; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px;">Tentar Novamente</button>
+                </div>
+            `;
+        };
+
         // Interceptar todos os erros JavaScript
         window.onerror = function(message, source, lineno, colno, error) {
             const errorMsg = `❌ JavaScript Error: ${message} at ${source}:${lineno}:${colno}`;
             addDebugLog(errorMsg);
+            addToScreenLog(errorMsg);
             if (error && error.stack) {
                 addDebugLog(`Stack: ${error.stack}`);
             }
@@ -2588,7 +2650,30 @@
 
         // Inicializar debug box imediatamente
         document.addEventListener('DOMContentLoaded', function() {
-            addDebugLog('🎯 DOM carregado, debug iniciado');
+            // Garantir que a caixa de debug está funcionando
+            const debugContent = document.getElementById('debugContent');
+            if (debugContent) {
+                addDebugLog('🎯 DOM carregado, debug iniciado');
+                addDebugLog('🔍 Verificando carregamento da página...');
+                
+                // Verificar se o Google Maps está sendo carregado
+                const scripts = document.querySelectorAll('script[src*="maps.googleapis.com"]');
+                addDebugLog(`📜 Scripts do Google Maps encontrados: ${scripts.length}`);
+                
+                // Verificar se a função initNavigation está disponível
+                if (typeof window.initNavigation === 'function') {
+                    addDebugLog('✅ initNavigation está disponível');
+                } else {
+                    addDebugLog('❌ initNavigation NÃO está disponível');
+                }
+                
+                // Log da URL atual
+                addDebugLog(`🌐 URL atual: ${window.location.href}`);
+                addDebugLog(`🔗 Search params: ${window.location.search}`);
+                
+            } else {
+                console.error('❌ debugContent não encontrado!');
+            }
         });
 
         // Initialize on page load
