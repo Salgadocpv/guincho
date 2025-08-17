@@ -1106,16 +1106,29 @@
                     startGPSTracking();
                     addDebugLog('📶 GPS iniciado');
                     
-                    // Initialize compass heading if available
-                    initializeCompass();
-                    addDebugLog('🧭 Bússola inicializada');
-                    
-                    // Forçar navegação ativa
+                    // Forçar navegação ativa ANTES da bússola
                     isNavigating = true;
                     addDebugLog(`✅ isNavigating definido como: ${isNavigating}`);
                     
+                    // Initialize compass heading if available
+                    addDebugLog('🧭 Tentando inicializar bússola...');
+                    try {
+                        initializeCompass();
+                        addDebugLog('✅ initializeCompass() chamado com sucesso');
+                    } catch (error) {
+                        addDebugLog(`❌ Erro ao inicializar bússola: ${error.message}`);
+                    }
+                    
                     console.log('Navigation started with', routeSteps.length, 'steps');
                     addDebugLog(`🏁 NAVEGAÇÃO INICIADA! ${routeSteps.length} etapas`);
+                    
+                    // Forçar bússola após 2 segundos se não funcionou
+                    setTimeout(() => {
+                        if (currentHeading === 0) {
+                            addDebugLog('⚠️ Bússola não ativou, tentando novamente...');
+                            forceCompassInit();
+                        }
+                    }, 2000);
                     
                 } else {
                     addDebugLog(`❌ Erro ao calcular rota: ${status}`);
@@ -1175,68 +1188,109 @@
 
         // Initialize compass and device orientation
         function initializeCompass() {
-            console.log('🧭 Inicializando bússola e orientação do dispositivo...');
-            
-            // Adicionar indicador visual de debug na tela
-            createDebugIndicator();
+            addDebugLog('🧭 Inicializando bússola e orientação do dispositivo...');
             
             // Verificar se o dispositivo suporta orientação
             if (!window.DeviceOrientationEvent) {
-                console.warn('❌ DeviceOrientationEvent não suportado');
-                updateDebugIndicator('❌ Orientação não suportada');
+                addDebugLog('❌ DeviceOrientationEvent não suportado');
+                updateDebugStatus('❌ Orientação não suportada');
                 return;
             }
             
+            addDebugLog('✅ DeviceOrientationEvent disponível');
+            
             // Solicitar permissão para iOS 13+
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                console.log('📱 Detectado iOS 13+ - Solicitando permissão...');
-                updateDebugIndicator('📱 Toque para ativar bússola');
+                addDebugLog('📱 Detectado iOS 13+ - Criando botão de permissão...');
+                updateDebugStatus('📱 Toque para ativar bússola');
                 
-                // Criar botão para solicitar permissão (requerido pelo iOS)
-                const permissionBtn = document.createElement('button');
-                permissionBtn.textContent = 'Ativar Bússola e Rotação';
-                permissionBtn.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    z-index: 300;
-                    background: #007bff;
-                    color: white;
-                    border: none;
-                    padding: 15px 30px;
-                    border-radius: 10px;
-                    font-size: 1.1rem;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-                `;
+                createCompassPermissionButton();
                 
-                permissionBtn.onclick = () => {
-                    console.log('🔄 Solicitando permissão de orientação...');
-                    DeviceOrientationEvent.requestPermission()
-                        .then(response => {
-                            permissionBtn.remove();
-                            if (response === 'granted') {
-                                console.log('✅ Permissão de orientação concedida!');
-                                updateDebugIndicator('✅ Bússola ativada');
-                                startCompassTracking();
-                            } else {
-                                console.warn('❌ Permissão de orientação negada');
-                                updateDebugIndicator('❌ Permissão negada');
-                                alert('Para rotação automática do mapa, permita o acesso à bússola.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('❌ Erro ao solicitar permissão:', error);
-                            updateDebugIndicator('❌ Erro: ' + error.message);
-                            permissionBtn.remove();
-                        });
-                };
-                
-                document.body.appendChild(permissionBtn);
             } else {
                 // Dispositivos que não precisam de permissão
-                console.log('🤖 Android/outros - Iniciando bússola diretamente');
-                updateDebugIndicator('🤖 Iniciando bússola...');
+                addDebugLog('🤖 Android/outros - Iniciando bússola diretamente');
+                updateDebugStatus('🤖 Iniciando bússola...');
+                startCompassTracking();
+            }
+        }
+        
+        // Função separada para criar botão de permissão
+        function createCompassPermissionButton() {
+            // Remover botão existente se houver
+            const existingBtn = document.getElementById('compassPermissionBtn');
+            if (existingBtn) {
+                existingBtn.remove();
+            }
+            
+            const permissionBtn = document.createElement('button');
+            permissionBtn.id = 'compassPermissionBtn';
+            permissionBtn.textContent = '🧭 Ativar Bússola e Rotação';
+            permissionBtn.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 350;
+                background: #007bff;
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 10px;
+                font-size: 1.1rem;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                animation: pulse 2s infinite;
+            `;
+            
+            // Adicionar animação de pulso
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse {
+                    0% { transform: translate(-50%, -50%) scale(1); }
+                    50% { transform: translate(-50%, -50%) scale(1.05); }
+                    100% { transform: translate(-50%, -50%) scale(1); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            permissionBtn.onclick = () => {
+                addDebugLog('🔄 Usuário clicou para solicitar permissão...');
+                updateDebugStatus('🔄 Solicitando permissão...');
+                
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        addDebugLog(`📱 Resposta da permissão: ${response}`);
+                        permissionBtn.remove();
+                        
+                        if (response === 'granted') {
+                            addDebugLog('✅ Permissão de orientação concedida!');
+                            updateDebugStatus('✅ Bússola ativada');
+                            startCompassTracking();
+                        } else {
+                            addDebugLog(`❌ Permissão de orientação negada: ${response}`);
+                            updateDebugStatus('❌ Permissão negada');
+                            alert('Para rotação automática do mapa, permita o acesso à bússola.');
+                        }
+                    })
+                    .catch(error => {
+                        addDebugLog(`❌ Erro ao solicitar permissão: ${error.message}`);
+                        updateDebugStatus('❌ Erro: ' + error.message);
+                        permissionBtn.remove();
+                    });
+            };
+            
+            document.body.appendChild(permissionBtn);
+            addDebugLog('✅ Botão de permissão criado e adicionado');
+        }
+        
+        // Função para forçar inicialização da bússola
+        function forceCompassInit() {
+            addDebugLog('🔄 Forçando inicialização da bússola...');
+            
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // Recriar botão se necessário
+                createCompassPermissionButton();
+            } else {
+                // Tentar iniciar diretamente
                 startCompassTracking();
             }
         }
@@ -1384,56 +1438,65 @@
         // Start compass tracking
         function startCompassTracking() {
             if (!window.DeviceOrientationEvent) {
-                console.error('❌ DeviceOrientationEvent não disponível');
-                updateDebugIndicator('❌ Orientação não disponível');
+                addDebugLog('❌ DeviceOrientationEvent não disponível');
+                updateDebugStatus('❌ Orientação não disponível');
                 return;
             }
             
-            console.log('🔄 Iniciando rastreamento de bússola...');
-            updateDebugIndicator('🔄 Conectando eventos...');
+            addDebugLog('🔄 Iniciando rastreamento de bússola...');
+            updateDebugStatus('🔄 Conectando eventos...');
             
             // Remover listeners existentes
             window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
             window.removeEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
             
+            addDebugLog('🗑️ Listeners antigos removidos');
+            
             // Teste simples primeiro
             let testReceived = false;
+            let eventType = '';
             
             function testOrientation(event) {
-                testReceived = true;
-                console.log('📡 Evento de orientação recebido!', {
-                    alpha: event.alpha,
-                    beta: event.beta, 
-                    gamma: event.gamma,
-                    absolute: event.absolute,
-                    webkitCompassHeading: event.webkitCompassHeading
-                });
-                updateDebugIndicator(`📡 α:${event.alpha?.toFixed(1)} β:${event.beta?.toFixed(1)} γ:${event.gamma?.toFixed(1)}`);
+                if (!testReceived) {
+                    testReceived = true;
+                    addDebugLog('📡 PRIMEIRO evento de orientação recebido!', {
+                        alpha: event.alpha,
+                        beta: event.beta, 
+                        gamma: event.gamma,
+                        absolute: event.absolute,
+                        webkitCompassHeading: event.webkitCompassHeading
+                    });
+                }
+                updateDebugStatus(`📡 ${eventType} α:${event.alpha?.toFixed(1)} β:${event.beta?.toFixed(1)} γ:${event.gamma?.toFixed(1)}`);
             }
             
             // Tentar usar deviceorientationabsolute primeiro (mais preciso)
             if ('ondeviceorientationabsolute' in window) {
+                eventType = 'absoluto';
                 window.addEventListener('deviceorientationabsolute', testOrientation, true);
                 window.addEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
-                console.log('🎯 Usando deviceorientationabsolute (mais preciso)');
-                updateDebugIndicator('🎯 Usando orientação absoluta');
+                addDebugLog('🎯 Usando deviceorientationabsolute (mais preciso)');
+                updateDebugStatus('🎯 Usando orientação absoluta');
             } else {
+                eventType = 'padrão';
                 window.addEventListener('deviceorientation', testOrientation, true);
                 window.addEventListener('deviceorientation', handleDeviceOrientation, true);
-                console.log('📱 Usando deviceorientation padrão');
-                updateDebugIndicator('📱 Usando orientação padrão');
+                addDebugLog('📱 Usando deviceorientation padrão');
+                updateDebugStatus('📱 Usando orientação padrão');
             }
+            
+            addDebugLog('✅ Event listeners adicionados');
             
             // Testar se está funcionando
             setTimeout(() => {
                 if (!testReceived) {
-                    console.warn('⚠️ Nenhum evento de orientação recebido em 3s!');
-                    updateDebugIndicator('⚠️ Sem eventos - Tentando GPS');
+                    addDebugLog('⚠️ Nenhum evento de orientação recebido em 3s!');
+                    updateDebugStatus('⚠️ Sem eventos - Tentando GPS');
                     orientationMode = 'movement';
                     updateOrientationButton();
                 } else {
-                    console.log('✅ Eventos de orientação funcionando!');
-                    updateDebugIndicator('✅ Orientação ativa');
+                    addDebugLog('✅ Eventos de orientação funcionando!');
+                    updateDebugStatus('✅ Bússola ativa e funcionando');
                 }
             }, 3000);
         }
