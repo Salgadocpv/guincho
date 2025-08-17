@@ -257,6 +257,8 @@
         let destinationLocation;
         let originAddress;
         let destinationAddress;
+        let userMarker = null;
+        let currentHeading = 0;
 
         // Initialize navigation from URL parameters
         function initNavigation() {
@@ -321,6 +323,12 @@
             
             directionsRenderer.setMap(map);
             
+            // Create user marker (blue arrow)
+            createUserMarker();
+            
+            // Initialize compass
+            initializeCompass();
+            
             // Hide loading and start navigation
             document.getElementById('mapLoading').style.display = 'none';
             
@@ -378,6 +386,83 @@
             
             // Update header distance
             document.getElementById('navigationDistance').textContent = leg.distance.text;
+        }
+
+        // Create user marker (blue arrow)
+        function createUserMarker() {
+            if (userMarker) {
+                userMarker.setMap(null);
+            }
+            
+            userMarker = new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                icon: {
+                    // Blue arrow pointing up
+                    path: 'M0,-20 L-8,8 L0,3 L8,8 Z',
+                    fillColor: '#1E90FF',
+                    fillOpacity: 1.0,
+                    strokeColor: '#FFFFFF',
+                    strokeWeight: 2,
+                    scale: 1.5,
+                    anchor: new google.maps.Point(0, 0),
+                    rotation: 0 // Always points up (north)
+                },
+                zIndex: 1000,
+                optimized: false
+            });
+        }
+
+        // Initialize compass to rotate map based on device orientation
+        function initializeCompass() {
+            if ('DeviceOrientationEvent' in window) {
+                // Request permission for iOS 13+
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(response => {
+                            if (response === 'granted') {
+                                startCompassTracking();
+                            }
+                        })
+                        .catch(console.error);
+                } else {
+                    // For other devices
+                    startCompassTracking();
+                }
+            }
+        }
+
+        // Start tracking device orientation for compass
+        function startCompassTracking() {
+            // Use deviceorientationabsolute for more accurate compass on supported devices
+            if ('ondeviceorientationabsolute' in window) {
+                window.addEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
+            } else {
+                window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+            }
+        }
+
+        // Handle device orientation changes
+        function handleDeviceOrientation(event) {
+            if (event.alpha !== null) {
+                // Get the compass heading
+                let heading = event.alpha;
+                
+                // For iOS, we need to adjust
+                if (event.webkitCompassHeading) {
+                    heading = event.webkitCompassHeading;
+                }
+                
+                // Convert to 0-360 range
+                heading = (360 - heading) % 360;
+                
+                currentHeading = heading;
+                
+                // Rotate the map so that the user's direction faces up
+                if (map) {
+                    map.setHeading(heading);
+                }
+            }
         }
 
         // Navigation controls
