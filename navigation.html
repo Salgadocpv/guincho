@@ -897,6 +897,10 @@
 
         // Initialize navigation from URL parameters
         function initNavigation() {
+            // Criar painel de debug PRIMEIRO
+            createDebugIndicator();
+            addDebugLog('🚀 Iniciando navegação...');
+            
             // Get parameters from URL
             const urlParams = new URLSearchParams(window.location.search);
             
