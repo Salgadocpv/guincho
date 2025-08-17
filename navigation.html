@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Iguincho - Navegação</title>
+    <title>Navegação em Tempo Real</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -16,84 +16,10 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
             height: 100vh;
             position: relative;
             overflow: hidden;
-            background: #000;
-        }
-
-        /* Navigation Header */
-        .navigation-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 150;
-            background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 80%, transparent 100%);
-            padding: 12px 16px 8px 16px;
-            text-align: center;
-            color: white;
-        }
-
-        .header-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-
-        .back-button {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.8rem;
-            border-radius: 6px;
-            backdrop-filter: blur(10px);
-        }
-
-        .back-button:hover {
-            background: rgba(0,0,0,0.6);
-            border-color: rgba(255,255,255,0.5);
-        }
-
-        .stop-navigation {
-            background: rgba(220, 53, 69, 0.8);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.8rem;
-            border-radius: 6px;
-            backdrop-filter: blur(10px);
-        }
-
-        .stop-navigation:hover {
-            background: rgba(220, 53, 69, 1);
-        }
-
-        .navigation-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .navigation-subtitle {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.8);
-        }
-
-        .navigation-distance {
-            font-size: 0.75rem;
-            color: rgba(40,167,69,1);
-            margin-top: 2px;
-            font-weight: 600;
+            background: #1d1d1d;
         }
 
         /* Map Container */
@@ -118,20 +44,20 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: #000;
+            background: #1d1d1d;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            z-index: 10;
+            z-index: 10000;
             color: white;
         }
 
         .map-loading-spinner {
             width: 50px;
             height: 50px;
-            border: 3px solid rgba(255,255,255,0.2);
-            border-top: 3px solid #1E90FF;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #8a2be2; /* Waze-like purple */
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 16px;
@@ -147,25 +73,57 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Bottom Info Panel */
-        .bottom-info {
+        /* Top Instruction Panel */
+        .top-instruction-panel {
             position: fixed;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
-            z-index: 100;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(20px);
-            border-radius: 12px;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 150;
+            background: #3d3d3d;
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .instruction-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #8a2be2;
+        }
+
+        .instruction-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .instruction-distance {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            margin-top: 4px;
+        }
+
+        /* Bottom Info Panel */
+        .bottom-info-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 150;
+            background: #3d3d3d;
             padding: 12px;
             color: white;
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.4);
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .route-info {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 10px;
+            align-items: center;
         }
 
         .route-stat {
@@ -174,23 +132,60 @@
         }
 
         .route-stat-label {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: rgba(255,255,255,0.7);
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .route-stat-value {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #1E90FF;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .route-stat-value.speed {
+            color: #8a2be2;
         }
 
-        .current-instruction {
-            text-align: center;
-            font-size: 0.85rem;
-            color: rgba(255,255,255,0.9);
-            line-height: 1.3;
+        /* Floating Action Buttons */
+        .floating-buttons {
+            position: fixed;
+            bottom: 100px; /* Adjust based on bottom panel height */
+            right: 16px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
+
+        .fab {
+            background-color: #8a2be2;
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fab:hover {
+            background-color: #9932cc;
+            transform: scale(1.05);
+        }
+        
+        .fab.stop {
+            background-color: #dc3545;
+        }
+        .fab.stop:hover {
+            background-color: #c82333;
+        }
+
     </style>
 </head>
 <body>
@@ -200,47 +195,45 @@
             <div class="map-loading-spinner"></div>
             <div class="map-loading-text">
                 Iniciando navegação...<br>
-                <small>Carregando rota e GPS</small>
+                <small>Aguardando sinal do GPS</small>
             </div>
         </div>
         <div id="map"></div>
     </div>
 
-    <!-- Navigation Header -->
-    <div class="navigation-header">
-        <div class="header-top">
-            <button class="back-button" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <button class="stop-navigation" onclick="stopNavigation()">
-                <i class="fas fa-stop"></i> Parar
-            </button>
-        </div>
-        <div class="navigation-title">Navegando para destino</div>
-        <div class="navigation-subtitle" id="navigationSubtitle">Siga as instruções do mapa</div>
-        <div class="navigation-distance" id="navigationDistance">Calculando rota...</div>
+    <!-- Top Instruction Panel -->
+    <div class="top-instruction-panel" id="topInstructionPanel" style="display: none;">
+        <div class="instruction-icon" id="instructionIcon"><i class="fas fa-arrow-up"></i></div>
+        <div class="instruction-text" id="instructionText">Calculando rota...</div>
+        <div class="instruction-distance" id="instructionDistance"></div>
     </div>
 
     <!-- Bottom Info Panel -->
-    <div class="bottom-info">
+    <div class="bottom-info-panel" id="bottomInfoPanel" style="display: none;">
         <div class="route-info">
-            <div class="route-stat">
-                <div class="route-stat-label">Distância</div>
-                <div class="route-stat-value" id="totalDistance">-</div>
-            </div>
-            <div class="route-stat">
-                <div class="route-stat-label">Tempo</div>
-                <div class="route-stat-value" id="totalTime">-</div>
-            </div>
             <div class="route-stat">
                 <div class="route-stat-label">Chegada</div>
                 <div class="route-stat-value" id="arrivalTime">-</div>
             </div>
+            <div class="route-stat">
+                <div class="route-stat-label">Tempo Restante</div>
+                <div class="route-stat-value" id="remainingTime">-</div>
+            </div>
+            <div class="route-stat">
+                <div class="route-stat-label">Distância</div>
+                <div class="route-stat-value" id="remainingDistance">-</div>
+            </div>
+            <div class="route-stat">
+                <div class="route-stat-label">Velocidade</div>
+                <div class="route-stat-value speed" id="currentSpeed">0 km/h</div>
+            </div>
         </div>
-        
-        <div class="current-instruction" id="currentInstruction">
-            Inicializando navegação...
-        </div>
+    </div>
+
+    <!-- Floating Action Buttons -->
+    <div class="floating-buttons">
+        <button class="fab stop" onclick="stopNavigation()"><i class="fas fa-stop"></i></button>
+        <button class="fab" onclick="showReportMenu()"><i class="fas fa-bullhorn"></i></button>
     </div>
 
     <!-- Google Maps API -->
@@ -255,88 +248,171 @@
         let directionsRenderer;
         let userLocation;
         let destinationLocation;
-        let originAddress;
-        let destinationAddress;
         let userMarker = null;
         let currentHeading = 0;
+        let locationWatcherId = null;
+        let currentRoute = null;
+        let lastRecalculationTime = 0;
 
-        // Initialize navigation from URL parameters
+        // Initialize navigation
         function initNavigation() {
-            console.log('🚀 initNavigation called!');
-            
-            // Get parameters from URL
             const urlParams = new URLSearchParams(window.location.search);
-            
-            // Parse coordinates
-            const originLat = parseFloat(urlParams.get('originLat'));
-            const originLng = parseFloat(urlParams.get('originLng'));
             const destLat = parseFloat(urlParams.get('destLat'));
             const destLng = parseFloat(urlParams.get('destLng'));
-            
-            // Parse addresses
-            try {
-                originAddress = decodeURIComponent(urlParams.get('originAddress') || 'Origem');
-            } catch (e) {
-                originAddress = urlParams.get('originAddress') || 'Origem';
-            }
-            
-            try {
-                destinationAddress = decodeURIComponent(urlParams.get('destAddress') || 'Destino');
-            } catch (e) {
-                destinationAddress = urlParams.get('destAddress') || 'Destino';
-            }
-            
-            // Validate parameters
-            if (isNaN(originLat) || isNaN(originLng) || isNaN(destLat) || isNaN(destLng)) {
-                alert('Parâmetros de navegação inválidos. Retornando...');
+
+            if (isNaN(destLat) || isNaN(destLng)) {
+                alert('Destino inválido.');
                 goBack();
                 return;
             }
-            
-            userLocation = { lat: originLat, lng: originLng };
             destinationLocation = { lat: destLat, lng: destLng };
-            
-            console.log('Navigation initialized:', { userLocation, destinationLocation });
-            
-            // Update page title
-            document.getElementById('navigationSubtitle').textContent = `Para: ${destinationAddress}`;
-            
-            // Initialize map
+
             map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 15,
-                center: userLocation,
+                zoom: 18,
+                center: { lat: 0, lng: 0 }, // Centered at 0,0 until we get GPS
                 mapTypeId: 'roadmap',
                 disableDefaultUI: true,
-                gestureHandling: 'greedy'
+                gestureHandling: 'greedy',
+                styles: [ // Waze-like map styles
+                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                    {
+                        featureType: "administrative.locality",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "poi",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry",
+                        stylers: [{ color: "#38414e" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#212a37" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#9ca5b3" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "geometry",
+                        stylers: [{ color: "#746855" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#1f2835" }],
+                    },
+                    {
+                        featureType: "transit",
+                        elementType: "geometry",
+                        stylers: [{ color: "#2f3948" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "geometry",
+                        stylers: [{ color: "#17263c" }],
+                    },
+                ]
             });
 
-            // Initialize directions service
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({
                 suppressMarkers: true,
                 polylineOptions: {
-                    strokeColor: '#1E90FF',
-                    strokeWeight: 6,
-                    strokeOpacity: 1.0
+                    strokeColor: '#8a2be2',
+                    strokeWeight: 8,
+                    strokeOpacity: 0.8
                 }
             });
-            
             directionsRenderer.setMap(map);
-            
-            // Create user marker (blue arrow)
-            createUserMarker();
-            
-            // Initialize compass
-            initializeCompass();
-            
-            // Hide loading and start navigation
-            document.getElementById('mapLoading').style.display = 'none';
-            
-            // Start navigation immediately
-            startNavigation();
+
+            startGpsTracking();
         }
 
-        // Start navigation with route calculation
+        // Start GPS tracking
+        function startGpsTracking() {
+            if (!navigator.geolocation) {
+                alert('GPS não suportado neste navegador.');
+                return;
+            }
+
+            locationWatcherId = navigator.geolocation.watchPosition(
+                handleGpsUpdate,
+                handleGpsError,
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        // Handle GPS updates
+        function handleGpsUpdate(position) {
+            userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            
+            currentHeading = position.coords.heading || 0;
+            const speed = position.coords.speed ? (position.coords.speed * 3.6).toFixed(0) : 0;
+            document.getElementById('currentSpeed').textContent = `${speed} km/h`;
+
+            if (!userMarker) {
+                // First time getting location
+                document.getElementById('mapLoading').style.display = 'none';
+                document.getElementById('topInstructionPanel').style.display = 'block';
+                document.getElementById('bottomInfoPanel').style.display = 'block';
+                
+                createUserMarker();
+                startNavigation();
+            } else {
+                userMarker.setPosition(userLocation);
+            }
+
+            map.setCenter(userLocation);
+            map.setHeading(currentHeading);
+            
+            if (currentRoute) {
+                checkOffRoute();
+                updateRemainingRouteInfo();
+            }
+        }
+
+        // Handle GPS errors
+        function handleGpsError(error) {
+            console.error('GPS Error: ' + error.message);
+            // Optionally show a message to the user
+        }
+
+        // Create or update the user marker
+        function createUserMarker() {
+            if (userMarker) {
+                userMarker.setMap(null);
+            }
+            userMarker = new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                    scale: 8,
+                    fillColor: '#4285F4',
+                    fillOpacity: 1.0,
+                    strokeColor: '#FFFFFF',
+                    strokeWeight: 2,
+                    rotation: currentHeading
+                },
+                zIndex: 1000
+            });
+        }
+
+        // Calculate initial route
         function startNavigation() {
             const request = {
                 origin: userLocation,
@@ -347,13 +423,9 @@
 
             directionsService.route(request, function(result, status) {
                 if (status === 'OK') {
-                    // Display route
+                    currentRoute = result;
                     directionsRenderer.setDirections(result);
-                    
-                    // Update UI with route info
-                    updateNavigationInfo(result);
-                    
-                    console.log('Navigation started successfully');
+                    updateUiWithNewRoute();
                 } else {
                     alert('Não foi possível calcular a rota: ' + status);
                     goBack();
@@ -361,108 +433,80 @@
             });
         }
 
-        // Update navigation information
-        function updateNavigationInfo(result) {
-            const route = result.routes[0];
-            const leg = route.legs[0];
+        // Check if user is off-route
+        function checkOffRoute() {
+            const now = Date.now();
+            if (now - lastRecalculationTime < 10000) return; // Avoid frequent recalculations
+
+            const routePolyline = new google.maps.Polyline({
+                path: currentRoute.routes[0].overview_path
+            });
+
+            if (!google.maps.geometry.poly.isLocationOnEdge(userLocation, routePolyline, 1e-4)) {
+                lastRecalculationTime = now;
+                document.getElementById('instructionText').textContent = "Recalculando rota...";
+                startNavigation(); // Recalculate route
+            }
+        }
+
+        // Update UI with new route info
+        function updateUiWithNewRoute() {
+            const leg = currentRoute.routes[0].legs[0];
+            document.getElementById('remainingDistance').textContent = leg.distance.text;
+            document.getElementById('remainingTime').textContent = leg.duration.text;
             
-            // Update distance and time
-            document.getElementById('totalDistance').textContent = leg.distance.text;
-            document.getElementById('totalTime').textContent = leg.duration.text;
-            
-            // Calculate arrival time
-            const now = new Date();
-            const arrivalTime = new Date(now.getTime() + leg.duration.value * 1000);
+            const arrivalTime = new Date(Date.now() + leg.duration.value * 1000);
             document.getElementById('arrivalTime').textContent = arrivalTime.toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
-            
-            // Update instruction
-            if (leg.steps && leg.steps.length > 0) {
-                const firstStep = leg.steps[0];
-                document.getElementById('currentInstruction').innerHTML = firstStep.instructions || 'Siga em frente';
-            }
-            
-            // Update header distance
-            document.getElementById('navigationDistance').textContent = leg.distance.text;
-        }
 
-        // Create user marker (blue arrow)
-        function createUserMarker() {
-            if (userMarker) {
-                userMarker.setMap(null);
-            }
-            
-            userMarker = new google.maps.Marker({
-                position: userLocation,
-                map: map,
-                icon: {
-                    // Blue arrow pointing up
-                    path: 'M0,-20 L-8,8 L0,3 L8,8 Z',
-                    fillColor: '#1E90FF',
-                    fillOpacity: 1.0,
-                    strokeColor: '#FFFFFF',
-                    strokeWeight: 2,
-                    scale: 1.5,
-                    anchor: new google.maps.Point(0, 0),
-                    rotation: 0 // Always points up (north)
-                },
-                zIndex: 1000,
-                optimized: false
-            });
+            updateRemainingRouteInfo();
         }
+        
+        // Update remaining distance, time, and current instruction
+        function updateRemainingRouteInfo() {
+            if (!currentRoute) return;
 
-        // Initialize compass to rotate map based on device orientation
-        function initializeCompass() {
-            if ('DeviceOrientationEvent' in window) {
-                // Request permission for iOS 13+
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    DeviceOrientationEvent.requestPermission()
-                        .then(response => {
-                            if (response === 'granted') {
-                                startCompassTracking();
-                            }
-                        })
-                        .catch(console.error);
-                } else {
-                    // For other devices
-                    startCompassTracking();
+            const leg = currentRoute.routes[0].legs[0];
+            let distanceToNextStep = Infinity;
+            let nextStep = leg.steps[0];
+
+            // Find the current step based on user's location
+            for (let i = 0; i < leg.steps.length; i++) {
+                const stepPolyline = new google.maps.Polyline({ path: leg.steps[i].path });
+                const distance = google.maps.geometry.spherical.computeDistanceBetween(userLocation, leg.steps[i].start_location);
+                
+                if (distance < distanceToNextStep) {
+                    distanceToNextStep = distance;
+                    nextStep = leg.steps[i];
                 }
             }
+            
+            // Update instruction panel
+            document.getElementById('instructionText').innerHTML = nextStep.instructions;
+            document.getElementById('instructionDistance').textContent = `em ${nextStep.distance.text}`;
+            updateInstructionIcon(nextStep.maneuver);
         }
 
-        // Start tracking device orientation for compass
-        function startCompassTracking() {
-            // Use deviceorientationabsolute for more accurate compass on supported devices
-            if ('ondeviceorientationabsolute' in window) {
-                window.addEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
-            } else {
-                window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+        // Update instruction icon based on maneuver
+        function updateInstructionIcon(maneuver) {
+            const iconEl = document.getElementById('instructionIcon');
+            let iconClass = 'fas fa-arrow-up'; // Default
+            switch (maneuver) {
+                case 'turn-left': iconClass = 'fas fa-turn-left'; break;
+                case 'turn-right': iconClass = 'fas fa-turn-right'; break;
+                case 'turn-sharp-left': iconClass = 'fas fa-turn-down-left'; break;
+                case 'turn-sharp-right': iconClass = 'fas fa-turn-down-right'; break;
+                case 'uturn-left': iconClass = 'fas fa-u-turn-left'; break;
+                case 'uturn-right': iconClass = 'fas fa-u-turn-right'; break;
+                case 'roundabout-left': iconClass = 'fas fa-undo'; break;
+                case 'roundabout-right': iconClass = 'fas fa-redo'; break;
+                case 'merge': iconClass = 'fas fa-compress-arrows-alt'; break;
+                case 'fork-left': iconClass = 'fas fa-code-branch'; break;
+                case 'fork-right': iconClass = 'fas fa-code-branch fa-flip-horizontal'; break;
             }
-        }
-
-        // Handle device orientation changes
-        function handleDeviceOrientation(event) {
-            if (event.alpha !== null) {
-                // Get the compass heading
-                let heading = event.alpha;
-                
-                // For iOS, we need to adjust
-                if (event.webkitCompassHeading) {
-                    heading = event.webkitCompassHeading;
-                }
-                
-                // Convert to 0-360 range
-                heading = (360 - heading) % 360;
-                
-                currentHeading = heading;
-                
-                // Rotate the map so that the user's direction faces up
-                if (map) {
-                    map.setHeading(heading);
-                }
-            }
+            iconEl.innerHTML = `<i class="${iconClass}"></i>`;
         }
 
         // Navigation controls
@@ -472,8 +516,16 @@
 
         function stopNavigation() {
             if (confirm('Deseja parar a navegação?')) {
+                if (locationWatcherId) {
+                    navigator.geolocation.clearWatch(locationWatcherId);
+                }
                 goBack();
             }
+        }
+        
+        function showReportMenu() {
+            // Placeholder for Waze-like reporting feature
+            alert('Função de reportar ainda não implementada.');
         }
 
         // Handle Google Maps API authentication errors
@@ -484,7 +536,7 @@
                     <i class="fas fa-key" style="font-size: 2rem; margin-bottom: 1rem; color: #dc3545;"></i><br>
                     Erro de autenticação do mapa<br>
                     <small>Chave da API inválida ou expirada</small><br>
-                    <button onclick="goBack()" style="margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Voltar</button>
+                    <button onclick="goBack()" style="margin-top: 1rem; padding: 10px 20px; background: #8a2be2; color: white; border: none; border-radius: 5px;">Voltar</button>
                 </div>
             `;
         };
