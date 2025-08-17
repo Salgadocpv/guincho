@@ -249,7 +249,6 @@
         let userLocation;
         let destinationLocation;
         let userMarker = null;
-        let currentHeading = 0;
         let locationWatcherId = null;
         let currentRoute = null;
         let lastRecalculationTime = 0;
@@ -337,6 +336,7 @@
             directionsRenderer.setMap(map);
 
             startGpsTracking();
+            initializeCompass(); // Initialize compass for map rotation
         }
 
         // Start GPS tracking
@@ -360,7 +360,6 @@
                 lng: position.coords.longitude
             };
             
-            currentHeading = position.coords.heading || 0;
             const speed = position.coords.speed ? (position.coords.speed * 3.6).toFixed(0) : 0;
             document.getElementById('currentSpeed').textContent = `${speed} km/h`;
 
@@ -377,7 +376,6 @@
             }
 
             map.setCenter(userLocation);
-            map.setHeading(currentHeading);
             
             if (currentRoute) {
                 checkOffRoute();
@@ -391,7 +389,7 @@
             // Optionally show a message to the user
         }
 
-        // Create or update the user marker
+        // Create the user marker
         function createUserMarker() {
             if (userMarker) {
                 userMarker.setMap(null);
@@ -406,10 +404,40 @@
                     fillOpacity: 1.0,
                     strokeColor: '#FFFFFF',
                     strokeWeight: 2,
-                    rotation: currentHeading
+                    rotation: 0 // Arrow always points up relative to the screen
                 },
                 zIndex: 1000
             });
+        }
+
+        // Initialize compass for device orientation
+        function initializeCompass() {
+            if ('DeviceOrientationEvent' in window) {
+                // iOS 13+ requires user permission
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(response => {
+                            if (response === 'granted') {
+                                window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                            }
+                        })
+                        .catch(console.error);
+                } else {
+                    // Non-iOS 13+ devices
+                    window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                }
+            }
+        }
+
+        // Handle device orientation changes to rotate the map
+        function handleDeviceOrientation(event) {
+            if (event.webkitCompassHeading) {
+                // iOS
+                map.setHeading(event.webkitCompassHeading);
+            } else if (event.alpha) {
+                // Android
+                map.setHeading(360 - event.alpha);
+            }
         }
 
         // Calculate initial route
