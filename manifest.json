@@ -1,7 +1,7 @@
 {
-  "name": "Guincho Express",
-  "short_name": "Guincho",
-  "description": "Socorro automotivo 24/7 - Guincho Express",
+  "name": "Iguincho",
+  "short_name": "Iguincho",
+  "description": "Socorro automotivo 24/7 - Iguincho",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#007bff",

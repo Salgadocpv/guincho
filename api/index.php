@@ -1,6 +1,6 @@
 <?php
 /**
- * API Principal - Guincho App
+ * API Principal - Iguincho
  * Arquivo de roteamento e configuração da API interna
  */
 
