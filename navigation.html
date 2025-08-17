@@ -195,14 +195,15 @@
             position: fixed;
             top: 120px;
             left: 10px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             color: white;
             padding: 10px;
             border-radius: 8px;
             font-family: monospace;
-            font-size: 12px;
+            font-size: 11px;
             z-index: 10001;
             max-width: calc(100% - 20px);
+            line-height: 1.4;
         }
 
     </style>
@@ -212,10 +213,12 @@
     <div id="debugPanel">
         <strong>Debug Info:</strong><br>
         <span id="debug-secure"></span><br>
+        <span id="debug-rendering"></span><br>
         <span id="debug-permission"></span><br>
         <span id="debug-rotation"></span><br>
         <span id="debug-counter"></span><br>
-        <span id="debug-heading"></span><br>
+        <span id="debug-sensor-heading"></span><br>
+        <span id="debug-map-heading"></span><br>
         <span id="debug-gps"></span>
     </div>
 
@@ -262,6 +265,7 @@
 
     <!-- Floating Action Buttons -->
     <div class="floating-buttons">
+        <button class="fab" onclick="testMapRotation()" title="Test Rotation"><i class="fas fa-vial"></i></button>
         <button class="fab stop" onclick="stopNavigation()"><i class="fas fa-stop"></i></button>
         <button class="fab" onclick="showReportMenu()"><i class="fas fa-bullhorn"></i></button>
         <button class="fab" id="compassBtn" onclick="toggleMapRotation()"><i class="fas fa-compass"></i></button>
@@ -286,6 +290,7 @@
         let isMapRotationActive = false;
         let currentMapHeading = 0;
         let orientationEventCounter = 0;
+        let mapDebugInterval = null;
 
         // Debugging function
         function updateDebugInfo(id, value) {
@@ -327,6 +332,16 @@
                     { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
                     { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
                 ]
+            });
+
+            // Listen for map idle event to get rendering type
+            google.maps.event.addListenerOnce(map, 'idle', () => {
+                updateDebugInfo('rendering', map.getRenderingType());
+                // Start map state debugger
+                if (mapDebugInterval) clearInterval(mapDebugInterval);
+                mapDebugInterval = setInterval(() => {
+                    updateDebugInfo('map-heading', map.getHeading()?.toFixed(2) || '0.00');
+                }, 1000);
             });
 
             directionsService = new google.maps.DirectionsService();
@@ -377,11 +392,11 @@
                 userMarker.setPosition(userLocation);
             }
 
-            // Centralize map updates here
-            map.setCenter(userLocation);
+            const cameraOptions = { center: userLocation, zoom: map.getZoom() };
             if (isMapRotationActive) {
-                map.setHeading(currentMapHeading);
+                cameraOptions.heading = currentMapHeading;
             }
+            map.moveCamera(cameraOptions);
             
             if (currentRoute) {
                 checkOffRoute();
@@ -420,14 +435,12 @@
 
             const compassBtn = document.getElementById('compassBtn');
             if (isMapRotationActive) {
-                // Deactivate rotation
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
-                map.moveCamera({ heading: 0 }); // Reset map to North-up
                 isMapRotationActive = false;
                 compassBtn.classList.remove('active');
                 updateDebugInfo('rotation', 'Inactive');
+                map.moveCamera({ heading: 0 });
             } else {
-                // Activate rotation
                 updateDebugInfo('permission', 'Requesting...');
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
@@ -457,20 +470,17 @@
             }
         }
 
-        // This function ONLY stores the heading. It does not touch the map.
         function handleDeviceOrientation(event) {
             orientationEventCounter++;
             let heading = 0;
             if (event.webkitCompassHeading) {
-                // iOS
                 heading = event.webkitCompassHeading;
             } else if (event.absolute && event.alpha !== null) {
-                // Android
                 heading = 360 - event.alpha;
             }
             currentMapHeading = heading;
             updateDebugInfo('counter', orientationEventCounter);
-            updateDebugInfo('heading', heading.toFixed(2));
+            updateDebugInfo('sensor-heading', heading.toFixed(2));
         }
 
         // Route calculation and updates
@@ -524,7 +534,6 @@
             const leg = currentRoute.routes[0].legs[0];
             let nextStep = leg.steps[0];
 
-            // Find the current step the user is on
             for (let i = 0; i < leg.steps.length - 1; i++) {
                 const stepPolyline = new google.maps.Polyline({ path: leg.steps[i].path });
                 if (google.maps.geometry.poly.isLocationOnEdge(userLocation, stepPolyline, 1e-4)) {
@@ -565,6 +574,7 @@
         function stopNavigation() {
             if (confirm('Deseja parar a navegação?')) {
                 if (locationWatcherId) navigator.geolocation.clearWatch(locationWatcherId);
+                if (mapDebugInterval) clearInterval(mapDebugInterval);
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
                 goBack();
             }
@@ -572,6 +582,13 @@
         
         function showReportMenu() {
             alert('Função de reportar ainda não implementada.');
+        }
+
+        function testMapRotation() {
+            const currentHeading = map.getHeading() || 0;
+            const newHeading = (currentHeading + 90) % 360;
+            map.moveCamera({ heading: newHeading, tilt: 45 });
+            console.log(`Forcing rotation to ${newHeading} degrees`);
         }
 
         window.gm_authFailure = function() {
