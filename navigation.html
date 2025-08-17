@@ -35,6 +35,7 @@
         #map {
             width: 100%;
             height: 100%;
+            transition: transform 0.5s linear; /* Smooth rotation */
         }
 
         /* Loading Screen */
@@ -190,46 +191,11 @@
             background-color: #c82333;
         }
 
-        /* Debug Panel */
-        #debugPanel {
-            position: fixed;
-            top: 120px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 11px;
-            z-index: 10001;
-            max-width: calc(100% - 20px);
-            line-height: 1.4;
-        }
-        #debugPanel button {
-            background: #555;
-            color: white;
-            border: 1px solid #777;
-            padding: 4px 8px;
-            margin-top: 5px;
-            cursor: pointer;
-        }
+        /* Debug Panel is removed for this version */
 
     </style>
 </head>
 <body>
-    <!-- Debug Panel -->
-    <div id="debugPanel">
-        <strong>Debug Info:</strong> <button onclick="copyDebugInfo()">Copiar</button><br>
-        <span id="debug-secure"></span><br>
-        <span id="debug-rendering"></span><br>
-        <span id="debug-permission"></span><br>
-        <span id="debug-rotation"></span><br>
-        <span id="debug-counter"></span><br>
-        <span id="debug-sensor-heading"></span><br>
-        <span id="debug-map-heading"></span><br>
-        <span id="debug-gps"></span>
-    </div>
-
     <!-- Map Container -->
     <div class="map-container">
         <div class="map-loading" id="mapLoading">
@@ -273,7 +239,6 @@
 
     <!-- Floating Action Buttons -->
     <div class="floating-buttons">
-        <button class="fab" onclick="testMapRotation()" title="Test Rotation"><i class="fas fa-vial"></i></button>
         <button class="fab stop" onclick="stopNavigation()"><i class="fas fa-stop"></i></button>
         <button class="fab" onclick="showReportMenu()"><i class="fas fa-bullhorn"></i></button>
         <button class="fab" id="compassBtn" onclick="toggleMapRotation()"><i class="fas fa-compass"></i></button>
@@ -297,36 +262,9 @@
         let lastRecalculationTime = 0;
         let isMapRotationActive = false;
         let currentMapHeading = 0;
-        let orientationEventCounter = 0;
-        let mapDebugInterval = null;
-
-        // Debugging functions
-        function updateDebugInfo(id, value) {
-            const el = document.getElementById(`debug-${id}`);
-            if (el) el.textContent = `${id}: ${value}`;
-        }
-
-        function copyDebugInfo() {
-            const debugContent = [
-                document.getElementById('debug-secure').textContent,
-                document.getElementById('debug-rendering').textContent,
-                document.getElementById('debug-permission').textContent,
-                document.getElementById('debug-rotation').textContent,
-                document.getElementById('debug-counter').textContent,
-                document.getElementById('debug-sensor-heading').textContent,
-                document.getElementById('debug-map-heading').textContent,
-                document.getElementById('debug-gps').textContent
-            ].join('\n');
-            navigator.clipboard.writeText(debugContent).then(() => {
-                alert('Debug info copied to clipboard!');
-            }, () => {
-                alert('Failed to copy debug info.');
-            });
-        }
 
         // Initialize navigation
         function initNavigation() {
-            updateDebugInfo('secure', window.isSecureContext ? 'HTTPS OK' : 'INSECURE (HTTP)');
             const urlParams = new URLSearchParams(window.location.search);
             const destLat = parseFloat(urlParams.get('destLat'));
             const destLng = parseFloat(urlParams.get('destLng'));
@@ -340,11 +278,12 @@
 
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 18,
-                center: { lat: 0, lng: 0 }, // Centered at 0,0 until we get GPS
+                center: { lat: 0, lng: 0 },
                 mapTypeId: 'roadmap',
                 disableDefaultUI: true,
                 gestureHandling: 'greedy',
-                styles: [ // Waze-like map styles
+                // We are not using map.setHeading, so these styles are for aesthetics
+                styles: [ 
                     { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
                     { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
                     { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
@@ -358,14 +297,6 @@
                     { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
                     { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
                 ]
-            });
-
-            google.maps.event.addListenerOnce(map, 'idle', () => {
-                updateDebugInfo('rendering', map.getRenderingType());
-                if (mapDebugInterval) clearInterval(mapDebugInterval);
-                mapDebugInterval = setInterval(() => {
-                    updateDebugInfo('map-heading', map.getHeading()?.toFixed(2) || '0.00');
-                }, 1000);
             });
 
             directionsService = new google.maps.DirectionsService();
@@ -399,14 +330,11 @@
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
-            updateDebugInfo('gps', `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`);
             
             const speed = position.coords.speed ? (position.coords.speed * 3.6).toFixed(0) : 0;
             document.getElementById('currentSpeed').textContent = `${speed} km/h`;
 
-            const isFirstUpdate = !userMarker;
-
-            if (isFirstUpdate) {
+            if (!userMarker) {
                 document.getElementById('mapLoading').style.display = 'none';
                 document.getElementById('topInstructionPanel').style.display = 'block';
                 document.getElementById('bottomInfoPanel').style.display = 'block';
@@ -416,15 +344,17 @@
                 userMarker.setPosition(userLocation);
             }
 
-            const cameraOptions = { center: userLocation, zoom: 18 }; // Use fixed zoom
-            if (isMapRotationActive) {
-                cameraOptions.heading = currentMapHeading;
-            }
+            map.setCenter(userLocation);
 
-            if (isFirstUpdate) {
-                setTimeout(() => map.moveCamera(cameraOptions), 200); // Delay first camera move
-            } else {
-                map.moveCamera(cameraOptions);
+            // CSS Rotation Hack
+            if (isMapRotationActive) {
+                const mapDiv = document.getElementById('map');
+                mapDiv.style.transform = `rotate(${360 - currentMapHeading}deg)`;
+                
+                // Counter-rotate the marker icon
+                const markerIcon = userMarker.getIcon();
+                markerIcon.rotation = currentMapHeading;
+                userMarker.setIcon(markerIcon);
             }
             
             if (currentRoute) {
@@ -462,44 +392,38 @@
             }
 
             const compassBtn = document.getElementById('compassBtn');
+            const mapDiv = document.getElementById('map');
+
             if (isMapRotationActive) {
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
                 isMapRotationActive = false;
                 compassBtn.classList.remove('active');
-                updateDebugInfo('rotation', 'Inactive');
-                map.moveCamera({ heading: 0 });
+                mapDiv.style.transform = 'rotate(0deg)'; // Reset CSS rotation
+                const markerIcon = userMarker.getIcon();
+                markerIcon.rotation = 0;
+                userMarker.setIcon(markerIcon);
             } else {
-                updateDebugInfo('permission', 'Requesting...');
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
                         .then(response => {
                             if (response === 'granted') {
-                                updateDebugInfo('permission', 'Granted');
                                 window.addEventListener('deviceorientation', handleDeviceOrientation, true);
                                 isMapRotationActive = true;
                                 compassBtn.classList.add('active');
-                                updateDebugInfo('rotation', 'Active');
                             } else {
-                                updateDebugInfo('permission', 'Denied');
                                 alert('Permissão para sensor de orientação foi negada.');
                             }
                         })
-                        .catch((e) => {
-                            updateDebugInfo('permission', `Error: ${e.message}`)
-                            alert('Não foi possível ativar a bússola.');
-                        });
+                        .catch(() => alert('Não foi possível ativar a bússola.'));
                 } else {
-                    updateDebugInfo('permission', 'Not needed (non-iOS)');
                     window.addEventListener('deviceorientation', handleDeviceOrientation, true);
                     isMapRotationActive = true;
                     compassBtn.classList.add('active');
-                    updateDebugInfo('rotation', 'Active');
                 }
             }
         }
 
         function handleDeviceOrientation(event) {
-            orientationEventCounter++;
             let heading = 0;
             if (event.webkitCompassHeading) {
                 heading = event.webkitCompassHeading;
@@ -507,8 +431,6 @@
                 heading = 360 - event.alpha;
             }
             currentMapHeading = heading;
-            updateDebugInfo('counter', orientationEventCounter);
-            updateDebugInfo('sensor-heading', heading.toFixed(2));
         }
 
         function startNavigation() {
@@ -601,7 +523,6 @@
         function stopNavigation() {
             if (confirm('Deseja parar a navegação?')) {
                 if (locationWatcherId) navigator.geolocation.clearWatch(locationWatcherId);
-                if (mapDebugInterval) clearInterval(mapDebugInterval);
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
                 goBack();
             }
@@ -611,23 +532,16 @@
             alert('Função de reportar ainda não implementada.');
         }
 
-        function testMapRotation() {
-            const currentHeading = map.getHeading() || 0;
-            const newHeading = (currentHeading + 90) % 360;
-            map.moveCamera({ heading: newHeading, tilt: 45, zoom: 18 });
-            console.log(`Forcing rotation to ${newHeading} degrees`);
-        }
-
         window.gm_authFailure = function() {
             console.error('❌ Google Maps API authentication failed');
-            document.getElementById('mapLoading').innerHTML = '
+            document.getElementById('mapLoading').innerHTML = `
                 <div style="color: white; text-align: center;">
                     <i class="fas fa-key" style="font-size: 2rem; margin-bottom: 1rem; color: #dc3545;"></i><br>
                     Erro de autenticação do mapa<br>
                     <small>Chave da API inválida ou expirada</small><br>
                     <button onclick="goBack()" style="margin-top: 1rem; padding: 10px 20px; background: #8a2be2; color: white; border: none; border-radius: 5px;">Voltar</button>
                 </div>
-            ';
+            `;
         };
     </script>
 </body>
