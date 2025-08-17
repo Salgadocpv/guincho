@@ -258,7 +258,7 @@
         let currentRoute = null;
         let lastRecalculationTime = 0;
         let isMapRotationActive = false;
-        let compassPermissionGranted = false;
+        let currentMapHeading = 0;
 
         // Initialize navigation
         function initNavigation() {
@@ -322,7 +322,7 @@
             );
         }
 
-        // Handle GPS updates
+        // Handle GPS updates - This is the main update loop
         function handleGpsUpdate(position) {
             userLocation = {
                 lat: position.coords.latitude,
@@ -342,8 +342,10 @@
                 userMarker.setPosition(userLocation);
             }
 
-            if (!isMapRotationActive) {
-                map.setCenter(userLocation);
+            // Centralize map updates here
+            map.setCenter(userLocation);
+            if (isMapRotationActive) {
+                map.setHeading(currentMapHeading);
             }
             
             if (currentRoute) {
@@ -376,9 +378,8 @@
 
         // Compass and map rotation logic
         function toggleMapRotation() {
-            // First, check for a secure context (HTTPS)
             if (!window.isSecureContext) {
-                alert('REQUISITO DE SEGURANÇA: Para ativar a bússola, esta página precisa ser acessada via HTTPS. Seu ambiente local (http://localhost) não é seguro.');
+                alert('REQUISITO DE SEGURANÇA: Para ativar a bússola, esta página precisa ser acessada via HTTPS.');
                 return;
             }
 
@@ -386,13 +387,12 @@
             if (isMapRotationActive) {
                 // Deactivate rotation
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
-                map.setHeading(0);
+                map.setHeading(0); // Reset map to North-up
                 isMapRotationActive = false;
                 compassBtn.classList.remove('active');
             } else {
                 // Activate rotation
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    // iOS 13+ permission model
                     DeviceOrientationEvent.requestPermission()
                         .then(response => {
                             if (response === 'granted') {
@@ -403,9 +403,9 @@
                                 alert('Permissão para sensor de orientação foi negada.');
                             }
                         })
-                        .catch(() => alert('Não foi possível ativar a bússola. Verifique as configurações do seu navegador.'));
+                        .catch(() => alert('Não foi possível ativar a bússola.'));
                 } else {
-                    // Standard devices (non-iOS 13+)
+                    // For non-iOS 13+ devices that don't need explicit permission
                     window.addEventListener('deviceorientation', handleDeviceOrientation, true);
                     isMapRotationActive = true;
                     compassBtn.classList.add('active');
@@ -413,17 +413,17 @@
             }
         }
 
+        // This function ONLY stores the heading. It does not touch the map.
         function handleDeviceOrientation(event) {
-            let heading = event.alpha;
+            let heading = 0;
             if (event.webkitCompassHeading) {
                 // iOS
                 heading = event.webkitCompassHeading;
-            } else {
+            } else if (event.absolute && event.alpha !== null) {
                 // Android
                 heading = 360 - event.alpha;
             }
-            map.setHeading(heading);
-            map.setCenter(userLocation); // Keep user centered while rotating
+            currentMapHeading = heading;
         }
 
         // Route calculation and updates
