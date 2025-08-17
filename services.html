@@ -390,14 +390,14 @@
         let selectedService = null;
         let userLocation = null;
 
-        // Direct service navigation
+        // Direct service navigation - Updated: Now goes to questionnaire first
         function goToService(serviceType) {
             showLoading();
 
             setTimeout(() => {
                 hideLoading();
-                // Redirect to questionnaire page first
-                window.location.href = `questions.html?service=${serviceType}`;
+                // Redirect to questionnaire page first, then to service details
+                window.location.href = `questions.html?service=${serviceType}&v=2`;
             }, 1000);
         }
 
