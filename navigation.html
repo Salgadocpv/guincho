@@ -256,6 +256,8 @@
         let lastRecalculationTime = 0;
         let isMapRotationActive = false;
         let currentMapHeading = 0;
+        let remainingRoutePolyline = null;
+        let completedRoutePolyline = null;
 
         function initNavigation() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -292,15 +294,8 @@
             });
 
             directionsService = new google.maps.DirectionsService();
-            directionsRenderer = new google.maps.DirectionsRenderer({
-                suppressMarkers: true,
-                polylineOptions: {
-                    strokeColor: '#8a2be2',
-                    strokeWeight: 8,
-                    strokeOpacity: 0.8
-                }
-            });
-            directionsRenderer.setMap(map);
+            // Don't use default directionsRenderer for route display
+            // We'll manage polylines manually for progressive route completion
 
             startGpsTracking();
         }
@@ -354,6 +349,7 @@
             if (currentRoute) {
                 checkOffRoute();
                 updateRemainingRouteInfo();
+                updateProgressiveRoute();
             }
         }
 
@@ -438,7 +434,6 @@
             directionsService.route(request, (result, status) => {
                 if (status === 'OK') {
                     currentRoute = result;
-                    directionsRenderer.setDirections(result);
                     updateUiWithNewRoute();
                 } else {
                     alert('Não foi possível calcular a rota: ' + status);
@@ -456,7 +451,88 @@
             if (!google.maps.geometry.poly.isLocationOnEdge(userLocation, routePolyline, 1e-4)) {
                 lastRecalculationTime = now;
                 document.getElementById('instructionText').textContent = "Recalculando rota...";
+                // Clear existing polylines before recalculating
+                clearRoutePolylines();
                 startNavigation();
+            }
+        }
+
+        // Progressive route drawing functions
+        function drawProgressiveRoute() {
+            if (!currentRoute) return;
+
+            // Clear existing polylines
+            clearRoutePolylines();
+
+            const routePath = currentRoute.routes[0].overview_path;
+            
+            // Create remaining route (full route initially)
+            remainingRoutePolyline = new google.maps.Polyline({
+                path: routePath,
+                strokeColor: '#8a2be2',
+                strokeWeight: 8,
+                strokeOpacity: 0.8,
+                zIndex: 100
+            });
+            remainingRoutePolyline.setMap(map);
+
+            // Create completed route (empty initially)
+            completedRoutePolyline = new google.maps.Polyline({
+                path: [],
+                strokeColor: '#28a745',
+                strokeWeight: 6,
+                strokeOpacity: 0.6,
+                zIndex: 99
+            });
+            completedRoutePolyline.setMap(map);
+        }
+
+        function updateProgressiveRoute() {
+            if (!currentRoute || !userLocation || !remainingRoutePolyline) return;
+
+            const routePath = currentRoute.routes[0].overview_path;
+            let closestPointIndex = 0;
+            let minDistance = Number.MAX_VALUE;
+
+            // Find closest point on route to user location
+            for (let i = 0; i < routePath.length; i++) {
+                const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                    new google.maps.LatLng(userLocation.lat, userLocation.lng),
+                    routePath[i]
+                );
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestPointIndex = i;
+                }
+            }
+
+            // Only update if user has progressed significantly (more than 50 meters ahead)
+            if (minDistance < 50 && closestPointIndex > 0) {
+                // Split route into completed and remaining parts
+                const completedPath = routePath.slice(0, closestPointIndex + 1);
+                const remainingPath = routePath.slice(closestPointIndex);
+
+                // Add user location to completed path for smooth transition
+                completedPath.push(new google.maps.LatLng(userLocation.lat, userLocation.lng));
+
+                // Update completed route (green)
+                completedRoutePolyline.setPath(completedPath);
+
+                // Update remaining route (purple)
+                const remainingPathWithUser = [new google.maps.LatLng(userLocation.lat, userLocation.lng), ...remainingPath];
+                remainingRoutePolyline.setPath(remainingPathWithUser);
+            }
+        }
+
+        function clearRoutePolylines() {
+            if (remainingRoutePolyline) {
+                remainingRoutePolyline.setMap(null);
+                remainingRoutePolyline = null;
+            }
+            if (completedRoutePolyline) {
+                completedRoutePolyline.setMap(null);
+                completedRoutePolyline = null;
             }
         }
 
@@ -468,6 +544,8 @@
             const arrivalTime = new Date(Date.now() + leg.duration.value * 1000);
             document.getElementById('arrivalTime').textContent = arrivalTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
+            // Draw the full route initially
+            drawProgressiveRoute();
             updateRemainingRouteInfo();
         }
         
@@ -555,6 +633,7 @@
             if (confirm('Deseja parar a navegação?')) {
                 if (locationWatcherId) navigator.geolocation.clearWatch(locationWatcherId);
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
+                clearRoutePolylines();
                 goBack();
             }
         }
