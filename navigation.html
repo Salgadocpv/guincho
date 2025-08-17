@@ -1326,8 +1326,12 @@
                 <div id="debugStatus">Inicializando...</div>
                 <div id="debugData" style="margin-top: 8px; font-size: 10px;"></div>
                 <div style="text-align: center; margin-top: 8px;">
-                    <button onclick="copyDebugInfo()" style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 10px;">📋 Copiar Debug</button>
-                    <button onclick="toggleDebugPanel()" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; margin-left: 5px;">❌ Fechar</button>
+                    <button onclick="copyDebugInfo()" style="background: #007bff; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px;">📋 Copiar</button>
+                    <button onclick="forceCompassInit()" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; margin-left: 2px;">🧭 Bússola</button>
+                    <button onclick="testRotation(90)" style="background: #ffc107; color: black; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; margin-left: 2px;">🔄 90°</button>
+                    <button onclick="testRotation(180)" style="background: #6f42c1; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; margin-left: 2px;">🔄 180°</button>
+                    <button onclick="getMapInfo()" style="background: #17a2b8; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; margin-left: 2px;">📊 Info</button>
+                    <button onclick="toggleDebugPanel()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; margin-left: 2px;">❌</button>
                 </div>
                 <div id="debugLogs" style="margin-top: 8px; max-height: 150px; overflow-y: auto; font-size: 9px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 3px;"></div>
             `;
