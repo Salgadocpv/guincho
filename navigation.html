@@ -1587,30 +1587,11 @@
                         
                         // Aplicar rotação se diferença > 3° (mais sensível)
                         if (Math.abs(headingDiff) > 3) {
-                            addDebugLog(`🔄 TENTANDO ROTAÇÃO: ${compassHeading.toFixed(1)}° → ${targetMapHeading.toFixed(1)}°`);
+                            addDebugLog(`🔄 ROTAÇÃO: ${compassHeading.toFixed(1)}° → ${targetMapHeading.toFixed(1)}°`);
                             
-                            // FORÇAR TILT E MAPTYPE - necessário para rotação
-                            if (currentMapTilt < 10) {
-                                addDebugLog(`⚠️ Tilt muito baixo (${currentMapTilt}°), forçando configuração 3D`);
-                                
-                                // Garantir que está em satellite para permitir 3D
-                                if (map.getMapTypeId() !== 'satellite') {
-                                    addDebugLog('🗺️ Mudando para satellite para permitir 3D');
-                                    map.setMapTypeId('satellite');
-                                }
-                                
-                                // Forçar tilt
-                                map.setTilt(45);
-                                
-                                // Aguardar aplicação
-                                setTimeout(() => {
-                                    const newTilt = map.getTilt();
-                                    addDebugLog(`📊 Tilt após forçar: ${newTilt}°`);
-                                }, 200);
-                            }
-                            
-                            // Tentar aplicar rotação
-                            map.setHeading(targetMapHeading);
+                            // SOLUÇÃO DEFINITIVA: CSS 3D (Google Maps rotacao limitada no iPhone)
+                            addDebugLog(`🎨 Aplicando CSS 3D`);
+                            \n                            // Aplicar rotação CSS diretamente no container do mapa\n                            const mapContainer = document.querySelector('.map-container');\n                            if (mapContainer) {\n                                mapContainer.style.transform = `rotate(${-targetMapHeading}deg)`;\n                                mapContainer.style.transformOrigin = 'center center';\n                                mapContainer.style.transition = 'transform 0.3s ease';\n                                addDebugLog(`✅ CSS rotação aplicada: ${-targetMapHeading}°`);\n                            } else {\n                                addDebugLog(`❌ Container do mapa não encontrado`);\n                            }
                             
                             // Verificar se funcionou
                             setTimeout(() => {
