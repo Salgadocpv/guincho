@@ -1228,34 +1228,144 @@
             }
         }
 
-        // Debug indicator for testing
+        // Advanced debug panel for iPhone testing
+        let debugLogs = [];
+        let debugPanel = null;
+        
         function createDebugIndicator() {
-            const debug = document.createElement('div');
-            debug.id = 'debugIndicator';
-            debug.style.cssText = `
+            debugPanel = document.createElement('div');
+            debugPanel.id = 'debugPanel';
+            debugPanel.style.cssText = `
                 position: fixed;
-                top: 120px;
-                left: 10px;
-                right: 10px;
-                background: rgba(0,0,0,0.8);
-                color: white;
-                padding: 8px;
-                font-size: 0.8rem;
-                border-radius: 5px;
-                z-index: 250;
-                font-family: monospace;
-                text-align: center;
+                top: 100px;
+                left: 5px;
+                right: 5px;
+                background: rgba(0,0,0,0.95);
+                color: #00ff00;
+                padding: 10px;
+                font-size: 11px;
+                border-radius: 8px;
+                z-index: 300;
+                font-family: 'Courier New', monospace;
+                max-height: 300px;
+                overflow-y: auto;
+                border: 2px solid #00ff00;
             `;
-            debug.textContent = '🔍 Inicializando debug...';
-            document.body.appendChild(debug);
+            
+            debugPanel.innerHTML = `
+                <div style="text-align: center; color: #ffff00; font-weight: bold; margin-bottom: 8px;">
+                    🔧 DEBUG PANEL - iPhone
+                </div>
+                <div id="debugStatus">Inicializando...</div>
+                <div id="debugData" style="margin-top: 8px; font-size: 10px;"></div>
+                <div style="text-align: center; margin-top: 8px;">
+                    <button onclick="copyDebugInfo()" style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 10px;">📋 Copiar Debug</button>
+                    <button onclick="toggleDebugPanel()" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; margin-left: 5px;">❌ Fechar</button>
+                </div>
+                <div id="debugLogs" style="margin-top: 8px; max-height: 150px; overflow-y: auto; font-size: 9px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 3px;"></div>
+            `;
+            
+            document.body.appendChild(debugPanel);
+            addDebugLog('🚀 Debug panel criado');
         }
         
-        function updateDebugIndicator(text) {
-            const debug = document.getElementById('debugIndicator');
-            if (debug) {
-                debug.textContent = text;
+        function addDebugLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            debugLogs.push(logEntry);
+            
+            // Manter apenas últimos 20 logs
+            if (debugLogs.length > 20) {
+                debugLogs.shift();
             }
-            console.log('DEBUG:', text);
+            
+            // Atualizar display
+            const logsDiv = document.getElementById('debugLogs');
+            if (logsDiv) {
+                logsDiv.innerHTML = debugLogs.map(log => `<div>${log}</div>`).join('');
+                logsDiv.scrollTop = logsDiv.scrollHeight;
+            }
+            
+            console.log('DEBUG:', message);
+        }
+        
+        function updateDebugStatus(text) {
+            const statusDiv = document.getElementById('debugStatus');
+            if (statusDiv) {
+                statusDiv.innerHTML = text;
+            }
+            addDebugLog(text);
+        }
+        
+        function updateDebugData(data) {
+            const dataDiv = document.getElementById('debugData');
+            if (dataDiv) {
+                dataDiv.innerHTML = data;
+            }
+        }
+        
+        function copyDebugInfo() {
+            const debugInfo = {
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                currentHeading: currentHeading,
+                orientationMode: orientationMode,
+                isNavigating: isNavigating,
+                mapHeading: map ? map.getHeading() : 'N/A',
+                mapTilt: map ? map.getTilt() : 'N/A',
+                logs: debugLogs,
+                deviceInfo: {
+                    hasDeviceOrientation: !!window.DeviceOrientationEvent,
+                    hasRequestPermission: typeof DeviceOrientationEvent.requestPermission === 'function',
+                    hasAbsoluteOrientation: 'ondeviceorientationabsolute' in window
+                }
+            };
+            
+            const debugText = JSON.stringify(debugInfo, null, 2);
+            
+            // Tentar copiar para clipboard
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(debugText).then(() => {
+                    alert('✅ Debug info copiado para clipboard!');
+                }).catch(() => {
+                    showTextToCopy(debugText);
+                });
+            } else {
+                showTextToCopy(debugText);
+            }
+        }
+        
+        function showTextToCopy(text) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.9);
+                z-index: 400;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 10px; max-width: 90%; max-height: 80%; overflow: auto;">
+                    <h3>📋 Copie o texto abaixo:</h3>
+                    <textarea readonly style="width: 100%; height: 300px; font-family: monospace; font-size: 10px;">${text}</textarea>
+                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Fechar</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function toggleDebugPanel() {
+            if (debugPanel) {
+                debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+            }
         }
         
         // Start compass tracking
@@ -1318,12 +1428,23 @@
         // Handle device orientation changes
         function handleDeviceOrientation(event) {
             let compassHeading = null;
+            let debugInfo = '';
+            
+            // Coletar todos os dados do evento
+            const eventData = {
+                alpha: event.alpha,
+                beta: event.beta,
+                gamma: event.gamma,
+                absolute: event.absolute,
+                webkitCompassHeading: event.webkitCompassHeading
+            };
             
             // Melhorada compatibilidade entre dispositivos
             if (typeof event.webkitCompassHeading !== 'undefined' && event.webkitCompassHeading !== null) {
                 // iOS Safari - valor já corrigido para norte magnético
                 compassHeading = event.webkitCompassHeading;
-                updateDebugIndicator(`🍎 iOS: ${compassHeading.toFixed(1)}°`);
+                debugInfo = `🍎 iOS: ${compassHeading.toFixed(1)}°`;
+                addDebugLog(`iOS webkitCompassHeading: ${compassHeading.toFixed(1)}°`);
             } else if (typeof event.alpha !== 'undefined' && event.alpha !== null) {
                 // Android e outros navegadores
                 if (event.absolute === true || typeof event.absolute === 'undefined') {
@@ -1333,8 +1454,20 @@
                     // Alpha é relativo à orientação inicial do dispositivo
                     compassHeading = event.alpha;
                 }
-                updateDebugIndicator(`🤖 Android: α=${event.alpha.toFixed(1)}° → ${compassHeading.toFixed(1)}°`);
+                debugInfo = `🤖 α=${event.alpha.toFixed(1)}° → ${compassHeading.toFixed(1)}°`;
+                addDebugLog(`Alpha: ${event.alpha.toFixed(1)}° (abs: ${event.absolute}) → ${compassHeading.toFixed(1)}°`);
             }
+            
+            // Atualizar dados na tela
+            updateDebugData(`
+                <strong>Dados do Sensor:</strong><br>
+                α: ${eventData.alpha?.toFixed(1) || 'null'}° | 
+                β: ${eventData.beta?.toFixed(1) || 'null'}° | 
+                γ: ${eventData.gamma?.toFixed(1) || 'null'}°<br>
+                Absoluto: ${eventData.absolute}<br>
+                WebKit: ${eventData.webkitCompassHeading?.toFixed(1) || 'null'}°<br>
+                <strong>Heading Calculado:</strong> ${compassHeading?.toFixed(1) || 'null'}°
+            `);
             
             if (compassHeading !== null && !isNaN(compassHeading)) {
                 // Normalizar para faixa 0-360
@@ -1342,30 +1475,58 @@
                 
                 // TESTE DIRETO - aplicar rotação sem dependências complexas
                 if (map) {
-                    // Calcular diferença
-                    const currentMapHeading = map.getHeading() || 0;
-                    const targetMapHeading = (360 - compassHeading) % 360; // Inverter para rotação correta
-                    let headingDiff = targetMapHeading - currentMapHeading;
-                    
-                    // Normalizar diferença
-                    if (headingDiff > 180) headingDiff -= 360;
-                    if (headingDiff < -180) headingDiff += 360;
-                    
-                    // Aplicar rotação se diferença > 5°
-                    if (Math.abs(headingDiff) > 5) {
-                        map.setHeading(targetMapHeading);
-                        console.log('🔄 ROTAÇÃO APLICADA:', {
-                            dispositivo: compassHeading.toFixed(1) + '°',
-                            mapa: targetMapHeading.toFixed(1) + '°',
-                            diferença: headingDiff.toFixed(1) + '°'
-                        });
+                    try {
+                        // Verificar se o mapa está realmente disponível
+                        const currentMapHeading = map.getHeading();
+                        const currentMapTilt = map.getTilt();
                         
-                        updateDebugIndicator(`🔄 Rot: ${compassHeading.toFixed(1)}° → Mapa: ${targetMapHeading.toFixed(1)}°`);
+                        addDebugLog(`Estado do mapa - Heading: ${currentMapHeading?.toFixed(1)}°, Tilt: ${currentMapTilt?.toFixed(1)}°`);
+                        
+                        // Calcular diferença
+                        const targetMapHeading = (360 - compassHeading) % 360; // Inverter para rotação correta
+                        let headingDiff = targetMapHeading - (currentMapHeading || 0);
+                        
+                        // Normalizar diferença
+                        if (headingDiff > 180) headingDiff -= 360;
+                        if (headingDiff < -180) headingDiff += 360;
+                        
+                        // Aplicar rotação se diferença > 3° (mais sensível)
+                        if (Math.abs(headingDiff) > 3) {
+                            addDebugLog(`🔄 TENTANDO ROTAÇÃO: ${compassHeading.toFixed(1)}° → ${targetMapHeading.toFixed(1)}°`);
+                            
+                            // Tentar aplicar rotação
+                            map.setHeading(targetMapHeading);
+                            
+                            // Verificar se funcionou
+                            setTimeout(() => {
+                                const newHeading = map.getHeading();
+                                addDebugLog(`✅ Resultado: ${newHeading?.toFixed(1)}° (esperado: ${targetMapHeading.toFixed(1)}°)`);
+                                
+                                if (Math.abs(newHeading - targetMapHeading) > 5) {
+                                    addDebugLog(`❌ ROTAÇÃO FALHOU! Diferença: ${Math.abs(newHeading - targetMapHeading).toFixed(1)}°`);
+                                } else {
+                                    addDebugLog(`✅ ROTAÇÃO BEM-SUCEDIDA!`);
+                                }
+                            }, 100);
+                        }
+                        
+                        // Atualizar status
+                        updateDebugStatus(`${debugInfo} | Mapa: ${(currentMapHeading || 0).toFixed(1)}° | Diff: ${headingDiff.toFixed(1)}°`);
+                        
+                        // Atualizar heading global
+                        currentHeading = compassHeading;
+                        
+                    } catch (error) {
+                        addDebugLog(`❌ ERRO no mapa: ${error.message}`);
+                        updateDebugStatus(`❌ Erro: ${error.message}`);
                     }
-                    
-                    // Atualizar heading global
-                    currentHeading = compassHeading;
+                } else {
+                    addDebugLog(`❌ Mapa não disponível!`);
+                    updateDebugStatus(`❌ Mapa null`);
                 }
+            } else {
+                addDebugLog(`❌ compassHeading inválido: ${compassHeading}`);
+                updateDebugStatus(`❌ Heading inválido`);
             }
         }
 
@@ -1924,6 +2085,45 @@
             
             window.location.href = 'service-details.html';
         }
+
+        // Funções globais para facilitar debug
+        window.showDebug = function() {
+            if (debugPanel) {
+                debugPanel.style.display = 'block';
+            }
+        };
+        
+        window.hideDebug = function() {
+            if (debugPanel) {
+                debugPanel.style.display = 'none';
+            }
+        };
+        
+        window.testRotation = function(degrees) {
+            if (map) {
+                addDebugLog(`🧪 TESTE MANUAL: Rotacionando para ${degrees}°`);
+                map.setHeading(degrees);
+                setTimeout(() => {
+                    const newHeading = map.getHeading();
+                    addDebugLog(`📊 Resultado do teste: ${newHeading?.toFixed(1)}°`);
+                }, 200);
+            }
+        };
+        
+        window.getMapInfo = function() {
+            if (map) {
+                const info = {
+                    heading: map.getHeading(),
+                    tilt: map.getTilt(),
+                    zoom: map.getZoom(),
+                    center: map.getCenter()?.toString(),
+                    mapTypeId: map.getMapTypeId()
+                };
+                addDebugLog(`📋 Info do mapa: ${JSON.stringify(info)}`);
+                return info;
+            }
+            return null;
+        };
 
         // Initialize on page load
         window.addEventListener('load', function() {
