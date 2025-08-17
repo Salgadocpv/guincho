@@ -179,6 +179,78 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Debug Box */
+        .debug-box {
+            position: fixed;
+            top: 80px;
+            right: 12px;
+            width: 300px;
+            max-height: 400px;
+            background: rgba(0,0,0,0.9);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            z-index: 200;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .debug-header {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .debug-content {
+            height: 350px;
+            overflow-y: auto;
+            padding: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .debug-controls {
+            padding: 8px 12px;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 8px;
+        }
+
+        .debug-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #666;
+            color: white;
+            padding: 4px 8px;
+            font-size: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .debug-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .debug-toggle {
+            background: none;
+            border: none;
+            color: #00ff00;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+
+        .debug-hidden {
+            display: none;
+        }
+
         /* Bottom Info Panel - Compact */
         .bottom-info {
             position: fixed;
@@ -433,6 +505,20 @@
         <div class="navigation-title">Navegando para destino</div>
         <div class="navigation-subtitle" id="navigationSubtitle">Siga as instruções do mapa</div>
         <div class="navigation-distance" id="navigationDistance">Calculando rota...</div>
+    </div>
+
+    <!-- Debug Box -->
+    <div class="debug-box" id="debugBox">
+        <div class="debug-header">
+            <span>🐛 Debug Console</span>
+            <button class="debug-toggle" onclick="toggleDebug()">−</button>
+        </div>
+        <div class="debug-content" id="debugContent"></div>
+        <div class="debug-controls">
+            <button class="debug-btn" onclick="clearDebug()">Limpar</button>
+            <button class="debug-btn" onclick="copyDebug()">Copiar</button>
+            <button class="debug-btn" onclick="exportDebug()">Exportar</button>
+        </div>
     </div>
 
     <!-- Bottom Info Panel -->
@@ -895,61 +981,214 @@
             }
         }
 
+        // Screen-visible debug logging for iPhone users
+        let screenLogs = [];
+        let screenLogContainer = null;
+        
+        function addToScreenLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            screenLogs.push(logEntry);
+            
+            // Manter apenas últimos 15 logs
+            if (screenLogs.length > 15) {
+                screenLogs.shift();
+            }
+            
+            // Garantir que o container existe
+            if (!screenLogContainer) {
+                createScreenLogContainer();
+            }
+            
+            // Atualizar display
+            if (screenLogContainer) {
+                screenLogContainer.innerHTML = screenLogs.map(log => `<div style="margin: 1px 0; font-size: 10px; word-wrap: break-word;">${log}</div>`).join('');
+                screenLogContainer.scrollTop = screenLogContainer.scrollHeight;
+            }
+            
+            // Também logar no console para compatibilidade
+            console.log('SCREEN_LOG:', message);
+        }
+        
+        function createScreenLogContainer() {
+            // Criar container fixo para logs visíveis
+            screenLogContainer = document.createElement('div');
+            screenLogContainer.id = 'screenLogContainer';
+            screenLogContainer.style.cssText = `
+                position: fixed;
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                background: rgba(0,0,0,0.9);
+                color: #00ff00;
+                padding: 8px;
+                font-size: 10px;
+                border-radius: 6px;
+                z-index: 250;
+                font-family: 'Courier New', monospace;
+                max-height: 120px;
+                overflow-y: auto;
+                border: 1px solid #00ff00;
+            `;
+            
+            // Adicionar cabeçalho
+            const header = document.createElement('div');
+            header.style.cssText = `
+                text-align: center;
+                color: #ffff00;
+                font-weight: bold;
+                margin-bottom: 4px;
+                font-size: 9px;
+            `;
+            header.innerHTML = '📱 DEBUG SCREEN LOG - iPhone';
+            screenLogContainer.appendChild(header);
+            
+            // Área de logs
+            const logArea = document.createElement('div');
+            logArea.id = 'screenLogArea';
+            screenLogContainer.appendChild(logArea);
+            
+            // Botão para copiar/ocultar
+            const controls = document.createElement('div');
+            controls.style.cssText = `
+                text-align: center;
+                margin-top: 4px;
+                border-top: 1px solid #333;
+                padding-top: 4px;
+            `;
+            controls.innerHTML = `
+                <button onclick="copyScreenLogs()" style="background: #007bff; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px; margin-right: 4px;">📋</button>
+                <button onclick="clearScreenLogs()" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px; margin-right: 4px;">🗑️</button>
+                <button onclick="toggleScreenLogs()" style="background: #6c757d; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px;">➖</button>
+            `;
+            screenLogContainer.appendChild(controls);
+            
+            document.body.appendChild(screenLogContainer);
+            addToScreenLog('✅ Screen log container criado');
+        }
+        
+        // Funções de controle dos logs na tela
+        window.copyScreenLogs = function() {
+            const logText = screenLogs.join('\n');
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(logText).then(() => {
+                    alert('📋 Logs copiados!');
+                }).catch(() => {
+                    showTextToCopy(logText);
+                });
+            } else {
+                showTextToCopy(logText);
+            }
+        };
+        
+        window.clearScreenLogs = function() {
+            screenLogs = [];
+            if (screenLogContainer) {
+                const logArea = screenLogContainer.querySelector('#screenLogArea');
+                if (logArea) logArea.innerHTML = '';
+            }
+            addToScreenLog('🗑️ Logs limpos');
+        };
+        
+        window.toggleScreenLogs = function() {
+            if (screenLogContainer) {
+                const isHidden = screenLogContainer.style.display === 'none';
+                screenLogContainer.style.display = isHidden ? 'block' : 'none';
+            }
+        };
+
         // Initialize navigation from URL parameters
         function initNavigation() {
-            console.log('🚀 initNavigation called!');
+            addToScreenLog('🚀 initNavigation called!');
             
             // Criar painel de debug PRIMEIRO
             createDebugIndicator();
             addDebugLog('🚀 Iniciando navegação...');
+            addToScreenLog('✅ Debug panel created');
+            
+            // Verificar se todas as APIs necessárias estão disponíveis
+            addDebugLog('🔍 Verificando APIs disponíveis...');
+            if (typeof google === 'undefined') {
+                addDebugLog('❌ Google Maps API não disponível');
+                return;
+            }
+            addDebugLog('✅ Google Maps API disponível');
+            
+            if (typeof navigator.geolocation === 'undefined') {
+                addDebugLog('❌ Geolocation API não disponível');
+            } else {
+                addDebugLog('✅ Geolocation API disponível');
+            }
             
             // Get parameters from URL
+            addDebugLog('📍 Obtendo parâmetros da URL...');
             console.log('📍 Getting URL parameters...');
             const urlParams = new URLSearchParams(window.location.search);
+            addDebugLog(`📍 URL search: ${window.location.search}`);
             
             // Parse origin coordinates
+            addDebugLog('📊 Parsing origin coordinates...');
             const originLat = parseFloat(urlParams.get('originLat'));
             const originLng = parseFloat(urlParams.get('originLng'));
+            addDebugLog(`📊 originLat: ${originLat}, originLng: ${originLng}`);
             
             // Safe decode addresses with fallback
+            addDebugLog('📊 Parsing origin address...');
             try {
                 originAddress = decodeURIComponent(urlParams.get('originAddress') || 'Origem');
+                addDebugLog(`📊 originAddress (decoded): ${originAddress}`);
             } catch (e) {
                 originAddress = urlParams.get('originAddress') || 'Origem';
+                addDebugLog(`📊 originAddress (fallback): ${originAddress}, error: ${e.message}`);
             }
             
             // Parse destination coordinates  
+            addDebugLog('📊 Parsing destination coordinates...');
             const destLat = parseFloat(urlParams.get('destLat'));
             const destLng = parseFloat(urlParams.get('destLng'));
+            addDebugLog(`📊 destLat: ${destLat}, destLng: ${destLng}`);
             
+            addDebugLog('📊 Parsing destination address...');
             try {
                 destinationAddress = decodeURIComponent(urlParams.get('destAddress') || 'Destino');
+                addDebugLog(`📊 destinationAddress (decoded): ${destinationAddress}`);
             } catch (e) {
                 destinationAddress = urlParams.get('destAddress') || 'Destino';
+                addDebugLog(`📊 destinationAddress (fallback): ${destinationAddress}, error: ${e.message}`);
             }
             
             // Validate parameters
+            addDebugLog('🔍 Validando parâmetros...');
             console.log('📊 URL Parameters:', { originLat, originLng, destLat, destLng, originAddress, destinationAddress });
             
             if (isNaN(originLat) || isNaN(originLng) || isNaN(destLat) || isNaN(destLng)) {
+                addDebugLog('❌ Parâmetros de navegação inválidos');
                 console.error('❌ Invalid navigation parameters');
                 alert('Parâmetros de navegação inválidos. Retornando...');
                 goBack();
                 return;
             }
             
+            addDebugLog('📍 Definindo localizações...');
             userLocation = { lat: originLat, lng: originLng };
             destinationLocation = { lat: destLat, lng: destLng };
+            addDebugLog(`📍 userLocation: ${JSON.stringify(userLocation)}`);
+            addDebugLog(`📍 destinationLocation: ${JSON.stringify(destinationLocation)}`);
             
             console.log('Navigation initialized:', { userLocation, destinationLocation });
             
             // Update page title with destination
+            addDebugLog('📝 Atualizando título da página...');
             const shortDestination = formatAddressForDisplay(destinationAddress);
             document.getElementById('navigationSubtitle').textContent = `Para: ${shortDestination}`;
+            addDebugLog(`📝 Título atualizado: ${shortDestination}`);
             
             // Initialize map with Vector map type for better 3D support in newer API versions
+            addDebugLog('🗺️ Criando instância do Google Maps...');
             console.log('🗺️ Creating Google Maps instance...');
-            map = new google.maps.Map(document.getElementById('map'), {
+            
+            try {
+                map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 20, // Higher zoom for better 3D effect
                 center: userLocation,
                 mapTypeId: 'satellite', // Satellite permite tilt/heading sempre
@@ -1045,34 +1284,53 @@
                 setTimeout(apply3DView, 1000);
             });
 
-            // Initialize directions service
-            directionsService = new google.maps.DirectionsService();
-            directionsRenderer = new google.maps.DirectionsRenderer({
-                suppressMarkers: true,
-                preserveViewport: true, // Prevent DirectionsRenderer from changing view
-                polylineOptions: {
-                    strokeColor: '#1E90FF',
-                    strokeWeight: 10,
-                    strokeOpacity: 1.0,
-                    zIndex: 200
-                }
-            });
-            
-            directionsRenderer.setMap(map);
-            
-            // Prevent DirectionsRenderer from resetting 3D view
-            google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
-                console.log('Directions changed, maintaining 3D view...');
-                setTimeout(() => {
-                    force3DViewMaintenance();
-                }, 200);
-            });
-            
-            // Hide loading and start navigation
-            document.getElementById('mapLoading').style.display = 'none';
-            
-            // Start navigation immediately
-            startNavigation();
+                addDebugLog('✅ Google Maps instância criada com sucesso');
+                
+                // Initialize directions service
+                addDebugLog('🗺️ Inicializando serviços de direção...');
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                    suppressMarkers: true,
+                    preserveViewport: true, // Prevent DirectionsRenderer from changing view
+                    polylineOptions: {
+                        strokeColor: '#1E90FF',
+                        strokeWeight: 10,
+                        strokeOpacity: 1.0,
+                        zIndex: 200
+                    }
+                });
+                addDebugLog('✅ DirectionsService e DirectionsRenderer criados');
+                
+                directionsRenderer.setMap(map);
+                addDebugLog('✅ DirectionsRenderer associado ao mapa');
+                
+                // Prevent DirectionsRenderer from resetting 3D view
+                google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
+                    addDebugLog('🗺️ Direções alteradas, mantendo vista 3D...');
+                    console.log('Directions changed, maintaining 3D view...');
+                    setTimeout(() => {
+                        force3DViewMaintenance();
+                    }, 200);
+                });
+                addDebugLog('✅ Event listener para direções configurado');
+                
+                // Hide loading and start navigation
+                addDebugLog('👁️ Ocultando tela de carregamento...');
+                document.getElementById('mapLoading').style.display = 'none';
+                addDebugLog('✅ Tela de carregamento ocultada');
+                
+                // Start navigation immediately
+                addDebugLog('🚀 Chamando startNavigation()...');
+                startNavigation();
+                
+            } catch (error) {
+                addDebugLog(`❌ ERRO ao criar mapa: ${error.message}`);
+                addDebugLog(`❌ Stack: ${error.stack}`);
+                console.error('❌ Error creating map:', error);
+                alert('Erro ao inicializar o mapa. Tente novamente.');
+                goBack();
+                return;
+            }
         }
 
         // Start navigation with route calculation
@@ -1356,12 +1614,19 @@
             const logEntry = `[${timestamp}] ${message}`;
             debugLogs.push(logEntry);
             
-            // Manter apenas últimos 20 logs
-            if (debugLogs.length > 20) {
+            // Manter apenas últimos 50 logs
+            if (debugLogs.length > 50) {
                 debugLogs.shift();
             }
             
-            // Atualizar display
+            // Atualizar display na caixa de debug
+            const debugContent = document.getElementById('debugContent');
+            if (debugContent) {
+                debugContent.textContent = debugLogs.join('\n');
+                debugContent.scrollTop = debugContent.scrollHeight;
+            }
+            
+            // Atualizar display antigo (se existir)
             const logsDiv = document.getElementById('debugLogs');
             if (logsDiv) {
                 logsDiv.innerHTML = debugLogs.map(log => `<div>${log}</div>`).join('');
@@ -1369,6 +1634,56 @@
             }
             
             console.log('DEBUG:', message);
+        }
+
+        // Funções de controle da caixa de debug
+        function toggleDebug() {
+            const debugBox = document.getElementById('debugBox');
+            const debugContent = debugBox.querySelector('.debug-content');
+            const debugControls = debugBox.querySelector('.debug-controls');
+            const toggleBtn = debugBox.querySelector('.debug-toggle');
+            
+            if (debugContent.style.display === 'none') {
+                debugContent.style.display = 'block';
+                debugControls.style.display = 'flex';
+                toggleBtn.textContent = '−';
+            } else {
+                debugContent.style.display = 'none';
+                debugControls.style.display = 'none';
+                toggleBtn.textContent = '+';
+            }
+        }
+
+        function clearDebug() {
+            debugLogs.length = 0;
+            const debugContent = document.getElementById('debugContent');
+            if (debugContent) {
+                debugContent.textContent = '';
+            }
+            addDebugLog('🧹 Debug limpo');
+        }
+
+        function copyDebug() {
+            const debugText = debugLogs.join('\n');
+            navigator.clipboard.writeText(debugText).then(() => {
+                addDebugLog('📋 Debug copiado para clipboard');
+            }).catch(err => {
+                addDebugLog('❌ Erro ao copiar: ' + err.message);
+            });
+        }
+
+        function exportDebug() {
+            const debugText = debugLogs.join('\n');
+            const blob = new Blob([debugText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `debug-navigation-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            addDebugLog('💾 Debug exportado para arquivo');
         }
         
         function updateDebugStatus(text) {
@@ -2253,15 +2568,53 @@
             return null;
         };
 
+        // Interceptar todos os erros JavaScript
+        window.onerror = function(message, source, lineno, colno, error) {
+            const errorMsg = `❌ JavaScript Error: ${message} at ${source}:${lineno}:${colno}`;
+            addDebugLog(errorMsg);
+            if (error && error.stack) {
+                addDebugLog(`Stack: ${error.stack}`);
+            }
+            return false;
+        };
+
+        // Interceptar promises rejeitadas
+        window.addEventListener('unhandledrejection', function(event) {
+            addDebugLog(`❌ Unhandled Promise Rejection: ${event.reason}`);
+            if (event.reason && event.reason.stack) {
+                addDebugLog(`Stack: ${event.reason.stack}`);
+            }
+        });
+
+        // Inicializar debug box imediatamente
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebugLog('🎯 DOM carregado, debug iniciado');
+        });
+
         // Initialize on page load
         window.addEventListener('load', function() {
+            addDebugLog('🔄 Página carregada, verificando Google Maps API...');
             console.log('🔄 Page loaded, checking Google Maps API...');
             
             // Check if initNavigation is defined
             if (typeof initNavigation === 'function') {
+                addDebugLog('✅ função initNavigation definida');
                 console.log('✅ initNavigation function is defined');
             } else {
+                addDebugLog('❌ função initNavigation NÃO definida!');
                 console.error('❌ initNavigation function not defined!');
+            }
+
+            // Verificar se Google está disponível
+            if (typeof google !== 'undefined') {
+                addDebugLog('✅ Google Maps API carregada');
+                if (typeof google.maps !== 'undefined') {
+                    addDebugLog('✅ google.maps disponível');
+                } else {
+                    addDebugLog('❌ google.maps NÃO disponível');
+                }
+            } else {
+                addDebugLog('❌ Google Maps API NÃO carregada');
             }
             
             // Fallback if Google Maps doesn't load
