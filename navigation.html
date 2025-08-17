@@ -422,7 +422,7 @@
             if (isMapRotationActive) {
                 // Deactivate rotation
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
-                map.setHeading(0); // Reset map to North-up
+                map.moveCamera({ heading: 0 }); // Reset map to North-up
                 isMapRotationActive = false;
                 compassBtn.classList.remove('active');
                 updateDebugInfo('rotation', 'Inactive');
