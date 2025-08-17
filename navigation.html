@@ -205,13 +205,21 @@
             max-width: calc(100% - 20px);
             line-height: 1.4;
         }
+        #debugPanel button {
+            background: #555;
+            color: white;
+            border: 1px solid #777;
+            padding: 4px 8px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
 
     </style>
 </head>
 <body>
     <!-- Debug Panel -->
     <div id="debugPanel">
-        <strong>Debug Info:</strong><br>
+        <strong>Debug Info:</strong> <button onclick="copyDebugInfo()">Copiar</button><br>
         <span id="debug-secure"></span><br>
         <span id="debug-rendering"></span><br>
         <span id="debug-permission"></span><br>
@@ -292,10 +300,28 @@
         let orientationEventCounter = 0;
         let mapDebugInterval = null;
 
-        // Debugging function
+        // Debugging functions
         function updateDebugInfo(id, value) {
             const el = document.getElementById(`debug-${id}`);
             if (el) el.textContent = `${id}: ${value}`;
+        }
+
+        function copyDebugInfo() {
+            const debugContent = [
+                document.getElementById('debug-secure').textContent,
+                document.getElementById('debug-rendering').textContent,
+                document.getElementById('debug-permission').textContent,
+                document.getElementById('debug-rotation').textContent,
+                document.getElementById('debug-counter').textContent,
+                document.getElementById('debug-sensor-heading').textContent,
+                document.getElementById('debug-map-heading').textContent,
+                document.getElementById('debug-gps').textContent
+            ].join('\n');
+            navigator.clipboard.writeText(debugContent).then(() => {
+                alert('Debug info copied to clipboard!');
+            }, () => {
+                alert('Failed to copy debug info.');
+            });
         }
 
         // Initialize navigation
@@ -334,10 +360,8 @@
                 ]
             });
 
-            // Listen for map idle event to get rendering type
             google.maps.event.addListenerOnce(map, 'idle', () => {
                 updateDebugInfo('rendering', map.getRenderingType());
-                // Start map state debugger
                 if (mapDebugInterval) clearInterval(mapDebugInterval);
                 mapDebugInterval = setInterval(() => {
                     updateDebugInfo('map-heading', map.getHeading()?.toFixed(2) || '0.00');
@@ -358,7 +382,6 @@
             startGpsTracking();
         }
 
-        // Start GPS tracking
         function startGpsTracking() {
             if (!navigator.geolocation) {
                 alert('GPS não suportado neste navegador.');
@@ -371,7 +394,6 @@
             );
         }
 
-        // Handle GPS updates - This is the main update loop
         function handleGpsUpdate(position) {
             userLocation = {
                 lat: position.coords.latitude,
@@ -382,7 +404,9 @@
             const speed = position.coords.speed ? (position.coords.speed * 3.6).toFixed(0) : 0;
             document.getElementById('currentSpeed').textContent = `${speed} km/h`;
 
-            if (!userMarker) {
+            const isFirstUpdate = !userMarker;
+
+            if (isFirstUpdate) {
                 document.getElementById('mapLoading').style.display = 'none';
                 document.getElementById('topInstructionPanel').style.display = 'block';
                 document.getElementById('bottomInfoPanel').style.display = 'block';
@@ -392,11 +416,16 @@
                 userMarker.setPosition(userLocation);
             }
 
-            const cameraOptions = { center: userLocation, zoom: map.getZoom() };
+            const cameraOptions = { center: userLocation, zoom: 18 }; // Use fixed zoom
             if (isMapRotationActive) {
                 cameraOptions.heading = currentMapHeading;
             }
-            map.moveCamera(cameraOptions);
+
+            if (isFirstUpdate) {
+                setTimeout(() => map.moveCamera(cameraOptions), 200); // Delay first camera move
+            } else {
+                map.moveCamera(cameraOptions);
+            }
             
             if (currentRoute) {
                 checkOffRoute();
@@ -426,7 +455,6 @@
             });
         }
 
-        // Compass and map rotation logic
         function toggleMapRotation() {
             if (!window.isSecureContext) {
                 alert('REQUISITO DE SEGURANÇA: Para ativar a bússola, esta página precisa ser acessada via HTTPS.');
@@ -483,7 +511,6 @@
             updateDebugInfo('sensor-heading', heading.toFixed(2));
         }
 
-        // Route calculation and updates
         function startNavigation() {
             const request = {
                 origin: userLocation,
@@ -587,20 +614,20 @@
         function testMapRotation() {
             const currentHeading = map.getHeading() || 0;
             const newHeading = (currentHeading + 90) % 360;
-            map.moveCamera({ heading: newHeading, tilt: 45 });
+            map.moveCamera({ heading: newHeading, tilt: 45, zoom: 18 });
             console.log(`Forcing rotation to ${newHeading} degrees`);
         }
 
         window.gm_authFailure = function() {
             console.error('❌ Google Maps API authentication failed');
-            document.getElementById('mapLoading').innerHTML = `
+            document.getElementById('mapLoading').innerHTML = '
                 <div style="color: white; text-align: center;">
                     <i class="fas fa-key" style="font-size: 2rem; margin-bottom: 1rem; color: #dc3545;"></i><br>
                     Erro de autenticação do mapa<br>
                     <small>Chave da API inválida ou expirada</small><br>
                     <button onclick="goBack()" style="margin-top: 1rem; padding: 10px 20px; background: #8a2be2; color: white; border: none; border-radius: 5px;">Voltar</button>
                 </div>
-            `;
+            ';
         };
     </script>
 </body>
