@@ -897,11 +897,14 @@
 
         // Initialize navigation from URL parameters
         function initNavigation() {
+            console.log('🚀 initNavigation called!');
+            
             // Criar painel de debug PRIMEIRO
             createDebugIndicator();
             addDebugLog('🚀 Iniciando navegação...');
             
             // Get parameters from URL
+            console.log('📍 Getting URL parameters...');
             const urlParams = new URLSearchParams(window.location.search);
             
             // Parse origin coordinates
@@ -926,7 +929,10 @@
             }
             
             // Validate parameters
+            console.log('📊 URL Parameters:', { originLat, originLng, destLat, destLng, originAddress, destinationAddress });
+            
             if (isNaN(originLat) || isNaN(originLng) || isNaN(destLat) || isNaN(destLng)) {
+                console.error('❌ Invalid navigation parameters');
                 alert('Parâmetros de navegação inválidos. Retornando...');
                 goBack();
                 return;
@@ -942,6 +948,7 @@
             document.getElementById('navigationSubtitle').textContent = `Para: ${shortDestination}`;
             
             // Initialize map with Vector map type for better 3D support in newer API versions
+            console.log('🗺️ Creating Google Maps instance...');
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 20, // Higher zoom for better 3D effect
                 center: userLocation,
@@ -2248,18 +2255,53 @@
 
         // Initialize on page load
         window.addEventListener('load', function() {
-            if (typeof google === 'undefined') {
-                setTimeout(() => {
+            console.log('🔄 Page loaded, checking Google Maps API...');
+            
+            // Check if initNavigation is defined
+            if (typeof initNavigation === 'function') {
+                console.log('✅ initNavigation function is defined');
+            } else {
+                console.error('❌ initNavigation function not defined!');
+            }
+            
+            // Fallback if Google Maps doesn't load
+            setTimeout(() => {
+                if (typeof google === 'undefined') {
+                    console.error('❌ Google Maps API failed to load');
                     document.getElementById('mapLoading').innerHTML = `
                         <div style="color: white; text-align: center;">
                             <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i><br>
                             Erro ao carregar mapa<br>
-                            <button onclick="goBack()" style="margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Voltar</button>
+                            <small>Verifique sua conexão com a internet</small><br>
+                            <button onclick="location.reload()" style="margin: 1rem 5px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px;">Tentar Novamente</button>
+                            <button onclick="goBack()" style="margin: 1rem 5px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Voltar</button>
                         </div>
                     `;
-                }, 2000);
-            }
+                } else if (!map) {
+                    console.error('❌ Google Maps API loaded but map not initialized');
+                    // Force manual initialization if callback failed
+                    try {
+                        console.log('🔄 Attempting manual initialization...');
+                        initNavigation();
+                    } catch (error) {
+                        console.error('❌ Manual initialization failed:', error);
+                    }
+                }
+            }, 5000);
         });
+        
+        // Handle Google Maps API authentication errors
+        window.gm_authFailure = function() {
+            console.error('❌ Google Maps API authentication failed');
+            document.getElementById('mapLoading').innerHTML = `
+                <div style="color: white; text-align: center;">
+                    <i class="fas fa-key" style="font-size: 2rem; margin-bottom: 1rem; color: #dc3545;"></i><br>
+                    Erro de autenticação do mapa<br>
+                    <small>Chave da API inválida ou expirada</small><br>
+                    <button onclick="goBack()" style="margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Voltar</button>
+                </div>
+            `;
+        };
     </script>
 </body>
 </html>
