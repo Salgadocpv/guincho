@@ -159,12 +159,12 @@
         }
 
         .fab {
-            background-color: #8a2be2;
+            background-color: #3d3d3d;
             color: white;
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            border: none;
+            border: 1px solid rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -175,10 +175,14 @@
         }
 
         .fab:hover {
-            background-color: #9932cc;
+            background-color: #4f4f4f;
             transform: scale(1.05);
         }
         
+        .fab.active {
+             background-color: #8a2be2;
+        }
+
         .fab.stop {
             background-color: #dc3545;
         }
@@ -234,6 +238,7 @@
     <div class="floating-buttons">
         <button class="fab stop" onclick="stopNavigation()"><i class="fas fa-stop"></i></button>
         <button class="fab" onclick="showReportMenu()"><i class="fas fa-bullhorn"></i></button>
+        <button class="fab" id="compassBtn" onclick="toggleMapRotation()"><i class="fas fa-compass"></i></button>
     </div>
 
     <!-- Google Maps API -->
@@ -252,6 +257,8 @@
         let locationWatcherId = null;
         let currentRoute = null;
         let lastRecalculationTime = 0;
+        let isMapRotationActive = false;
+        let compassPermissionGranted = false;
 
         // Initialize navigation
         function initNavigation() {
@@ -276,51 +283,15 @@
                     { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
                     { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
                     { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                    {
-                        featureType: "administrative.locality",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }],
-                    },
-                    {
-                        featureType: "poi",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "geometry",
-                        stylers: [{ color: "#38414e" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "geometry.stroke",
-                        stylers: [{ color: "#212a37" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#9ca5b3" }],
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "geometry",
-                        stylers: [{ color: "#746855" }],
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "geometry.stroke",
-                        stylers: [{ color: "#1f2835" }],
-                    },
-                    {
-                        featureType: "transit",
-                        elementType: "geometry",
-                        stylers: [{ color: "#2f3948" }],
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "geometry",
-                        stylers: [{ color: "#17263c" }],
-                    },
+                    { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                    { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                    { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+                    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+                    { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+                    { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+                    { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+                    { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
+                    { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
                 ]
             });
 
@@ -336,7 +307,6 @@
             directionsRenderer.setMap(map);
 
             startGpsTracking();
-            initializeCompass(); // Initialize compass for map rotation
         }
 
         // Start GPS tracking
@@ -345,7 +315,6 @@
                 alert('GPS não suportado neste navegador.');
                 return;
             }
-
             locationWatcherId = navigator.geolocation.watchPosition(
                 handleGpsUpdate,
                 handleGpsError,
@@ -364,18 +333,18 @@
             document.getElementById('currentSpeed').textContent = `${speed} km/h`;
 
             if (!userMarker) {
-                // First time getting location
                 document.getElementById('mapLoading').style.display = 'none';
                 document.getElementById('topInstructionPanel').style.display = 'block';
                 document.getElementById('bottomInfoPanel').style.display = 'block';
-                
                 createUserMarker();
                 startNavigation();
             } else {
                 userMarker.setPosition(userLocation);
             }
 
-            map.setCenter(userLocation);
+            if (!isMapRotationActive) {
+                map.setCenter(userLocation);
+            }
             
             if (currentRoute) {
                 checkOffRoute();
@@ -383,17 +352,12 @@
             }
         }
 
-        // Handle GPS errors
         function handleGpsError(error) {
             console.error('GPS Error: ' + error.message);
-            // Optionally show a message to the user
         }
 
-        // Create the user marker
         function createUserMarker() {
-            if (userMarker) {
-                userMarker.setMap(null);
-            }
+            if (userMarker) userMarker.setMap(null);
             userMarker = new google.maps.Marker({
                 position: userLocation,
                 map: map,
@@ -404,43 +368,59 @@
                     fillOpacity: 1.0,
                     strokeColor: '#FFFFFF',
                     strokeWeight: 2,
-                    rotation: 0 // Arrow always points up relative to the screen
+                    rotation: 0
                 },
                 zIndex: 1000
             });
         }
 
-        // Initialize compass for device orientation
-        function initializeCompass() {
-            if ('DeviceOrientationEvent' in window) {
-                // iOS 13+ requires user permission
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // Compass and map rotation logic
+        function toggleMapRotation() {
+            const compassBtn = document.getElementById('compassBtn');
+            if (isMapRotationActive) {
+                // Deactivate rotation
+                window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
+                map.setHeading(0);
+                isMapRotationActive = false;
+                compassBtn.classList.remove('active');
+            } else {
+                // Activate rotation
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    // iOS 13+ permission model
                     DeviceOrientationEvent.requestPermission()
                         .then(response => {
                             if (response === 'granted') {
                                 window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                                isMapRotationActive = true;
+                                compassBtn.classList.add('active');
+                            } else {
+                                alert('Permissão para sensor de orientação negada.');
                             }
                         })
-                        .catch(console.error);
+                        .catch(() => alert('Não foi possível ativar a bússola.'));
                 } else {
-                    // Non-iOS 13+ devices
+                    // Standard devices
                     window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                    isMapRotationActive = true;
+                    compassBtn.classList.add('active');
                 }
             }
         }
 
-        // Handle device orientation changes to rotate the map
         function handleDeviceOrientation(event) {
+            let heading = event.alpha;
             if (event.webkitCompassHeading) {
                 // iOS
-                map.setHeading(event.webkitCompassHeading);
-            } else if (event.alpha) {
+                heading = event.webkitCompassHeading;
+            } else {
                 // Android
-                map.setHeading(360 - event.alpha);
+                heading = 360 - event.alpha;
             }
+            map.setHeading(heading);
+            map.setCenter(userLocation); // Keep user centered while rotating
         }
 
-        // Calculate initial route
+        // Route calculation and updates
         function startNavigation() {
             const request = {
                 origin: userLocation,
@@ -449,7 +429,7 @@
                 unitSystem: google.maps.UnitSystem.METRIC
             };
 
-            directionsService.route(request, function(result, status) {
+            directionsService.route(request, (result, status) => {
                 if (status === 'OK') {
                     currentRoute = result;
                     directionsRenderer.setDirections(result);
@@ -461,66 +441,53 @@
             });
         }
 
-        // Check if user is off-route
         function checkOffRoute() {
             const now = Date.now();
-            if (now - lastRecalculationTime < 10000) return; // Avoid frequent recalculations
+            if (now - lastRecalculationTime < 10000) return;
 
-            const routePolyline = new google.maps.Polyline({
-                path: currentRoute.routes[0].overview_path
-            });
+            const routePolyline = new google.maps.Polyline({ path: currentRoute.routes[0].overview_path });
 
             if (!google.maps.geometry.poly.isLocationOnEdge(userLocation, routePolyline, 1e-4)) {
                 lastRecalculationTime = now;
                 document.getElementById('instructionText').textContent = "Recalculando rota...";
-                startNavigation(); // Recalculate route
+                startNavigation();
             }
         }
 
-        // Update UI with new route info
         function updateUiWithNewRoute() {
             const leg = currentRoute.routes[0].legs[0];
             document.getElementById('remainingDistance').textContent = leg.distance.text;
             document.getElementById('remainingTime').textContent = leg.duration.text;
             
             const arrivalTime = new Date(Date.now() + leg.duration.value * 1000);
-            document.getElementById('arrivalTime').textContent = arrivalTime.toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            document.getElementById('arrivalTime').textContent = arrivalTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
             updateRemainingRouteInfo();
         }
         
-        // Update remaining distance, time, and current instruction
         function updateRemainingRouteInfo() {
             if (!currentRoute) return;
 
             const leg = currentRoute.routes[0].legs[0];
-            let distanceToNextStep = Infinity;
             let nextStep = leg.steps[0];
 
-            // Find the current step based on user's location
-            for (let i = 0; i < leg.steps.length; i++) {
+            // Find the current step the user is on
+            for (let i = 0; i < leg.steps.length - 1; i++) {
                 const stepPolyline = new google.maps.Polyline({ path: leg.steps[i].path });
-                const distance = google.maps.geometry.spherical.computeDistanceBetween(userLocation, leg.steps[i].start_location);
-                
-                if (distance < distanceToNextStep) {
-                    distanceToNextStep = distance;
-                    nextStep = leg.steps[i];
+                if (google.maps.geometry.poly.isLocationOnEdge(userLocation, stepPolyline, 1e-4)) {
+                    nextStep = leg.steps[i+1] || leg.steps[i];
+                    break;
                 }
             }
             
-            // Update instruction panel
             document.getElementById('instructionText').innerHTML = nextStep.instructions;
             document.getElementById('instructionDistance').textContent = `em ${nextStep.distance.text}`;
             updateInstructionIcon(nextStep.maneuver);
         }
 
-        // Update instruction icon based on maneuver
         function updateInstructionIcon(maneuver) {
             const iconEl = document.getElementById('instructionIcon');
-            let iconClass = 'fas fa-arrow-up'; // Default
+            let iconClass = 'fas fa-arrow-up';
             switch (maneuver) {
                 case 'turn-left': iconClass = 'fas fa-turn-left'; break;
                 case 'turn-right': iconClass = 'fas fa-turn-right'; break;
@@ -544,19 +511,16 @@
 
         function stopNavigation() {
             if (confirm('Deseja parar a navegação?')) {
-                if (locationWatcherId) {
-                    navigator.geolocation.clearWatch(locationWatcherId);
-                }
+                if (locationWatcherId) navigator.geolocation.clearWatch(locationWatcherId);
+                window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
                 goBack();
             }
         }
         
         function showReportMenu() {
-            // Placeholder for Waze-like reporting feature
             alert('Função de reportar ainda não implementada.');
         }
 
-        // Handle Google Maps API authentication errors
         window.gm_authFailure = function() {
             console.error('❌ Google Maps API authentication failed');
             document.getElementById('mapLoading').innerHTML = `
