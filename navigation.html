@@ -945,8 +945,8 @@
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 20, // Higher zoom for better 3D effect
                 center: userLocation,
-                mapTypeId: 'roadmap',
-                mapId: 'DEMO_MAP_ID', // Required for advanced features
+                mapTypeId: 'satellite', // Satellite permite tilt/heading sempre
+                // mapId removido - ID inválido impede 3D
                 tilt: 45, // Revertido para 45 graus - 60 corta o mapa
                 heading: currentHeading,
                 disableDefaultUI: true,
@@ -1589,10 +1589,24 @@
                         if (Math.abs(headingDiff) > 3) {
                             addDebugLog(`🔄 TENTANDO ROTAÇÃO: ${compassHeading.toFixed(1)}° → ${targetMapHeading.toFixed(1)}°`);
                             
-                            // FORÇAR TILT PRIMEIRO - map.setHeading() só funciona com tilt > 0
+                            // FORÇAR TILT E MAPTYPE - necessário para rotação
                             if (currentMapTilt < 10) {
-                                addDebugLog(`⚠️ Tilt muito baixo (${currentMapTilt}°), forçando para 45°`);
+                                addDebugLog(`⚠️ Tilt muito baixo (${currentMapTilt}°), forçando configuração 3D`);
+                                
+                                // Garantir que está em satellite para permitir 3D
+                                if (map.getMapTypeId() !== 'satellite') {
+                                    addDebugLog('🗺️ Mudando para satellite para permitir 3D');
+                                    map.setMapTypeId('satellite');
+                                }
+                                
+                                // Forçar tilt
                                 map.setTilt(45);
+                                
+                                // Aguardar aplicação
+                                setTimeout(() => {
+                                    const newTilt = map.getTilt();
+                                    addDebugLog(`📊 Tilt após forçar: ${newTilt}°`);
+                                }, 200);
                             }
                             
                             // Tentar aplicar rotação
