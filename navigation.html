@@ -32,7 +32,6 @@
             z-index: 1;
             transition: transform 0.2s linear;
             overflow: hidden;
-            transform: rotateX(45deg);
             transform-style: preserve-3d;
             perspective: 1000px;
         }
@@ -341,6 +340,12 @@
 
             map.setCenter(userLocation);
 
+            // Apply default 45° tilt when compass is not active
+            if (!isMapRotationActive) {
+                const mapContainer = document.querySelector('.map-container');
+                mapContainer.style.transform = 'rotateX(45deg)';
+            }
+
             if (isMapRotationActive) {
                 const mapContainer = document.querySelector('.map-container');
                 
@@ -356,7 +361,9 @@
                     }, 50);
                 }
                 
-                mapContainer.style.transform = `rotateX(45deg) rotate(${360 - normalizedHeading}deg)`;
+                // Apply 45° tilt in the direction of movement
+                // First rotate to align direction, then apply tilt forward
+                mapContainer.style.transform = `rotateZ(${360 - normalizedHeading}deg) rotateX(45deg)`;
                 
                 const markerIcon = userMarker.getIcon();
                 markerIcon.rotation = normalizedHeading;
