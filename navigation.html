@@ -32,6 +32,9 @@
             z-index: 1;
             transition: transform 0.2s linear;
             overflow: hidden;
+            transform: rotateX(45deg);
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
 
         /* The map div itself fills the oversized container */
@@ -339,7 +342,7 @@
 
             if (isMapRotationActive) {
                 const mapContainer = document.querySelector('.map-container');
-                mapContainer.style.transform = `rotate(${360 - currentMapHeading}deg)`;
+                mapContainer.style.transform = `rotateX(45deg) rotate(${360 - currentMapHeading}deg)`;
                 
                 const markerIcon = userMarker.getIcon();
                 markerIcon.rotation = currentMapHeading;
@@ -388,7 +391,7 @@
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
                 isMapRotationActive = false;
                 compassBtn.classList.remove('active');
-                mapContainer.style.transform = 'rotate(0deg)';
+                mapContainer.style.transform = 'rotateX(45deg)';
                 const markerIcon = userMarker.getIcon();
                 markerIcon.rotation = 0;
                 userMarker.setIcon(markerIcon);
