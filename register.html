@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Cadastro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Iguincho">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #007bff 0%, #495057 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Subtle background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.05) 0%, transparent 40%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.03) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+            box-sizing: border-box;
+        }
+
+        /* Header Section */
+        .register-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            padding: 8px;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            color: white;
+            transform: translateX(-2px);
+        }
+
+        .app-logo {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .app-title {
+            font-size: 1.8rem;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .app-subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        /* Form Section */
+        .register-form {
+            width: 100%;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-group.half {
+            display: inline-block;
+            width: calc(50% - 8px);
+            margin-right: 16px;
+        }
+
+        .form-group.half:last-child {
+            margin-right: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 0;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            font-size: 1rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-bottom-color: white;
+            background: transparent;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .form-input:focus + .form-label {
+            color: white;
+        }
+
+        /* Select styling */
+        .form-select {
+            width: 100%;
+            padding: 16px 0;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-bottom-color: white;
+        }
+
+        .form-select option {
+            background: #495057;
+            color: white;
+        }
+
+        /* Password Toggle */
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: white;
+        }
+
+        /* Terms and Privacy */
+        .terms-group {
+            margin-bottom: 32px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .custom-checkbox.checked {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
+
+        .custom-checkbox.checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 6px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 1px 1px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-label {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.4;
+        }
+
+        .checkbox-label a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: none;
+        }
+
+        /* Submit Button */
+        .submit-button {
+            width: 100%;
+            padding: 18px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Login Link */
+        .login-link {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Loading state */
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+            .register-container {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+            
+            .form-group.half {
+                width: 100%;
+                margin-right: 0;
+            }
+            
+            .app-title {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* Error states */
+        .form-input.error {
+            border-bottom-color: #ff6b6b;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+
+    <div class="register-container">
+        <!-- Header Section -->
+        <div class="register-header">
+            <div class="app-logo">
+                <i class="fas fa-car"></i>
+            </div>
+            <div class="app-title">Criar Conta</div>
+            <div class="app-subtitle">Cadastre-se no Iguincho</div>
+        </div>
+
+        <!-- Form Section -->
+        <form class="register-form" id="registerForm">
+            <!-- Personal Information -->
+            <div class="form-section">
+                <div class="section-title">Dados Pessoais</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" class="form-input" id="fullName" name="fullName" placeholder="Seu nome completo" required>
+                    <div class="error-message" id="fullNameError">Por favor, insira seu nome completo</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">CPF</label>
+                    <input type="text" class="form-input" id="cpf" name="cpf" placeholder="000.000.000-00" required>
+                    <div class="error-message" id="cpfError">CPF inválido</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Data de Nascimento</label>
+                    <input type="date" class="form-input" id="birthDate" name="birthDate" required>
+                    <div class="error-message" id="birthDateError">Data inválida</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Telefone</label>
+                    <input type="tel" class="form-input" id="phone" name="phone" placeholder="(11) 99999-9999" required>
+                    <div class="error-message" id="phoneError">Telefone inválido</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">WhatsApp</label>
+                    <input type="tel" class="form-input" id="whatsapp" name="whatsapp" placeholder="(11) 99999-9999">
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="form-section">
+                <div class="section-title">Contato e Acesso</div>
+                
+                <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <input type="email" class="form-input" id="email" name="email" placeholder="seu@email.com" required>
+                    <div class="error-message" id="emailError">E-mail inválido</div>
+                </div>
+
+                <div class="form-group password-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-input" id="password" name="password" placeholder="Mínimo 6 caracteres" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <i class="fas fa-eye" id="passwordIcon"></i>
+                    </button>
+                    <div class="error-message" id="passwordError">Senha deve ter no mínimo 6 caracteres</div>
+                </div>
+
+                <div class="form-group password-group">
+                    <label class="form-label">Confirmar Senha</label>
+                    <input type="password" class="form-input" id="confirmPassword" name="confirmPassword" placeholder="Repita sua senha" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                        <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                    </button>
+                    <div class="error-message" id="confirmPasswordError">Senhas não conferem</div>
+                </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div class="form-section">
+                <div class="section-title">Informações do Veículo</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Placa do Veículo</label>
+                    <input type="text" class="form-input" id="licensePlate" name="licensePlate" placeholder="ABC-1234" required>
+                    <div class="error-message" id="licensePlateError">Placa inválida</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Marca</label>
+                    <select class="form-select" id="vehicleBrand" name="vehicleBrand" required>
+                        <option value="">Selecione a marca</option>
+                        <option value="volkswagen">Volkswagen</option>
+                        <option value="chevrolet">Chevrolet</option>
+                        <option value="ford">Ford</option>
+                        <option value="fiat">Fiat</option>
+                        <option value="toyota">Toyota</option>
+                        <option value="honda">Honda</option>
+                        <option value="hyundai">Hyundai</option>
+                        <option value="nissan">Nissan</option>
+                        <option value="renault">Renault</option>
+                        <option value="peugeot">Peugeot</option>
+                        <option value="bmw">BMW</option>
+                        <option value="mercedes">Mercedes-Benz</option>
+                        <option value="audi">Audi</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                    <div class="error-message" id="vehicleBrandError">Selecione uma marca</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Modelo</label>
+                    <input type="text" class="form-input" id="vehicleModel" name="vehicleModel" placeholder="Ex: Gol, Corolla" required>
+                    <div class="error-message" id="vehicleModelError">Informe o modelo</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Ano</label>
+                    <input type="number" class="form-input" id="vehicleYear" name="vehicleYear" placeholder="2020" min="1980" max="2025" required>
+                    <div class="error-message" id="vehicleYearError">Ano inválido</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Cor</label>
+                    <select class="form-select" id="vehicleColor" name="vehicleColor" required>
+                        <option value="">Selecione a cor</option>
+                        <option value="branco">Branco</option>
+                        <option value="preto">Preto</option>
+                        <option value="prata">Prata</option>
+                        <option value="cinza">Cinza</option>
+                        <option value="azul">Azul</option>
+                        <option value="vermelho">Vermelho</option>
+                        <option value="verde">Verde</option>
+                        <option value="amarelo">Amarelo</option>
+                        <option value="bege">Bege</option>
+                        <option value="marrom">Marrom</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                    <div class="error-message" id="vehicleColorError">Selecione uma cor</div>
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="terms-group">
+                <div class="checkbox-group" onclick="toggleCheckbox('termsAccepted')">
+                    <div class="custom-checkbox" id="termsAccepted"></div>
+                    <label class="checkbox-label">
+                        Aceito os <a href="#" onclick="showTerms(event)">Termos de Uso</a> e a <a href="#" onclick="showPrivacy(event)">Política de Privacidade</a>
+                    </label>
+                </div>
+
+                <div class="checkbox-group" onclick="toggleCheckbox('marketingAccepted')">
+                    <div class="custom-checkbox" id="marketingAccepted"></div>
+                    <label class="checkbox-label">
+                        Aceito receber notificações sobre promoções e novidades
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-button" id="submitButton" disabled>
+                <span class="submit-text">Criar Conta</span>
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <span>Criando conta...</span>
+                </div>
+            </button>
+
+            <!-- Login Link -->
+            <div class="login-link">
+                Já tem uma conta? <a href="index.html">Entrar</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Form validation and functionality
+        let isFormValid = false;
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFormValidation();
+            setupMasks();
+        });
+
+        // Setup input masks
+        function setupMasks() {
+            // CPF mask
+            document.getElementById('cpf').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = value;
+            });
+
+            // Phone masks
+            ['phone', 'whatsapp'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                    value = value.replace(/(\d{4,5})(\d{4})$/, '$1-$2');
+                    e.target.value = value;
+                });
+            });
+
+            // License plate mask
+            document.getElementById('licensePlate').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                if (value.length > 3) {
+                    value = value.replace(/(\w{3})(\w)/, '$1-$2');
+                }
+                e.target.value = value;
+            });
+        }
+
+        // Setup form validation
+        function setupFormValidation() {
+            const form = document.getElementById('registerForm');
+            const submitButton = document.getElementById('submitButton');
+
+            // Add event listeners to all inputs
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', validateForm);
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (validateForm() && document.getElementById('termsAccepted').classList.contains('checked')) {
+                    submitForm();
+                }
+            });
+        }
+
+        // Validate individual field
+        function validateField(field) {
+            const value = field.value.trim();
+            const fieldName = field.name;
+            let isValid = true;
+            let errorMessage = '';
+
+            switch (fieldName) {
+                case 'fullName':
+                    isValid = value.length >= 3 && value.includes(' ');
+                    errorMessage = 'Por favor, insira seu nome completo';
+                    break;
+                
+                case 'cpf':
+                    isValid = validateCPF(value);
+                    errorMessage = 'CPF inválido';
+                    break;
+                
+                case 'email':
+                    isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                    errorMessage = 'E-mail inválido';
+                    break;
+                
+                case 'password':
+                    isValid = value.length >= 6;
+                    errorMessage = 'Senha deve ter no mínimo 6 caracteres';
+                    break;
+                
+                case 'confirmPassword':
+                    isValid = value === document.getElementById('password').value;
+                    errorMessage = 'Senhas não conferem';
+                    break;
+                
+                case 'phone':
+                    isValid = value.replace(/\D/g, '').length >= 10;
+                    errorMessage = 'Telefone inválido';
+                    break;
+                
+                case 'licensePlate':
+                    isValid = /^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$/.test(value.replace('-', ''));
+                    errorMessage = 'Placa inválida';
+                    break;
+                
+                case 'vehicleYear':
+                    const year = parseInt(value);
+                    isValid = year >= 1980 && year <= 2025;
+                    errorMessage = 'Ano inválido';
+                    break;
+                
+                default:
+                    isValid = value.length > 0;
+                    errorMessage = 'Campo obrigatório';
+            }
+
+            // Show/hide error
+            const errorElement = document.getElementById(fieldName + 'Error');
+            if (errorElement) {
+                if (isValid) {
+                    field.classList.remove('error');
+                    errorElement.style.display = 'none';
+                } else {
+                    field.classList.add('error');
+                    errorElement.textContent = errorMessage;
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            return isValid;
+        }
+
+        // Validate entire form
+        function validateForm() {
+            const form = document.getElementById('registerForm');
+            const requiredInputs = form.querySelectorAll('input[required], select[required]');
+            let allValid = true;
+
+            requiredInputs.forEach(input => {
+                if (!validateField(input)) {
+                    allValid = false;
+                }
+            });
+
+            // Check if terms are accepted
+            const termsAccepted = document.getElementById('termsAccepted').classList.contains('checked');
+            
+            isFormValid = allValid && termsAccepted;
+            document.getElementById('submitButton').disabled = !isFormValid;
+            
+            return isFormValid;
+        }
+
+        // CPF validation
+        function validateCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+            
+            let sum = 0;
+            for (let i = 0; i < 9; i++) {
+                sum += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            let remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            if (remainder !== parseInt(cpf.charAt(9))) return false;
+            
+            sum = 0;
+            for (let i = 0; i < 10; i++) {
+                sum += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            return remainder === parseInt(cpf.charAt(10));
+        }
+
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + 'Icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Toggle checkbox
+        function toggleCheckbox(checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            checkbox.classList.toggle('checked');
+            validateForm();
+        }
+
+        // Submit form
+        function submitForm() {
+            const submitButton = document.getElementById('submitButton');
+            const submitText = submitButton.querySelector('.submit-text');
+            const loading = submitButton.querySelector('.loading');
+            
+            // Show loading state
+            submitText.style.display = 'none';
+            loading.style.display = 'flex';
+            submitButton.disabled = true;
+            
+            // Collect form data
+            const formData = new FormData(document.getElementById('registerForm'));
+            const userData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                userData[key] = value;
+            }
+            
+            // Add checkbox states
+            userData.termsAccepted = document.getElementById('termsAccepted').classList.contains('checked');
+            userData.marketingAccepted = document.getElementById('marketingAccepted').classList.contains('checked');
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Store user data (in real app, send to backend)
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Redirect to services page
+                window.location.href = 'services.html';
+            }, 2000);
+        }
+
+        // Show terms modal (placeholder)
+        function showTerms(event) {
+            event.preventDefault();
+            alert('Termos de Uso:\n\nEsta é uma versão de demonstração. Em um app real, aqui seria exibido o documento completo dos termos de uso.');
+        }
+
+        // Show privacy modal (placeholder)
+        function showPrivacy(event) {
+            event.preventDefault();
+            alert('Política de Privacidade:\n\nEsta é uma versão de demonstração. Em um app real, aqui seria exibida a política completa de privacidade.');
+        }
+
+        // Go back to login
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
