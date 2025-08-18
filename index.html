@@ -317,27 +317,51 @@
             font-size: 1.1rem;
         }
 
-        /* Register Link */
-        .register-link {
-            text-align: center;
-            margin-top: 32px;
+        /* Form Container */
+        .form-container {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
 
-        .register-link span {
-            color: rgba(255,255,255,0.6);
-            font-size: 0.9rem;
-        }
-
-        .register-link a {
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            font-weight: 400;
-            margin-left: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .register-link a:hover {
+        /* Register Button */
+        .register-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
             color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 16px rgba(40,167,69,0.3);
+        }
+
+        .register-btn:hover {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40,167,69,0.4);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .register-btn i {
+            font-size: 1.2rem;
         }
 
         /* Security Features */
@@ -587,45 +611,46 @@
             <p class="app-subtitle">Socorro automotivo 24/7</p>
         </div>
 
-        <!-- Login Form -->
-        <form class="login-form" onsubmit="handleLogin(event)">
-            <!-- Email/Phone Input -->
-            <div class="form-group">
-                <label for="email" class="form-label">Email ou Telefone</label>
-                <input 
-                    type="text" 
-                    id="email" 
-                    class="form-input" 
-                    placeholder="seu@email.com ou (11) 99999-9999"
-                    required
-                    autocomplete="username"
-                    aria-describedby="email-help"
-                >
-            </div>
-
-            <!-- Password Input -->
-            <div class="form-group">
-                <label for="password" class="form-label">Senha</label>
-                <div class="password-group">
+        <!-- Login Form Container -->
+        <div class="form-container">
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <!-- Email/Phone Input -->
+                <div class="form-group">
+                    <label for="email" class="form-label">Email ou Telefone</label>
                     <input 
-                        type="password" 
-                        id="password" 
+                        type="text" 
+                        id="email" 
                         class="form-input" 
-                        placeholder="Digite sua senha"
+                        placeholder="seu@email.com ou (11) 99999-9999"
                         required
-                        autocomplete="current-password"
-                        aria-describedby="password-help"
+                        autocomplete="username"
+                        aria-describedby="email-help"
                     >
-                    <button 
-                        type="button" 
-                        class="password-toggle" 
-                        onclick="togglePassword()"
-                        aria-label="Mostrar/ocultar senha"
-                    >
-                        <i class="fas fa-eye"></i>
-                    </button>
                 </div>
-            </div>
+
+                <!-- Password Input -->
+                <div class="form-group">
+                    <label for="password" class="form-label">Senha</label>
+                    <div class="password-group">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-input" 
+                            placeholder="Digite sua senha"
+                            required
+                            autocomplete="current-password"
+                            aria-describedby="password-help"
+                        >
+                        <button 
+                            type="button" 
+                            class="password-toggle" 
+                            onclick="togglePassword()"
+                            aria-label="Mostrar/ocultar senha"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
 
             <!-- Form Options -->
@@ -646,10 +671,12 @@
         </form>
 
         <!-- Install App Button -->
-        <button class="install-app" id="installBtn" onclick="installApp()">
-            <i class="fas fa-download"></i>
-            Instalar App
-        </button>
+                <button class="install-app" id="installBtn" onclick="installApp()">
+                    <i class="fas fa-download"></i>
+                    Instalar App
+                </button>
+            </form>
+        </div>
 
         <!-- Divider -->
         <div class="divider">
@@ -663,11 +690,11 @@
             </button>
         </div>
 
-        <!-- Register Link -->
-        <div class="register-link">
-            <span>Não tem uma conta?</span>
-            <a href="#" onclick="goToRegister()">Cadastre-se</a>
-        </div>
+        <!-- Register Button -->
+        <button class="register-btn" onclick="goToRegister()">
+            <i class="fas fa-user-plus"></i>
+            Criar Nova Conta
+        </button>
 
         <!-- Security Info -->
         <div class="security-info">
@@ -742,7 +769,7 @@
 
         // Go to Register
         function goToRegister() {
-            alert('Redirecionando para cadastro...');
+            window.location.href = 'register.html';
         }
 
         // Loading Management
