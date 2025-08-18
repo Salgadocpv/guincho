@@ -259,6 +259,7 @@
         let lastRecalculationTime = 0;
         let isMapRotationActive = false;
         let currentMapHeading = 0;
+        let previousMapHeading = 0;
         let remainingRoutePolyline = null;
         let completedRoutePolyline = null;
 
@@ -342,11 +343,26 @@
 
             if (isMapRotationActive) {
                 const mapContainer = document.querySelector('.map-container');
-                mapContainer.style.transform = `rotateX(45deg) rotate(${360 - currentMapHeading}deg)`;
+                
+                // Normalize heading and prevent 360° jumps
+                const normalizedHeading = normalizeHeading(currentMapHeading, previousMapHeading);
+                
+                // Temporarily disable transition for large angle changes
+                const angleDiff = Math.abs(normalizedHeading - previousMapHeading);
+                if (angleDiff > 180) {
+                    mapContainer.style.transition = 'none';
+                    setTimeout(() => {
+                        mapContainer.style.transition = 'transform 0.2s linear';
+                    }, 50);
+                }
+                
+                mapContainer.style.transform = `rotateX(45deg) rotate(${360 - normalizedHeading}deg)`;
                 
                 const markerIcon = userMarker.getIcon();
-                markerIcon.rotation = currentMapHeading;
+                markerIcon.rotation = normalizedHeading;
                 userMarker.setIcon(markerIcon);
+                
+                previousMapHeading = normalizedHeading;
             }
             
             if (currentRoute) {
@@ -395,6 +411,9 @@
                 const markerIcon = userMarker.getIcon();
                 markerIcon.rotation = 0;
                 userMarker.setIcon(markerIcon);
+                // Reset heading tracking
+                currentMapHeading = 0;
+                previousMapHeading = 0;
             } else {
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
@@ -625,6 +644,26 @@
             isMapRotationActive = true;
             compassBtn.classList.add('active');
             console.log('Compass navigation activated automatically');
+        }
+
+        // Normalize heading to prevent 360° jumps
+        function normalizeHeading(newHeading, previousHeading) {
+            // Ensure values are between 0 and 360
+            newHeading = newHeading % 360;
+            if (newHeading < 0) newHeading += 360;
+            
+            previousHeading = previousHeading % 360;
+            if (previousHeading < 0) previousHeading += 360;
+            
+            // Calculate the difference
+            let diff = newHeading - previousHeading;
+            
+            // Normalize the difference to be between -180 and 180
+            while (diff > 180) diff -= 360;
+            while (diff < -180) diff += 360;
+            
+            // Return the smoothed heading
+            return previousHeading + diff;
         }
 
         // Navigation controls
