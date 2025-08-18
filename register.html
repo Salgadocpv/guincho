@@ -455,21 +455,36 @@
 
                 <div class="form-group half">
                     <label class="form-label">Marca</label>
-                    <select class="form-select" id="vehicleBrand" name="vehicleBrand" required>
+                    <select class="form-select" id="vehicleBrand" name="vehicleBrand" required onchange="updateModels()">
                         <option value="">Selecione a marca</option>
-                        <option value="volkswagen">Volkswagen</option>
+                        <option value="audi">Audi</option>
+                        <option value="bmw">BMW</option>
+                        <option value="byd">BYD</option>
+                        <option value="caoa_chery">CAOA Chery</option>
                         <option value="chevrolet">Chevrolet</option>
-                        <option value="ford">Ford</option>
+                        <option value="citroen">Citroën</option>
                         <option value="fiat">Fiat</option>
-                        <option value="toyota">Toyota</option>
+                        <option value="ford">Ford</option>
+                        <option value="gwm">GWM</option>
                         <option value="honda">Honda</option>
                         <option value="hyundai">Hyundai</option>
+                        <option value="jac_motors">JAC Motors</option>
+                        <option value="jeep">Jeep</option>
+                        <option value="kia">Kia</option>
+                        <option value="land_rover">Land Rover</option>
+                        <option value="lexus">Lexus</option>
+                        <option value="mercedes_benz">Mercedes-Benz</option>
+                        <option value="mitsubishi">Mitsubishi</option>
                         <option value="nissan">Nissan</option>
-                        <option value="renault">Renault</option>
                         <option value="peugeot">Peugeot</option>
-                        <option value="bmw">BMW</option>
-                        <option value="mercedes">Mercedes-Benz</option>
-                        <option value="audi">Audi</option>
+                        <option value="porsche">Porsche</option>
+                        <option value="ram">RAM</option>
+                        <option value="renault">Renault</option>
+                        <option value="subaru">Subaru</option>
+                        <option value="suzuki">Suzuki</option>
+                        <option value="toyota">Toyota</option>
+                        <option value="volkswagen">Volkswagen</option>
+                        <option value="volvo">Volvo</option>
                         <option value="outros">Outros</option>
                     </select>
                     <div class="error-message" id="vehicleBrandError">Selecione uma marca</div>
@@ -477,8 +492,10 @@
 
                 <div class="form-group half">
                     <label class="form-label">Modelo</label>
-                    <input type="text" class="form-input" id="vehicleModel" name="vehicleModel" placeholder="Ex: Gol, Corolla" required>
-                    <div class="error-message" id="vehicleModelError">Informe o modelo</div>
+                    <select class="form-select" id="vehicleModel" name="vehicleModel" required disabled>
+                        <option value="">Primeiro selecione a marca</option>
+                    </select>
+                    <div class="error-message" id="vehicleModelError">Selecione um modelo</div>
                 </div>
 
                 <div class="form-group half">
@@ -773,16 +790,108 @@
             }, 2000);
         }
 
-        // Show terms modal (placeholder)
+        // Show terms page
         function showTerms(event) {
             event.preventDefault();
-            alert('Termos de Uso:\n\nEsta é uma versão de demonstração. Em um app real, aqui seria exibido o documento completo dos termos de uso.');
+            window.open('terms.html', '_blank');
         }
 
-        // Show privacy modal (placeholder)
+        // Show privacy page
         function showPrivacy(event) {
             event.preventDefault();
-            alert('Política de Privacidade:\n\nEsta é uma versão de demonstração. Em um app real, aqui seria exibida a política completa de privacidade.');
+            window.open('privacy.html', '_blank');
+        }
+
+        // Vehicle models database
+        const vehicleModels = {
+            audi: ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'],
+            
+            bmw: ['118i', '120i', '125i', 'M135i', '218i', '220i', 'M240i', '320i', '330i', 'M340i', 'M3', '420i', '430i', 'M440i', 'M4', '520i', '530i', 'M550i', 'M5', '630i', '640i', 'M850i', '740i', '750i', 'M760i', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'i3', 'i4', 'iX', 'iX3'],
+            
+            byd: ['Dolphin', 'Yuan Plus', 'Seal', 'Tan', 'Song Plus', 'King', 'e2', 'e3', 'Han'],
+            
+            caoa_chery: ['Arrizo 5', 'Arrizo 6', 'Tiggo 2', 'Tiggo 3X', 'Tiggo 4', 'Tiggo 5X', 'Tiggo 7', 'Tiggo 8', 'Tiggo 8 Pro'],
+            
+            chevrolet: ['Agile', 'Astra', 'Aveo', 'Blazer', 'Bolt', 'Camaro', 'Captiva', 'Celta', 'Classic', 'Cobalt', 'Corsa', 'Cruze', 'Equinox', 'Joy', 'Malibu', 'Meriva', 'Montana', 'Onix', 'Onix Plus', 'Prisma', 'S10', 'Silverado', 'Sonic', 'Spin', 'Tracker', 'TrailBlazer', 'Trax', 'Vectra', 'Zafira'],
+            
+            citroen: ['Aircross', 'Berlingo', 'C3', 'C4 Cactus', 'C4 Lounge', 'C4 Picasso', 'C5 Aircross', 'DS3', 'DS4', 'DS5', 'Jumper', 'Jumpy', 'SpaceTourer', 'Xsara Picasso'],
+            
+            fiat: ['Argo', 'Bravo', 'Cronos', 'Doblo', 'Ducato', 'Fastback', 'Fiorino', 'Freemont', 'Grand Siena', 'Idea', 'Linea', 'Marea', 'Mobi', 'Palio', 'Pulse', 'Punto', 'Siena', 'Stilo', 'Strada', 'Toro', 'Uno'],
+            
+            ford: ['Bronco', 'EcoSport', 'Edge', 'Escort', 'Expedition', 'Explorer', 'F-150', 'F-250', 'F-350', 'Fiesta', 'Focus', 'Fusion', 'Ka', 'Maverick', 'Mustang', 'Ranger', 'Territory', 'Transit'],
+            
+            gwm: ['Haval H6', 'Ora 03', 'Poer'],
+            
+            honda: ['Accord', 'City', 'Civic', 'CR-V', 'Fit', 'HR-V', 'Pilot', 'Ridgeline', 'WR-V'],
+            
+            hyundai: ['Accent', 'Azera', 'Creta', 'Elantra', 'HB20', 'HB20S', 'HB20X', 'i30', 'ix35', 'Santa Fe', 'Sonata', 'Tucson', 'Veloster', 'Vera Cruz'],
+            
+            jac_motors: ['E-J7', 'E-JS1', 'E-JS4', 'iEV20', 'iEV40', 'J2', 'J3', 'J5', 'J6', 'JS3', 'JS4', 'T40', 'T50', 'T60', 'T80'],
+            
+            jeep: ['Cherokee', 'Commander', 'Compass', 'Grand Cherokee', 'Renegade', 'Wrangler'],
+            
+            kia: ['Bongo', 'Cadenza', 'Carnival', 'Cerato', 'Mohave', 'Optima', 'Picanto', 'Rio', 'Sorento', 'Soul', 'Sportage', 'Stinger', 'Stonic'],
+            
+            land_rover: ['Defender', 'Discovery', 'Discovery Sport', 'Evoque', 'Freelander', 'Range Rover', 'Range Rover Sport', 'Range Rover Velar', 'Range Rover Vogue'],
+            
+            lexus: ['CT', 'ES', 'GS', 'IS', 'LC', 'LS', 'LX', 'NX', 'RC', 'RX', 'UX'],
+            
+            mercedes_benz: ['A 200', 'A 250', 'A 35 AMG', 'A 45 AMG', 'B 200', 'C 180', 'C 200', 'C 250', 'C 300', 'C 43 AMG', 'C 63 AMG', 'CLA 200', 'CLA 250', 'CLA 35 AMG', 'CLA 45 AMG', 'CLS 350', 'CLS 450', 'CLS 53 AMG', 'E 200', 'E 250', 'E 300', 'E 350', 'E 450', 'E 53 AMG', 'E 63 AMG', 'G 350', 'G 500', 'G 63 AMG', 'GLA 200', 'GLA 250', 'GLA 35 AMG', 'GLA 45 AMG', 'GLB 200', 'GLB 250', 'GLB 35 AMG', 'GLC 200', 'GLC 250', 'GLC 300', 'GLC 43 AMG', 'GLC 63 AMG', 'GLE 350', 'GLE 400', 'GLE 450', 'GLE 53 AMG', 'GLE 63 AMG', 'GLS 350', 'GLS 400', 'GLS 450', 'GLS 580', 'S 350', 'S 400', 'S 450', 'S 500', 'S 560', 'S 63 AMG', 'SLC 200', 'SLC 300', 'SLC 43 AMG', 'Sprinter', 'Vito'],
+            
+            mitsubishi: ['ASX', 'Eclipse Cross', 'L200', 'Lancer', 'Outlander', 'Pajero', 'Pajero Dakar', 'Pajero Full', 'Pajero Sport', 'Space Wagon'],
+            
+            nissan: ['350Z', '370Z', 'Altima', 'Frontier', 'GT-R', 'Kicks', 'Leaf', 'Livina', 'March', 'Maxima', 'Murano', 'Pathfinder', 'Sentra', 'Tiida', 'Versa', 'X-Terra', 'X-Trail'],
+            
+            peugeot: ['106', '107', '206', '207', '208', '2008', '301', '307', '308', '3008', '406', '407', '408', '5008', 'Boxer', 'Expert', 'Partner'],
+            
+            porsche: ['718 Boxster', '718 Cayman', '911', 'Cayenne', 'Macan', 'Panamera', 'Taycan'],
+            
+            ram: ['1500', '2500', '3500', '700'],
+            
+            renault: ['Alaskan', 'Arkana', 'Captur', 'Clio', 'Duster', 'Fluence', 'Kadjar', 'Kangoo', 'Koleos', 'Kwid', 'Logan', 'Master', 'Megane', 'Oroch', 'Sandero', 'Scenic', 'Symbol', 'Trafic'],
+            
+            subaru: ['BRZ', 'Forester', 'Impreza', 'Legacy', 'Outback', 'Tribeca', 'WRX', 'XV'],
+            
+            suzuki: ['Alto', 'Baleno', 'Grand Vitara', 'Jimny', 'S-Cross', 'SX4', 'Swift', 'Vitara'],
+            
+            toyota: ['Bandeirante', 'Camry', 'Corolla', 'Corolla Cross', 'Etios', 'Fielder', 'Hilux', 'Land Cruiser', 'Prado', 'Prius', 'RAV4', 'SW4', 'Yaris', 'Yaris Cross'],
+            
+            volkswagen: ['Amarok', 'Arteon', 'Atlas', 'Beetle', 'Bora', 'Brasília', 'Crossfox', 'Fox', 'Fusca', 'Gol', 'Golf', 'Jetta', 'Kombi', 'Nivus', 'Parati', 'Passat', 'Polo', 'Santana', 'Saveiro', 'SpaceFox', 'T-Cross', 'Taos', 'Tiguan', 'Touareg', 'Up!', 'Variant', 'Virtus', 'Voyage'],
+            
+            volvo: ['C30', 'C70', 'S40', 'S60', 'S80', 'S90', 'V40', 'V60', 'V90', 'XC40', 'XC60', 'XC70', 'XC90']
+        };
+
+        // Update models based on selected brand
+        function updateModels() {
+            const brandSelect = document.getElementById('vehicleBrand');
+            const modelSelect = document.getElementById('vehicleModel');
+            const selectedBrand = brandSelect.value;
+
+            // Clear previous options
+            modelSelect.innerHTML = '';
+            
+            if (selectedBrand && vehicleModels[selectedBrand]) {
+                modelSelect.disabled = false;
+                modelSelect.innerHTML = '<option value="">Selecione o modelo</option>';
+                
+                // Add models for selected brand
+                vehicleModels[selectedBrand].forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.toLowerCase().replace(/\s+/g, '_');
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+            } else {
+                modelSelect.disabled = true;
+                modelSelect.innerHTML = '<option value="">Primeiro selecione a marca</option>';
+            }
+
+            // Reset validation
+            modelSelect.classList.remove('error');
+            document.getElementById('vehicleModelError').style.display = 'none';
+            
+            // Validate form after model update
+            validateForm();
         }
 
         // Go back to login

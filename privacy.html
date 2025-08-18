@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Política de Privacidade</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #007bff 0%, #495057 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-2px);
+        }
+
+        .header-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .content-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .document-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .document-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #007bff;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+        }
+
+        h2:first-of-type {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #555;
+            text-align: justify;
+        }
+
+        ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .highlight {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .contact-info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border-left: 4px solid #007bff;
+        }
+
+        .contact-info h3 {
+            color: #007bff;
+            margin-top: 0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .data-table th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .content-card {
+                padding: 25px;
+                border-radius: 15px;
+            }
+            
+            .document-title {
+                font-size: 1.6rem;
+            }
+            
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            .data-table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <button class="back-button" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="header-title">Política de Privacidade</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content-card">
+            <h1 class="document-title">Política de Privacidade do Iguincho</h1>
+            <p class="document-subtitle">Proteção e Uso de Dados Pessoais</p>
+            
+            <div class="last-updated">
+                <strong>Última atualização:</strong> 18 de agosto de 2025
+            </div>
+
+            <div class="highlight">
+                <strong>Resumo:</strong> Esta política explica como coletamos, usamos, armazenamos e protegemos suas informações pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei 13.709/18).
+            </div>
+
+            <h2>1. Quem Somos</h2>
+            <p>O Iguincho é uma plataforma digital que conecta usuários que necessitam de serviços de socorro automotivo com prestadores qualificados. Somos o controlador de dados conforme definido pela LGPD.</p>
+            
+            <p><strong>Controlador:</strong> Iguincho Tecnologia Ltda.<br>
+            <strong>CNPJ:</strong> 12.345.678/0001-90<br>
+            <strong>Endereço:</strong> Rua das Inovações, 123 - São Paulo, SP<br>
+            <strong>DPO:</strong> privacidade@iguincho.com.br</p>
+
+            <h2>2. Quais Dados Coletamos</h2>
+            <p>Coletamos diferentes tipos de informações para fornecer e melhorar nossos serviços:</p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Tipo de Dado</th>
+                        <th>Exemplos</th>
+                        <th>Finalidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Dados de Identificação</strong></td>
+                        <td>Nome, CPF, data de nascimento</td>
+                        <td>Identificação e verificação do usuário</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dados de Contato</strong></td>
+                        <td>E-mail, telefone, WhatsApp</td>
+                        <td>Comunicação e notificações sobre serviços</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dados do Veículo</strong></td>
+                        <td>Marca, modelo, ano, cor, placa</td>
+                        <td>Prestação adequada do serviço de socorro</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dados de Localização</strong></td>
+                        <td>GPS, endereços salvos</td>
+                        <td>Localização para atendimento e navegação</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dados de Uso</strong></td>
+                        <td>Histórico de serviços, avaliações</td>
+                        <td>Melhoria do serviço e suporte</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dados de Pagamento</strong></td>
+                        <td>Método de pagamento, histórico financeiro</td>
+                        <td>Processamento de pagamentos</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>3. Como Coletamos os Dados</h2>
+            <h3>3.1. Coleta Direta</h3>
+            <ul>
+                <li>Informações fornecidas durante o cadastro</li>
+                <li>Dados inseridos ao solicitar serviços</li>
+                <li>Comunicações e feedback através do app</li>
+                <li>Atendimento ao cliente</li>
+            </ul>
+
+            <h3>3.2. Coleta Automática</h3>
+            <ul>
+                <li>Dados de localização GPS (com sua permissão)</li>
+                <li>Informações do dispositivo e uso do aplicativo</li>
+                <li>Dados de navegação e interação</li>
+                <li>Logs de sistema para segurança</li>
+            </ul>
+
+            <h2>4. Base Legal para o Tratamento</h2>
+            <p>Tratamos seus dados pessoais com base nas seguintes hipóteses legais da LGPD:</p>
+            
+            <ul>
+                <li><strong>Execução de contrato:</strong> Para fornecer os serviços de socorro automotivo</li>
+                <li><strong>Interesse legítimo:</strong> Para melhorar nossos serviços e garantir segurança</li>
+                <li><strong>Consentimento:</strong> Para comunicações de marketing (quando aplicável)</li>
+                <li><strong>Cumprimento de obrigação legal:</strong> Para atender exigências regulatórias</li>
+                <li><strong>Proteção da vida:</strong> Em situações de emergência que envolvam risco</li>
+            </ul>
+
+            <h2>5. Como Usamos os Dados</h2>
+            <h3>5.1. Prestação de Serviços</h3>
+            <ul>
+                <li>Conectar você com prestadores de serviços</li>
+                <li>Processar solicitações de socorro</li>
+                <li>Facilitar comunicação entre usuários e prestadores</li>
+                <li>Processar pagamentos e emitir comprovantes</li>
+            </ul>
+
+            <h3>5.2. Melhoria e Segurança</h3>
+            <ul>
+                <li>Análise de desempenho e qualidade dos serviços</li>
+                <li>Desenvolvimento de novos recursos</li>
+                <li>Prevenção de fraudes e atividades suspeitas</li>
+                <li>Cumprimento de obrigações legais</li>
+            </ul>
+
+            <h3>5.3. Comunicação</h3>
+            <ul>
+                <li>Notificações sobre status dos serviços</li>
+                <li>Atualizações importantes sobre a plataforma</li>
+                <li>Suporte ao cliente</li>
+                <li>Marketing (apenas com consentimento)</li>
+            </ul>
+
+            <h2>6. Compartilhamento de Dados</h2>
+            <p>Compartilhamos seus dados apenas quando necessário e de forma limitada:</p>
+
+            <h3>6.1. Prestadores de Serviços</h3>
+            <p>Compartilhamos informações necessárias (nome, telefone, localização, dados do veículo) com os prestadores para execução do serviço solicitado.</p>
+
+            <h3>6.2. Parceiros Tecnológicos</h3>
+            <ul>
+                <li>Processadores de pagamento (dados limitados para transações)</li>
+                <li>Serviços de mapas e geolocalização</li>
+                <li>Provedores de infraestrutura em nuvem</li>
+                <li>Serviços de análise e métricas (dados anonimizados)</li>
+            </ul>
+
+            <h3>6.3. Autoridades</h3>
+            <p>Podemos compartilhar dados quando exigido por lei, ordem judicial ou para proteger direitos, propriedade ou segurança.</p>
+
+            <div class="warning">
+                <strong>Importante:</strong> Nunca vendemos seus dados pessoais para terceiros. Todo compartilhamento é limitado ao necessário para a prestação do serviço.
+            </div>
+
+            <h2>7. Proteção de Dados</h2>
+            <h3>7.1. Medidas Técnicas</h3>
+            <ul>
+                <li>Criptografia de dados em trânsito e em repouso</li>
+                <li>Sistemas de autenticação e autorização robustos</li>
+                <li>Monitoramento contínuo de segurança</li>
+                <li>Backups seguros e regulares</li>
+            </ul>
+
+            <h3>7.2. Medidas Organizacionais</h3>
+            <ul>
+                <li>Treinamento de funcionários sobre proteção de dados</li>
+                <li>Políticas internas de segurança da informação</li>
+                <li>Controle de acesso baseado em necessidade</li>
+                <li>Avaliações regulares de segurança</li>
+            </ul>
+
+            <h2>8. Retenção de Dados</h2>
+            <p>Mantemos seus dados pelo tempo necessário para:</p>
+            
+            <ul>
+                <li><strong>Dados da conta:</strong> Enquanto a conta estiver ativa + 5 anos após exclusão</li>
+                <li><strong>Histórico de serviços:</strong> 5 anos para fins contábeis e fiscais</li>
+                <li><strong>Dados de localização:</strong> 30 dias após o serviço (para suporte)</li>
+                <li><strong>Comunicações:</strong> 2 anos para resolução de disputas</li>
+                <li><strong>Dados financeiros:</strong> Conforme exigido pela legislação fiscal</li>
+            </ul>
+
+            <h2>9. Seus Direitos</h2>
+            <p>Conforme a LGPD, você tem os seguintes direitos:</p>
+
+            <h3>9.1. Direitos Básicos</h3>
+            <ul>
+                <li><strong>Acesso:</strong> Saber quais dados temos sobre você</li>
+                <li><strong>Correção:</strong> Atualizar dados incorretos ou incompletos</li>
+                <li><strong>Exclusão:</strong> Solicitar remoção de seus dados</li>
+                <li><strong>Portabilidade:</strong> Receber seus dados em formato estruturado</li>
+                <li><strong>Oposição:</strong> Opor-se ao tratamento em certas situações</li>
+            </ul>
+
+            <h3>9.2. Como Exercer seus Direitos</h3>
+            <p>Para exercer qualquer direito, entre em contato conosco através de:</p>
+            <ul>
+                <li>E-mail: privacidade@iguincho.com.br</li>
+                <li>Seção "Privacidade" no aplicativo</li>
+                <li>Formulário online em nosso site</li>
+            </ul>
+
+            <p>Responderemos suas solicitações em até 15 dias úteis.</p>
+
+            <h2>10. Dados de Menores</h2>
+            <p>Nossos serviços são destinados apenas a maiores de 18 anos. Não coletamos intencionalmente dados de menores de idade. Se tomarmos conhecimento da coleta inadvertida de dados de menores, tomaremos medidas para removê-los.</p>
+
+            <h2>11. Transferência Internacional</h2>
+            <p>Alguns de nossos parceiros tecnológicos podem estar localizados fora do Brasil. Nestes casos, garantimos que:</p>
+            <ul>
+                <li>A transferência atende aos requisitos da LGPD</li>
+                <li>Existem salvaguardas adequadas para proteção dos dados</li>
+                <li>Os parceiros seguem padrões similares de proteção</li>
+            </ul>
+
+            <h2>12. Cookies e Tecnologias Similares</h2>
+            <p>Utilizamos cookies e tecnologias similares para:</p>
+            <ul>
+                <li>Melhorar a funcionalidade do aplicativo</li>
+                <li>Personalizar sua experiência</li>
+                <li>Analisar uso e performance</li>
+                <li>Lembrais suas preferências</li>
+            </ul>
+
+            <p>Você pode gerenciar preferências de cookies nas configurações do aplicativo.</p>
+
+            <h2>13. Alterações nesta Política</h2>
+            <p>Podemos atualizar esta política periodicamente. Mudanças significativas serão comunicadas através de:</p>
+            <ul>
+                <li>Notificação no aplicativo</li>
+                <li>E-mail para seu endereço cadastrado</li>
+                <li>Aviso em nosso site</li>
+            </ul>
+
+            <p>O uso continuado do serviço após as mudanças constitui aceite das alterações.</p>
+
+            <h2>14. Incidentes de Segurança</h2>
+            <p>Em caso de vazamento ou incidente de segurança que possa representar risco aos seus dados, notificaremos:</p>
+            <ul>
+                <li>A Autoridade Nacional de Proteção de Dados (ANPD) em até 72 horas</li>
+                <li>Você, quando houver alto risco aos seus direitos e liberdades</li>
+            </ul>
+
+            <div class="contact-info">
+                <h3>Contato - Proteção de Dados</h3>
+                <p><strong>Encarregado de Dados (DPO):</strong> dpo@iguincho.com.br</p>
+                <p><strong>Privacidade:</strong> privacidade@iguincho.com.br</p>
+                <p><strong>Telefone:</strong> 0800 123 4567</p>
+                <p><strong>Endereço:</strong> Rua das Inovações, 123 - São Paulo, SP - CEP 01234-567</p>
+                <p><strong>Horário:</strong> Segunda a sexta, 9h às 18h</p>
+                <br>
+                <p><strong>ANPD:</strong> Se não estivermos respondendo adequadamente às suas solicitações, você pode entrar em contato com a Autoridade Nacional de Proteção de Dados através do site <a href="https://www.gov.br/anpd" target="_blank">www.gov.br/anpd</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

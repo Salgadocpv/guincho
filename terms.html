@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Termos de Uso</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #007bff 0%, #495057 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-2px);
+        }
+
+        .header-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .content-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .document-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .document-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #007bff;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+        }
+
+        h2:first-of-type {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #555;
+            text-align: justify;
+        }
+
+        ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .contact-info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border-left: 4px solid #007bff;
+        }
+
+        .contact-info h3 {
+            color: #007bff;
+            margin-top: 0;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .content-card {
+                padding: 25px;
+                border-radius: 15px;
+            }
+            
+            .document-title {
+                font-size: 1.6rem;
+            }
+            
+            h2 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <button class="back-button" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="header-title">Termos de Uso</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content-card">
+            <h1 class="document-title">Termos de Uso do Iguincho</h1>
+            <p class="document-subtitle">Plataforma de Socorro Automotivo</p>
+            
+            <div class="last-updated">
+                <strong>Última atualização:</strong> 18 de agosto de 2025
+            </div>
+
+            <h2>1. Aceitação dos Termos</h2>
+            <p>Ao utilizar o aplicativo Iguincho ("Aplicativo"), você concorda em cumprir e estar vinculado a estes Termos de Uso. Se você não concordar com qualquer parte destes termos, não deverá usar nosso serviço.</p>
+            
+            <p>O Iguincho é uma plataforma digital que conecta usuários que necessitam de serviços de socorro automotivo (guincho, troca de pneu, socorro de bateria, chaveiro, mecânico e eletricista) com prestadores de serviços qualificados.</p>
+
+            <h2>2. Definições</h2>
+            <ul>
+                <li><strong>Usuário:</strong> Pessoa física que utiliza o aplicativo para solicitar serviços de socorro automotivo</li>
+                <li><strong>Prestador:</strong> Pessoa física ou jurídica que oferece serviços de socorro automotivo através da plataforma</li>
+                <li><strong>Serviços:</strong> Guincho, socorro de bateria, troca de pneu, chaveiro, mecânico e eletricista automotivo</li>
+                <li><strong>Plataforma:</strong> O aplicativo Iguincho e todos os seus recursos e funcionalidades</li>
+            </ul>
+
+            <h2>3. Cadastro e Conta do Usuário</h2>
+            <h3>3.1. Elegibilidade</h3>
+            <p>Para usar o Iguincho, você deve ter pelo menos 18 anos de idade e possuir capacidade legal para celebrar contratos. Ao criar uma conta, você declara que todas as informações fornecidas são verdadeiras, precisas e completas.</p>
+            
+            <h3>3.2. Responsabilidade pelas Informações</h3>
+            <p>Você é responsável por manter a confidencialidade de sua conta e senha, bem como por todas as atividades que ocorram em sua conta. Deve notificar-nos imediatamente sobre qualquer uso não autorizado de sua conta.</p>
+
+            <h3>3.3. Informações do Veículo</h3>
+            <p>É obrigatório fornecer informações precisas sobre seu veículo (marca, modelo, ano, cor e placa) para garantir o atendimento adequado. Informações incorretas podem resultar em cancelamento do serviço sem reembolso.</p>
+
+            <h2>4. Uso do Serviço</h2>
+            <h3>4.1. Natureza do Serviço</h3>
+            <p>O Iguincho é uma plataforma de intermediação que conecta usuários e prestadores de serviços. Não somos prestadores diretos dos serviços de socorro automotivo, mas sim facilitadores da conexão entre as partes.</p>
+
+            <h3>4.2. Disponibilidade</h3>
+            <p>Os serviços estão disponíveis 24 horas por dia, 7 dias por semana, sujeitos à disponibilidade de prestadores na sua região. Não garantimos disponibilidade imediata em todas as localidades.</p>
+
+            <h3>4.3. Localização</h3>
+            <p>Para utilizar nossos serviços, você deve permitir o acesso à sua localização. Essa informação é essencial para conectá-lo ao prestador mais próximo e para o atendimento eficiente.</p>
+
+            <h2>5. Solicitação e Execução de Serviços</h2>
+            <h3>5.1. Processo de Solicitação</h3>
+            <p>Ao solicitar um serviço, você deve fornecer informações precisas sobre sua localização, problema do veículo e qualquer informação relevante para o atendimento.</p>
+
+            <h3>5.2. Aceite do Serviço</h3>
+            <p>Uma vez que um prestador aceite sua solicitação, um contrato é formado diretamente entre você e o prestador. O Iguincho facilita essa conexão, mas não é parte do contrato de prestação de serviços.</p>
+
+            <h3>5.3. Cancelamento</h3>
+            <p>Você pode cancelar uma solicitação antes da chegada do prestador ao local. Cancelamentos após a chegada do prestador podem estar sujeitos a taxas de cancelamento conforme nossa política de preços.</p>
+
+            <h2>6. Pagamentos e Preços</h2>
+            <h3>6.1. Estrutura de Preços</h3>
+            <p>Os preços são determinados pelos prestadores e podem variar conforme o tipo de serviço, localização, horário e urgência. Preços estimados são fornecidos antes da confirmação do serviço.</p>
+
+            <h3>6.2. Métodos de Pagamento</h3>
+            <p>Aceitamos diversos métodos de pagamento, incluindo cartões de crédito, débito, PIX e dinheiro (quando aceito pelo prestador). O pagamento deve ser efetuado diretamente ao prestador no momento do atendimento.</p>
+
+            <h3>6.3. Taxa da Plataforma</h3>
+            <p>Uma pequena taxa de conveniência pode ser aplicada para manter e melhorar os serviços da plataforma. Esta taxa será claramente informada antes da confirmação do serviço.</p>
+
+            <h2>7. Responsabilidades e Limitações</h2>
+            <h3>7.1. Responsabilidade dos Prestadores</h3>
+            <p>Os prestadores são responsáveis pela qualidade e execução dos serviços. O Iguincho não se responsabiliza por danos causados durante a prestação do serviço, mas oferece suporte para resolução de conflitos.</p>
+
+            <h3>7.2. Limitação de Responsabilidade</h3>
+            <p>O Iguincho não será responsável por:</p>
+            <ul>
+                <li>Danos ao veículo durante o atendimento</li>
+                <li>Atrasos no atendimento devido a fatores externos</li>
+                <li>Indisponibilidade temporária da plataforma</li>
+                <li>Ações ou omissões dos prestadores de serviços</li>
+            </ul>
+
+            <h3>7.3. Seguro e Garantias</h3>
+            <p>Recomendamos que todos os prestadores possuam seguro adequado. Verificamos documentação básica, mas não garantimos cobertura de seguro para todos os serviços.</p>
+
+            <div class="highlight">
+                <strong>Importante:</strong> Em caso de emergência que represente risco de vida, contate imediatamente os serviços de emergência (190, 192, 193) antes de usar o aplicativo.
+            </div>
+
+            <h2>8. Política de Privacidade e Dados</h2>
+            <p>Sua privacidade é importante para nós. Coletamos, usamos e protegemos suas informações pessoais conforme descrito em nossa <a href="privacy.html">Política de Privacidade</a>, que faz parte integrante destes termos.</p>
+
+            <h2>9. Avaliações e Feedback</h2>
+            <p>Encorajamos avaliações honestas e construtivas. Você pode avaliar os prestadores após cada serviço. Avaliações falsas, ofensivas ou difamatórias podem resultar na suspensão da conta.</p>
+
+            <h2>10. Conduta do Usuário</h2>
+            <p>Você concorda em:</p>
+            <ul>
+                <li>Usar o serviço apenas para fins legítimos</li>
+                <li>Fornecer informações precisas e atualizadas</li>
+                <li>Tratar prestadores com respeito e cortesia</li>
+                <li>Não usar o serviço para atividades ilegais</li>
+                <li>Não tentar burlar sistemas de segurança da plataforma</li>
+            </ul>
+
+            <h2>11. Suspensão e Cancelamento</h2>
+            <p>Podemos suspender ou cancelar sua conta a qualquer momento se você violar estes termos, usar o serviço de forma inadequada ou por outros motivos legítimos. Você também pode cancelar sua conta a qualquer momento através do aplicativo.</p>
+
+            <h2>12. Modificações dos Termos</h2>
+            <p>Reservamos o direito de modificar estes termos a qualquer momento. Notificaremos sobre mudanças significativas através do aplicativo ou por e-mail. O uso continuado do serviço após as modificações constitui aceitação dos novos termos.</p>
+
+            <h2>13. Resolução de Disputas</h2>
+            <p>Em caso de disputas, encorajamos primeiro o contato direto conosco através dos canais de suporte. Disputas não resolvidas serão submetidas à jurisdição brasileira, especificamente aos tribunais de São Paulo, SP.</p>
+
+            <h2>14. Disposições Gerais</h2>
+            <p>Estes termos constituem o acordo completo entre você e o Iguincho. Se alguma disposição for considerada inválida, as demais permanecem em vigor. Nossa falha em exercer qualquer direito não constitui renúncia a esse direito.</p>
+
+            <h2>15. Lei Aplicável</h2>
+            <p>Estes termos são regidos pelas leis da República Federativa do Brasil, incluindo o Código de Defesa do Consumidor (Lei 8.078/90) e o Marco Civil da Internet (Lei 12.965/14).</p>
+
+            <div class="contact-info">
+                <h3>Contato e Suporte</h3>
+                <p><strong>E-mail:</strong> suporte@iguincho.com.br</p>
+                <p><strong>Telefone:</strong> 0800 123 4567</p>
+                <p><strong>WhatsApp:</strong> (11) 99999-9999</p>
+                <p><strong>Horário de Atendimento:</strong> 24 horas por dia, 7 dias por semana</p>
+                <p><strong>Endereço:</strong> Rua das Inovações, 123 - São Paulo, SP - CEP 01234-567</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
