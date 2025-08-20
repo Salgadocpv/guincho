@@ -780,14 +780,42 @@
             userData.termsAccepted = document.getElementById('termsAccepted').classList.contains('checked');
             userData.marketingAccepted = document.getElementById('marketingAccepted').classList.contains('checked');
             
-            // Simulate API call
-            setTimeout(() => {
-                // Store user data (in real app, send to backend)
-                localStorage.setItem('userData', JSON.stringify(userData));
+            // Call API
+            fetch('api/auth/register-client.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Store user data for session
+                    localStorage.setItem('userData', JSON.stringify({
+                        user_id: data.data.user_id,
+                        user_type: 'client',
+                        registered: true
+                    }));
+                    
+                    // Show success message
+                    alert('Cadastro realizado com sucesso!\nBem-vindo ao Iguincho!');
+                    
+                    // Redirect to services page
+                    window.location.href = 'services.html';
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro no cadastro:', error);
+                alert('Erro no cadastro: ' + error.message);
                 
-                // Redirect to services page
-                window.location.href = 'services.html';
-            }, 2000);
+                // Reset button state
+                submitText.style.display = 'block';
+                loading.style.display = 'none';
+                submitButton.disabled = false;
+            });
         }
 
         // Show terms page
