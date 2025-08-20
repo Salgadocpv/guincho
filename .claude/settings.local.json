@@ -11,7 +11,9 @@
       "Bash(git commit:*)",
       "Bash(python:*)",
       "Bash(php:*)",
-      "Bash(start service-details.html)"
+      "Bash(start service-details.html)",
+      "Bash(git checkout:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
