@@ -582,6 +582,221 @@
         .install-app i {
             font-size: 1rem;
         }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .registration-modal {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px 32px;
+            max-width: 420px;
+            width: 90%;
+            margin: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: modalSlideIn 0.4s ease-out;
+            position: relative;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 0.9rem;
+            color: rgba(0, 0, 0, 0.6);
+            line-height: 1.4;
+        }
+
+        .registration-options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .registration-option {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .registration-option:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(0, 123, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .registration-option.client {
+            border-color: rgba(0, 123, 255, 0.2);
+        }
+
+        .registration-option.client:hover {
+            border-color: #007bff;
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
+        }
+
+        .registration-option.driver {
+            border-color: rgba(40, 167, 69, 0.2);
+        }
+
+        .registration-option.driver:hover {
+            border-color: #28a745;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+        }
+
+        .option-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .option-icon.client {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .option-icon.driver {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .option-description {
+            font-size: 0.85rem;
+            color: rgba(0, 0, 0, 0.6);
+            line-height: 1.3;
+        }
+
+        .option-arrow {
+            color: rgba(0, 0, 0, 0.3);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .registration-option:hover .option-arrow {
+            color: rgba(0, 0, 0, 0.6);
+            transform: translateX(4px);
+        }
+
+        /* Mobile responsiveness for modal */
+        @media (max-width: 480px) {
+            .registration-modal {
+                padding: 32px 24px;
+                margin: 16px;
+                border-radius: 16px;
+            }
+
+            .modal-title {
+                font-size: 1.3rem;
+            }
+
+            .registration-option {
+                padding: 16px;
+                gap: 12px;
+            }
+
+            .option-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 1.3rem;
+            }
+
+            .option-title {
+                font-size: 1rem;
+            }
+
+            .option-description {
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -703,6 +918,50 @@
         </div>
     </div>
 
+    <!-- Registration Type Selection Modal -->
+    <div class="modal-overlay" id="registrationModal">
+        <div class="registration-modal">
+            <button class="modal-close" onclick="closeRegistrationModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="modal-header">
+                <h3 class="modal-title">Escolha seu tipo de cadastro</h3>
+                <p class="modal-subtitle">Selecione a opção que melhor descreve você</p>
+            </div>
+            
+            <div class="registration-options">
+                <!-- Client Registration Option -->
+                <div class="registration-option client" onclick="goToClientRegister()">
+                    <div class="option-icon client">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="option-content">
+                        <h4 class="option-title">Sou Cliente</h4>
+                        <p class="option-description">Preciso de serviços de guincho e socorro automotivo</p>
+                    </div>
+                    <div class="option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+                
+                <!-- Driver Registration Option -->
+                <div class="registration-option driver" onclick="goToDriverRegister()">
+                    <div class="option-icon driver">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="option-content">
+                        <h4 class="option-title">Sou Guincheiro</h4>
+                        <p class="option-description">Quero prestar serviços de guincho como parceiro</p>
+                    </div>
+                    <div class="option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State Management
         let isPasswordVisible = false;
@@ -767,10 +1026,52 @@
             alert('Redirecionando para recuperação de senha...');
         }
 
-        // Go to Register
+        // Show Registration Modal
         function goToRegister() {
+            showRegistrationModal();
+        }
+
+        // Show Registration Modal
+        function showRegistrationModal() {
+            const modal = document.getElementById('registrationModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+
+        // Close Registration Modal
+        function closeRegistrationModal() {
+            const modal = document.getElementById('registrationModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Go to Client Registration
+        function goToClientRegister() {
             window.location.href = 'register.html';
         }
+
+        // Go to Driver Registration
+        function goToDriverRegister() {
+            window.location.href = 'register-driver.html';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('registrationModal');
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeRegistrationModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('show')) {
+                    closeRegistrationModal();
+                }
+            });
+        });
 
         // Loading Management
         function showLoading() {
