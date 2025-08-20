@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Cadastro de Guincheiro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Iguincho">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #28a745 0%, #495057 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Subtle background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.05) 0%, transparent 40%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.03) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 1;
+            box-sizing: border-box;
+        }
+
+        /* Header Section */
+        .register-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            padding: 8px;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            color: white;
+            transform: translateX(-2px);
+        }
+
+        .app-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .app-title {
+            font-size: 1.9rem;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .app-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        /* Form Section */
+        .register-form {
+            width: 100%;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-group.half {
+            display: inline-block;
+            width: calc(50% - 8px);
+            margin-right: 16px;
+        }
+
+        .form-group.half:last-child {
+            margin-right: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 0;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            font-size: 1rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-bottom-color: white;
+            background: transparent;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .form-input:focus + .form-label {
+            color: white;
+        }
+
+        /* Select styling */
+        .form-select {
+            width: 100%;
+            padding: 16px 0;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-bottom-color: white;
+        }
+
+        .form-select option {
+            background: #495057;
+            color: white;
+        }
+
+        /* Password Toggle */
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: white;
+        }
+
+        /* File upload styling */
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.6);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-label:hover {
+            color: rgba(255,255,255,0.8);
+            border-bottom-color: rgba(255,255,255,0.5);
+        }
+
+        .file-upload-label.has-file {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        /* Checkbox styling */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .custom-checkbox.checked {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
+
+        .custom-checkbox.checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 6px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 1px 1px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-label {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.4;
+        }
+
+        .checkbox-label a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: none;
+        }
+
+        /* Submit Button */
+        .submit-button {
+            width: 100%;
+            padding: 18px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Login Link */
+        .login-link {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Loading state */
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+            .register-container {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+            
+            .form-group.half {
+                width: 100%;
+                margin-right: 0;
+            }
+            
+            .app-title {
+                font-size: 1.7rem;
+            }
+        }
+
+        /* Error states */
+        .form-input.error {
+            border-bottom-color: #ff6b6b;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        /* Professional badge */
+        .professional-badge {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.4);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.9);
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .professional-badge i {
+            margin-right: 6px;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+
+    <div class="register-container">
+        <!-- Header Section -->
+        <div class="register-header">
+            <div class="app-logo">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div class="professional-badge">
+                <i class="fas fa-shield-alt"></i>
+                Cadastro Profissional
+            </div>
+            <div class="app-title">Seja um Guincheiro</div>
+            <div class="app-subtitle">Cadastre-se como profissional do Iguincho</div>
+        </div>
+
+        <!-- Form Section -->
+        <form class="register-form" id="registerDriverForm">
+            <!-- Personal Information -->
+            <div class="form-section">
+                <div class="section-title">Dados Pessoais</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" class="form-input" id="fullName" name="fullName" placeholder="Seu nome completo" required>
+                    <div class="error-message" id="fullNameError">Por favor, insira seu nome completo</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">CPF</label>
+                    <input type="text" class="form-input" id="cpf" name="cpf" placeholder="000.000.000-00" required>
+                    <div class="error-message" id="cpfError">CPF inválido</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Data de Nascimento</label>
+                    <input type="date" class="form-input" id="birthDate" name="birthDate" required>
+                    <div class="error-message" id="birthDateError">Data inválida</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">CNH</label>
+                    <input type="text" class="form-input" id="cnh" name="cnh" placeholder="Número da CNH" required>
+                    <div class="error-message" id="cnhError">CNH obrigatória</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Categoria da CNH</label>
+                    <select class="form-select" id="cnhCategory" name="cnhCategory" required>
+                        <option value="">Selecione a categoria</option>
+                        <option value="B">B - Veículos até 3.500kg</option>
+                        <option value="C">C - Veículos de 3.500kg a 6.000kg</option>
+                        <option value="D">D - Veículos acima de 6.000kg</option>
+                        <option value="E">E - Veículos com reboque</option>
+                    </select>
+                    <div class="error-message" id="cnhCategoryError">Selecione uma categoria</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Telefone</label>
+                    <input type="tel" class="form-input" id="phone" name="phone" placeholder="(11) 99999-9999" required>
+                    <div class="error-message" id="phoneError">Telefone inválido</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">WhatsApp</label>
+                    <input type="tel" class="form-input" id="whatsapp" name="whatsapp" placeholder="(11) 99999-9999" required>
+                    <div class="error-message" id="whatsappError">WhatsApp obrigatório</div>
+                </div>
+            </div>
+
+            <!-- Professional Information -->
+            <div class="form-section">
+                <div class="section-title">Informações Profissionais</div>
+                
+                <div class="form-group half">
+                    <label class="form-label">Experiência (anos)</label>
+                    <select class="form-select" id="experience" name="experience" required>
+                        <option value="">Selecione</option>
+                        <option value="0-1">Menos de 1 ano</option>
+                        <option value="1-3">1 a 3 anos</option>
+                        <option value="3-5">3 a 5 anos</option>
+                        <option value="5-10">5 a 10 anos</option>
+                        <option value="10+">Mais de 10 anos</option>
+                    </select>
+                    <div class="error-message" id="experienceError">Selecione a experiência</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Especialidade</label>
+                    <select class="form-select" id="specialty" name="specialty" required>
+                        <option value="">Selecione</option>
+                        <option value="carros">Carros de Passeio</option>
+                        <option value="motos">Motocicletas</option>
+                        <option value="suv">SUVs e Utilitários</option>
+                        <option value="caminhoes">Caminhões</option>
+                        <option value="todos">Todos os Veículos</option>
+                    </select>
+                    <div class="error-message" id="specialtyError">Selecione uma especialidade</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Região de Atuação</label>
+                    <input type="text" class="form-input" id="workRegion" name="workRegion" placeholder="Ex: São Paulo - Centro, Zona Sul" required>
+                    <div class="error-message" id="workRegionError">Região de atuação obrigatória</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Disponibilidade</label>
+                    <select class="form-select" id="availability" name="availability" required>
+                        <option value="">Selecione</option>
+                        <option value="24h">24 horas</option>
+                        <option value="comercial">Horário Comercial (8h-18h)</option>
+                        <option value="noturno">Período Noturno (18h-6h)</option>
+                        <option value="fds">Finais de Semana</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                    <div class="error-message" id="availabilityError">Selecione a disponibilidade</div>
+                </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div class="form-section">
+                <div class="section-title">Guincho / Veículo de Trabalho</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Placa do Guincho</label>
+                    <input type="text" class="form-input" id="truckPlate" name="truckPlate" placeholder="ABC-1234" required>
+                    <div class="error-message" id="truckPlateError">Placa obrigatória</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Marca do Guincho</label>
+                    <input type="text" class="form-input" id="truckBrand" name="truckBrand" placeholder="Ex: Ford, Mercedes" required>
+                    <div class="error-message" id="truckBrandError">Marca obrigatória</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Modelo</label>
+                    <input type="text" class="form-input" id="truckModel" name="truckModel" placeholder="Ex: Cargo, Atego" required>
+                    <div class="error-message" id="truckModelError">Modelo obrigatório</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Ano</label>
+                    <input type="number" class="form-input" id="truckYear" name="truckYear" placeholder="2020" min="1990" max="2025" required>
+                    <div class="error-message" id="truckYearError">Ano inválido</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">Capacidade de Carga</label>
+                    <select class="form-select" id="truckCapacity" name="truckCapacity" required>
+                        <option value="">Selecione</option>
+                        <option value="leve">Até 1.500kg (carros pequenos)</option>
+                        <option value="media">1.500kg - 3.000kg (carros médios/SUVs)</option>
+                        <option value="pesada">3.000kg - 6.000kg (caminhonetes/utilitários)</option>
+                        <option value="extra">Acima de 6.000kg (caminhões)</option>
+                    </select>
+                    <div class="error-message" id="truckCapacityError">Selecione a capacidade</div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="form-section">
+                <div class="section-title">Acesso à Plataforma</div>
+                
+                <div class="form-group">
+                    <label class="form-label">E-mail Profissional</label>
+                    <input type="email" class="form-input" id="email" name="email" placeholder="seu@email.com" required>
+                    <div class="error-message" id="emailError">E-mail inválido</div>
+                </div>
+
+                <div class="form-group password-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-input" id="password" name="password" placeholder="Mínimo 8 caracteres" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <i class="fas fa-eye" id="passwordIcon"></i>
+                    </button>
+                    <div class="error-message" id="passwordError">Senha deve ter no mínimo 8 caracteres</div>
+                </div>
+
+                <div class="form-group password-group">
+                    <label class="form-label">Confirmar Senha</label>
+                    <input type="password" class="form-input" id="confirmPassword" name="confirmPassword" placeholder="Repita sua senha" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                        <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                    </button>
+                    <div class="error-message" id="confirmPasswordError">Senhas não conferem</div>
+                </div>
+            </div>
+
+            <!-- Documents Upload -->
+            <div class="form-section">
+                <div class="section-title">Documentação</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Foto da CNH</label>
+                    <div class="file-upload">
+                        <input type="file" id="cnhPhoto" name="cnhPhoto" accept="image/*" required>
+                        <label for="cnhPhoto" class="file-upload-label" id="cnhPhotoLabel">
+                            <i class="fas fa-upload"></i> Selecionar foto da CNH
+                        </label>
+                    </div>
+                    <div class="error-message" id="cnhPhotoError">Foto da CNH obrigatória</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">CRLV do Guincho</label>
+                    <div class="file-upload">
+                        <input type="file" id="crlvPhoto" name="crlvPhoto" accept="image/*" required>
+                        <label for="crlvPhoto" class="file-upload-label" id="crlvPhotoLabel">
+                            <i class="fas fa-upload"></i> Selecionar CRLV
+                        </label>
+                    </div>
+                    <div class="error-message" id="crlvPhotoError">CRLV obrigatório</div>
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="form-section">
+                <div class="checkbox-group" onclick="toggleCheckbox('termsAccepted')">
+                    <div class="custom-checkbox" id="termsAccepted"></div>
+                    <label class="checkbox-label">
+                        Aceito os <a href="terms.html" target="_blank">Termos de Uso</a> e a <a href="privacy.html" target="_blank">Política de Privacidade</a>
+                    </label>
+                </div>
+
+                <div class="checkbox-group" onclick="toggleCheckbox('professionalTerms')">
+                    <div class="custom-checkbox" id="professionalTerms"></div>
+                    <label class="checkbox-label">
+                        Aceito os termos específicos para prestadores de serviço e declaro que todas as informações são verdadeiras
+                    </label>
+                </div>
+
+                <div class="checkbox-group" onclick="toggleCheckbox('backgroundCheck')">
+                    <div class="custom-checkbox" id="backgroundCheck"></div>
+                    <label class="checkbox-label">
+                        Autorizo a verificação de antecedentes e validação dos documentos fornecidos
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-button" id="submitButton" disabled>
+                <span class="submit-text">Enviar Cadastro para Análise</span>
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <span>Enviando cadastro...</span>
+                </div>
+            </button>
+
+            <!-- Login Link -->
+            <div class="login-link">
+                Já é um guincheiro cadastrado? <a href="index.html">Entrar</a><br>
+                É um cliente? <a href="register.html">Cadastrar como Cliente</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Form validation and functionality
+        let isFormValid = false;
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFormValidation();
+            setupMasks();
+            setupFileUploads();
+        });
+
+        // Setup file upload handlers
+        function setupFileUploads() {
+            ['cnhPhoto', 'crlvPhoto'].forEach(id => {
+                const input = document.getElementById(id);
+                const label = document.getElementById(id + 'Label');
+                
+                input.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        label.classList.add('has-file');
+                        label.innerHTML = `<i class="fas fa-check"></i> ${this.files[0].name}`;
+                    } else {
+                        label.classList.remove('has-file');
+                        label.innerHTML = `<i class="fas fa-upload"></i> Selecionar arquivo`;
+                    }
+                    validateForm();
+                });
+            });
+        }
+
+        // Setup input masks
+        function setupMasks() {
+            // CPF mask
+            document.getElementById('cpf').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = value;
+            });
+
+            // Phone masks
+            ['phone', 'whatsapp'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                    value = value.replace(/(\d{4,5})(\d{4})$/, '$1-$2');
+                    e.target.value = value;
+                });
+            });
+
+            // License plate mask
+            ['truckPlate'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                    if (value.length > 3) {
+                        value = value.replace(/(\w{3})(\w)/, '$1-$2');
+                    }
+                    e.target.value = value;
+                });
+            });
+
+            // CNH mask
+            document.getElementById('cnh').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) {
+                    value = value.substring(0, 11);
+                }
+                e.target.value = value;
+            });
+        }
+
+        // Setup form validation
+        function setupFormValidation() {
+            const form = document.getElementById('registerDriverForm');
+            const submitButton = document.getElementById('submitButton');
+
+            // Add event listeners to all inputs
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', validateForm);
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (validateForm() && allRequiredCheckboxesChecked()) {
+                    submitForm();
+                }
+            });
+        }
+
+        // Check if all required checkboxes are checked
+        function allRequiredCheckboxesChecked() {
+            return ['termsAccepted', 'professionalTerms', 'backgroundCheck'].every(id => 
+                document.getElementById(id).classList.contains('checked')
+            );
+        }
+
+        // Validate individual field
+        function validateField(field) {
+            const value = field.value.trim();
+            const fieldName = field.name;
+            let isValid = true;
+            let errorMessage = '';
+
+            switch (fieldName) {
+                case 'fullName':
+                    isValid = value.length >= 3 && value.includes(' ');
+                    errorMessage = 'Por favor, insira seu nome completo';
+                    break;
+                
+                case 'cpf':
+                    isValid = validateCPF(value);
+                    errorMessage = 'CPF inválido';
+                    break;
+                
+                case 'cnh':
+                    isValid = value.replace(/\D/g, '').length >= 9;
+                    errorMessage = 'CNH deve ter pelo menos 9 dígitos';
+                    break;
+                
+                case 'email':
+                    isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                    errorMessage = 'E-mail inválido';
+                    break;
+                
+                case 'password':
+                    isValid = value.length >= 8;
+                    errorMessage = 'Senha deve ter no mínimo 8 caracteres';
+                    break;
+                
+                case 'confirmPassword':
+                    isValid = value === document.getElementById('password').value;
+                    errorMessage = 'Senhas não conferem';
+                    break;
+                
+                case 'phone':
+                case 'whatsapp':
+                    isValid = value.replace(/\D/g, '').length >= 10;
+                    errorMessage = 'Telefone inválido';
+                    break;
+                
+                case 'truckPlate':
+                    isValid = /^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$/.test(value.replace('-', ''));
+                    errorMessage = 'Placa inválida';
+                    break;
+                
+                case 'truckYear':
+                    const year = parseInt(value);
+                    isValid = year >= 1990 && year <= 2025;
+                    errorMessage = 'Ano inválido';
+                    break;
+                
+                default:
+                    isValid = value.length > 0;
+                    errorMessage = 'Campo obrigatório';
+            }
+
+            // Check file uploads
+            if (field.type === 'file') {
+                isValid = field.files.length > 0;
+                errorMessage = 'Arquivo obrigatório';
+            }
+
+            // Show/hide error
+            const errorElement = document.getElementById(fieldName + 'Error');
+            if (errorElement) {
+                if (isValid) {
+                    field.classList.remove('error');
+                    errorElement.style.display = 'none';
+                } else {
+                    field.classList.add('error');
+                    errorElement.textContent = errorMessage;
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            return isValid;
+        }
+
+        // Validate entire form
+        function validateForm() {
+            const form = document.getElementById('registerDriverForm');
+            const requiredInputs = form.querySelectorAll('input[required], select[required]');
+            let allValid = true;
+
+            requiredInputs.forEach(input => {
+                if (!validateField(input)) {
+                    allValid = false;
+                }
+            });
+
+            // Check checkboxes
+            const checkboxesValid = allRequiredCheckboxesChecked();
+            
+            isFormValid = allValid && checkboxesValid;
+            document.getElementById('submitButton').disabled = !isFormValid;
+            
+            return isFormValid;
+        }
+
+        // CPF validation
+        function validateCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+            
+            let sum = 0;
+            for (let i = 0; i < 9; i++) {
+                sum += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            let remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            if (remainder !== parseInt(cpf.charAt(9))) return false;
+            
+            sum = 0;
+            for (let i = 0; i < 10; i++) {
+                sum += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            return remainder === parseInt(cpf.charAt(10));
+        }
+
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + 'Icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Toggle checkbox
+        function toggleCheckbox(checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            checkbox.classList.toggle('checked');
+            validateForm();
+        }
+
+        // Submit form
+        function submitForm() {
+            const submitButton = document.getElementById('submitButton');
+            const submitText = submitButton.querySelector('.submit-text');
+            const loading = submitButton.querySelector('.loading');
+            
+            // Show loading state
+            submitText.style.display = 'none';
+            loading.style.display = 'flex';
+            submitButton.disabled = true;
+            
+            // Collect form data
+            const formData = new FormData(document.getElementById('registerDriverForm'));
+            const userData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                userData[key] = value;
+            }
+            
+            // Add checkbox states
+            userData.userType = 'driver';
+            userData.termsAccepted = document.getElementById('termsAccepted').classList.contains('checked');
+            userData.professionalTerms = document.getElementById('professionalTerms').classList.contains('checked');
+            userData.backgroundCheck = document.getElementById('backgroundCheck').classList.contains('checked');
+            userData.registrationDate = new Date().toISOString();
+            userData.status = 'pending_approval';
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Store user data (in real app, send to backend)
+                localStorage.setItem('driverData', JSON.stringify(userData));
+                
+                // Show success message and redirect
+                alert('Cadastro enviado com sucesso!\n\nSeu cadastro será analisado em até 48 horas.\nVocê receberá um e-mail com o resultado da análise.');
+                
+                // Redirect to login page
+                window.location.href = 'index.html';
+            }, 3000);
+        }
+
+        // Go back to login
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
