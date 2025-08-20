@@ -17,7 +17,7 @@ try {
     // Dados do cliente de teste
     $clientData = [
         'full_name' => 'João Silva Santos',
-        'cpf' => '123.456.789-01',
+        'cpf' => '111.444.777-35', // CPF válido
         'birth_date' => '1990-05-15',
         'phone' => '(11) 99999-1234',
         'whatsapp' => '(11) 99999-1234',
@@ -35,7 +35,7 @@ try {
     // Dados do guincheiro de teste
     $driverUserData = [
         'full_name' => 'Carlos Eduardo Moreira',
-        'cpf' => '987.654.321-02',
+        'cpf' => '222.555.888-46',
         'birth_date' => '1985-08-22',
         'phone' => '(11) 88888-5678',
         'whatsapp' => '(11) 88888-5678',

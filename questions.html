@@ -157,16 +157,6 @@
             transform: translateY(-30px);
         }
 
-        .question-image {
-            width: 100%;
-            max-width: 280px;
-            height: auto;
-            border-radius: 8px;
-            margin: 0 auto 30px;
-            opacity: 0.9;
-            transition: all 0.3s ease;
-        }
-
         .question-text {
             font-size: 1.2rem;
             font-weight: 300;
@@ -373,68 +363,119 @@
             'eletricista': 'Eletricista'
         };
 
-        // Questions data - images from perguntas folder
-        const questionsData = [
+        // Standard questions (appears for all services)
+        const standardQuestions = [
             {
-                id: 1,
-                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09.jpeg',
-                text: 'Qual é a situação do seu veículo?',
+                id: 'vehicle_type',
+                text: 'Qual é o tipo do veículo?',
                 options: [
-                    { id: 'situacao_1', text: 'Não liga' },
-                    { id: 'situacao_2', text: 'Liga mas não anda' },
-                    { id: 'situacao_3', text: 'Problema mecânico' },
-                    { id: 'situacao_4', text: 'Acidente' }
+                    { id: 'carro_passeio', text: 'Carro Passeio' },
+                    { id: 'sedan_grande', text: 'Sedan Grande Porte' },
+                    { id: 'pickup_suv', text: 'Pickup SUV' },
+                    { id: 'van_furgao', text: 'Van Furgão' },
+                    { id: 'utilitario_carga', text: 'Utilitário Carga' },
+                    { id: 'motocicleta', text: 'Motocicleta' },
+                    { id: 'outros', text: 'Outros' }
                 ]
             },
             {
-                id: 2,
-                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09 (1).jpeg',
-                text: 'Que tipo de veículo você possui?',
+                id: 'vehicle_armored',
+                text: 'Este veículo é blindado? (Para saber o peso do veículo)',
                 options: [
-                    { id: 'veiculo_1', text: 'Carro pequeno' },
-                    { id: 'veiculo_2', text: 'Carro médio/grande' },
-                    { id: 'veiculo_3', text: 'SUV/Pickup' },
-                    { id: 'veiculo_4', text: 'Moto' }
-                ]
-            },
-            {
-                id: 3,
-                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09 (2).jpeg',
-                text: 'Onde está localizado seu veículo?',
-                options: [
-                    { id: 'local_1', text: 'Na rua/estrada' },
-                    { id: 'local_2', text: 'Em garagem/estacionamento' },
-                    { id: 'local_3', text: 'Em local de difícil acesso' },
-                    { id: 'local_4', text: 'Em oficina' }
-                ]
-            },
-            {
-                id: 4,
-                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09 (3).jpeg',
-                text: 'Qual a urgência do atendimento?',
-                options: [
-                    { id: 'urgencia_1', text: 'Emergência - Preciso agora' },
-                    { id: 'urgencia_2', text: 'Urgente - Em até 1 hora' },
-                    { id: 'urgencia_3', text: 'Normal - Em até 2 horas' },
-                    { id: 'urgencia_4', text: 'Posso aguardar - Hoje' }
-                ]
-            },
-            {
-                id: 5,
-                image: 'perguntas/WhatsApp Image 2025-08-17 at 20.18.09 (4).jpeg',
-                text: 'Você tem seguro ou convênio?',
-                options: [
-                    { id: 'seguro_1', text: 'Sim, tenho seguro auto' },
-                    { id: 'seguro_2', text: 'Sim, tenho convênio' },
-                    { id: 'seguro_3', text: 'Não tenho' },
-                    { id: 'seguro_4', text: 'Não sei informar' }
+                    { id: 'blindado', text: 'É blindado' },
+                    { id: 'nao_blindado', text: 'Não é blindado' }
                 ]
             }
         ];
 
+        // Service-specific questions
+        const serviceSpecificQuestions = {
+            'chaveiro': [
+                {
+                    id: 'chaveiro_situation',
+                    text: 'Em que situação você está?',
+                    options: [
+                        { id: 'chave_trancada', text: 'A chave está trancada dentro do veículo' },
+                        { id: 'perdi_chave', text: 'Perdi a chave' }
+                    ]
+                }
+            ],
+            'guincho': [
+                {
+                    id: 'guincho_reason',
+                    text: 'Qual o motivo do guincho?',
+                    options: [
+                        { id: 'acidente', text: 'Acidente' },
+                        { id: 'pane_mecanica', text: 'Pane mecânica' },
+                        { id: 'nao_liga', text: 'Veículo não liga' },
+                        { id: 'outros_motivos', text: 'Outros motivos' }
+                    ]
+                },
+                {
+                    id: 'guincho_destination',
+                    text: 'Para onde deseja levar o veículo?',
+                    options: [
+                        { id: 'oficina_escolha', text: 'Oficina de minha escolha' },
+                        { id: 'oficina_indicacao', text: 'Oficina por indicação' },
+                        { id: 'residencia', text: 'Minha residência' },
+                        { id: 'outros_local', text: 'Outro local' }
+                    ]
+                }
+            ],
+            'bateria': [
+                {
+                    id: 'bateria_problem',
+                    text: 'Qual o problema com a bateria?',
+                    options: [
+                        { id: 'descarregada', text: 'Bateria descarregada' },
+                        { id: 'nao_funciona', text: 'Bateria não funciona' },
+                        { id: 'substituicao', text: 'Preciso substituir' },
+                        { id: 'nao_sei', text: 'Não sei o problema' }
+                    ]
+                }
+            ],
+            'pneu': [
+                {
+                    id: 'pneu_problem',
+                    text: 'Qual o problema com o pneu?',
+                    options: [
+                        { id: 'furado', text: 'Pneu furado' },
+                        { id: 'murcho', text: 'Pneu murcho' },
+                        { id: 'sem_estepe', text: 'Não tenho estepe' },
+                        { id: 'nao_consigo_trocar', text: 'Não consigo trocar' }
+                    ]
+                }
+            ],
+            'mecanico': [
+                {
+                    id: 'mecanico_problem',
+                    text: 'Qual o problema mecânico?',
+                    options: [
+                        { id: 'nao_liga', text: 'Veículo não liga' },
+                        { id: 'barulho_estranho', text: 'Barulho estranho' },
+                        { id: 'superaquecimento', text: 'Superaquecimento' },
+                        { id: 'outros_problemas', text: 'Outros problemas' }
+                    ]
+                }
+            ],
+            'eletricista': [
+                {
+                    id: 'eletrica_problem',
+                    text: 'Qual o problema elétrico?',
+                    options: [
+                        { id: 'luzes_nao_funcionam', text: 'Luzes não funcionam' },
+                        { id: 'sistema_eletrico', text: 'Problema no sistema elétrico' },
+                        { id: 'alternador', text: 'Problema no alternador' },
+                        { id: 'outros_eletricos', text: 'Outros problemas elétricos' }
+                    ]
+                }
+            ]
+        };
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             getServiceFromUrl();
+            buildQuestionsList();
             loadQuestions();
             showCurrentQuestion();
         });
@@ -449,17 +490,27 @@
             document.getElementById('serviceTitle').textContent = serviceName;
         }
 
+        // Build complete questions list for the selected service
+        function buildQuestionsList() {
+            // Start with standard questions
+            questions = [...standardQuestions];
+            
+            // Add service-specific questions if they exist
+            if (serviceSpecificQuestions[selectedService]) {
+                questions = questions.concat(serviceSpecificQuestions[selectedService]);
+            }
+        }
+
         // Load questions into DOM
         function loadQuestions() {
             const container = document.getElementById('questionContainer');
             
-            questionsData.forEach((question, index) => {
+            questions.forEach((question, index) => {
                 const questionCard = document.createElement('div');
                 questionCard.className = 'question-card';
                 questionCard.id = `question-${index}`;
                 
                 questionCard.innerHTML = `
-                    <img src="${question.image}" alt="Pergunta ${question.id}" class="question-image" onerror="this.style.display='none'">
                     <div class="question-text">${question.text}</div>
                     <div class="answer-buttons">
                         ${question.options.map(option => `
@@ -472,8 +523,6 @@
                 
                 container.appendChild(questionCard);
             });
-            
-            questions = questionsData;
         }
 
         // Show current question
