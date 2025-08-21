@@ -19,7 +19,8 @@
       "Bash(start \"http://localhost/guincho/service-details.html?service=guincho\")",
       "Bash(start \"http://localhost/guincho/api/database/setup_local.php\")",
       "Bash(start \"http://localhost/guincho/api/test/api-test.php\")",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "Bash(\"C:\\xampp\\php\\php.exe\":*)"
     ],
     "deny": [],
     "ask": []
