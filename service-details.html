@@ -91,6 +91,7 @@
             height: 100vh;
             touch-action: none;
             overflow: hidden;
+            cursor: pointer;
         }
 
         #map {
@@ -348,7 +349,7 @@
         }
 
         .trip-value {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: rgba(255,255,255,0.8);
             line-height: 1.3;
         }
@@ -694,6 +695,28 @@
             }
         }
 
+        /* Clickable area overlay to toggle panel */
+        .map-toggle-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        /* Don't interfere with the map when panel is expanded */
+        .map-toggle-overlay.panel-expanded {
+            bottom: 350px; /* Adjust based on panel height */
+        }
+
+        /* Don't interfere with map controls and modals */
+        .map-toggle-overlay.disabled {
+            pointer-events: none;
+        }
+
         /* Mobile responsive */
         @media (max-width: 480px) {
             .location-modal {
@@ -761,6 +784,9 @@
             <span id="currentPositionText">Sua posição atual</span>
         </div>
     </div>
+
+    <!-- Clickable overlay for panel toggle -->
+    <div class="map-toggle-overlay" id="mapToggleOverlay" onclick="togglePanelFromMap()"></div>
 
     <!-- Address Modal -->
     <div class="location-modal-overlay" id="addressModalOverlay" style="display: none;">
@@ -1013,6 +1039,9 @@
 
             mapInitialized = true;
             
+            // Initialize overlay state
+            updateOverlayState();
+            
             // Auto-open origin selection modal after map loads
             setTimeout(() => {
                 selectOrigin();
@@ -1106,6 +1135,9 @@
             gpsOption.style.display = showGPS ? 'flex' : 'none';
             
             document.getElementById('locationModalOverlay').style.display = 'flex';
+            
+            // Disable map toggle overlay while modal is open
+            document.getElementById('mapToggleOverlay').classList.add('disabled');
         }
 
         function closeLocationModal() {
@@ -1113,6 +1145,9 @@
             // Não limpar currentSelectionType aqui pois ainda vamos usar
             isSelectingOnMap = false;
             document.getElementById('map').style.cursor = '';
+            
+            // Re-enable map toggle overlay
+            document.getElementById('mapToggleOverlay').classList.remove('disabled');
         }
         
         function cancelLocationModal() {
@@ -1120,6 +1155,9 @@
             currentSelectionType = ''; // Limpar quando cancelar
             isSelectingOnMap = false;
             document.getElementById('map').style.cursor = '';
+            
+            // Re-enable map toggle overlay
+            document.getElementById('mapToggleOverlay').classList.remove('disabled');
         }
 
         // Location selection methods
@@ -1202,6 +1240,9 @@
             input.value = '';
             modal.style.display = 'flex';
             
+            // Disable map toggle overlay while modal is open
+            document.getElementById('mapToggleOverlay').classList.add('disabled');
+            
             // Inicializar autocomplete do Google Places
             setTimeout(() => {
                 initializeAutocomplete(input);
@@ -1283,6 +1324,9 @@
         function closeAddressModalNew() {
             document.getElementById('addressModalOverlay').style.display = 'none';
             // Não limpar currentSelectionType aqui pois ainda precisamos saber o tipo
+            
+            // Re-enable map toggle overlay
+            document.getElementById('mapToggleOverlay').classList.remove('disabled');
         }
 
         function confirmAddressNew() {
@@ -1557,17 +1601,43 @@
                 collapsePanel();
             }
         }
+
+        function togglePanelFromMap() {
+            // Only toggle if not in special modes
+            if (isSelectingOnMap || 
+                document.getElementById('locationModalOverlay').style.display !== 'none' ||
+                document.getElementById('addressModalOverlay').style.display !== 'none') {
+                return;
+            }
+            
+            togglePanel();
+        }
         
         function collapsePanel() {
             const panel = document.getElementById('bottomPanel');
+            const overlay = document.getElementById('mapToggleOverlay');
+            
             panel.classList.add('collapsed');
+            overlay.classList.remove('panel-expanded');
             panelCollapsed = true;
         }
         
         function expandPanel() {
             const panel = document.getElementById('bottomPanel');
+            const overlay = document.getElementById('mapToggleOverlay');
+            
             panel.classList.remove('collapsed');
+            overlay.classList.add('panel-expanded');
             panelCollapsed = false;
+        }
+
+        function updateOverlayState() {
+            const overlay = document.getElementById('mapToggleOverlay');
+            if (!panelCollapsed) {
+                overlay.classList.add('panel-expanded');
+            } else {
+                overlay.classList.remove('panel-expanded');
+            }
         }
 
         // Go back to services

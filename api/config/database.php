@@ -5,6 +5,7 @@
  */
 
 class Database {
+    // SEMPRE usar banco do servidor Hostinger
     private $host = 'srv1310.hstgr.io';
     private $db_name = 'u461266905_guincho';
     private $username = 'u461266905_guincho';
@@ -47,12 +48,18 @@ class Database {
             return [
                 'status' => 'success',
                 'message' => 'Conexão estabelecida com sucesso',
+                'environment' => 'Servidor (Hostinger)',
+                'host' => $this->host,
+                'database' => $this->db_name,
                 'server_info' => $conn->getAttribute(PDO::ATTR_SERVER_INFO)
             ];
         } catch(Exception $e) {
             return [
                 'status' => 'error',
-                'message' => 'Erro na conexão: ' . $e->getMessage()
+                'message' => 'Erro na conexão: ' . $e->getMessage(),
+                'environment' => 'Servidor (Hostinger)',
+                'host' => $this->host,
+                'database' => $this->db_name
             ];
         }
     }

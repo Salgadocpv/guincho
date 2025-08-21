@@ -15,7 +15,11 @@
       "Bash(git checkout:*)",
       "Bash(mkdir:*)",
       "Bash(git pull:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(start \"http://localhost/guincho/service-details.html?service=guincho\")",
+      "Bash(start \"http://localhost/guincho/api/database/setup_local.php\")",
+      "Bash(start \"http://localhost/guincho/api/test/api-test.php\")",
+      "Bash(start:*)"
     ],
     "deny": [],
     "ask": []
