@@ -151,21 +151,22 @@
             backdrop-filter: blur(20px);
             margin: 0 12px 12px 12px;
             border-radius: 12px;
-            padding: 8px 16px 12px;
+            padding: 10px 16px 14px;
             box-shadow: 0 -8px 32px rgba(0,0,0,0.3);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(255,255,255,0.1);
-            max-height: 20vh;
-            overflow-y: auto;
+            height: 30vh;
+            max-height: 30vh;
+            overflow: hidden;
         }
 
         /* Drag Handle */
         .drag-handle {
-            width: 30px;
-            height: 3px;
+            width: 35px;
+            height: 4px;
             background: rgba(255,255,255,0.8);
             border-radius: 2px;
-            margin: 0 auto 8px;
+            margin: 0 auto 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
@@ -184,7 +185,7 @@
 
         /* Panel Animation States */
         .bottom-panel.collapsed {
-            transform: translateY(calc(100% - 35px));
+            transform: translateY(calc(100% - 40px));
         }
 
         .bottom-panel.collapsed .trip-selection {
@@ -295,17 +296,17 @@
         .trip-selection {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            padding: 4px 0;
+            gap: 8px;
+            padding: 6px 0;
         }
 
         .trip-item {
             display: flex;
             align-items: center;
-            padding: 8px 12px;
+            padding: 10px 14px;
             background: rgba(0,0,0,0.4);
             backdrop-filter: blur(15px);
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
             cursor: pointer;
             transition: all 0.3s ease;
@@ -330,13 +331,13 @@
         }
 
         .trip-icon {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 10px;
-            font-size: 0.9rem;
+            margin-right: 12px;
+            font-size: 1rem;
         }
 
         .trip-content {
@@ -344,22 +345,22 @@
         }
 
         .trip-label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: white;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
 
         .trip-value {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             color: rgba(255,255,255,0.8);
-            line-height: 1.2;
+            line-height: 1.25;
         }
 
         .trip-arrow {
             color: rgba(255,255,255,0.6);
-            font-size: 0.75rem;
-            margin-left: 8px;
+            font-size: 0.8rem;
+            margin-left: 10px;
         }
 
         .trip-item:hover .trip-arrow {
@@ -711,7 +712,7 @@
 
         /* Don't interfere with the map when panel is expanded */
         .map-toggle-overlay.panel-expanded {
-            bottom: 350px; /* Adjust based on panel height */
+            bottom: 30vh; /* Match panel height */
         }
 
         /* Don't interfere with map controls and modals */
@@ -746,28 +747,41 @@
 
             .bottom-panel {
                 margin: 0 8px 8px 8px;
-                padding: 6px 12px 8px;
+                padding: 8px 12px 10px;
                 border-radius: 10px;
-                max-height: 18vh;
+                height: 28vh;
+                max-height: 28vh;
+            }
+            
+            .trip-selection {
+                gap: 6px;
+                padding: 4px 0;
             }
             
             .trip-item {
-                padding: 6px 10px;
+                padding: 8px 12px;
             }
             
             .trip-icon {
-                width: 20px;
-                height: 20px;
-                margin-right: 8px;
-                font-size: 0.8rem;
+                width: 24px;
+                height: 24px;
+                margin-right: 10px;
+                font-size: 0.9rem;
             }
             
             .trip-label {
-                font-size: 0.7rem;
+                font-size: 0.75rem;
+                margin-bottom: 2px;
             }
             
             .trip-value {
-                font-size: 0.6rem;
+                font-size: 0.65rem;
+            }
+            
+            .drag-handle {
+                width: 30px;
+                height: 3px;
+                margin-bottom: 8px;
             }
         }
     </style>
