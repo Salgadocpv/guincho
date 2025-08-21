@@ -4,7 +4,7 @@
 -- Tabela de usuários (clientes)
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_type ENUM('client', 'driver') NOT NULL DEFAULT 'client',
+    user_type ENUM('client', 'driver', 'partner') NOT NULL DEFAULT 'client',
     
     -- Dados pessoais
     full_name VARCHAR(255) NOT NULL,
@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS drivers (
     -- Documentação
     cnh_photo_path VARCHAR(255),
     crlv_photo_path VARCHAR(255),
+    vehicle_photo_path VARCHAR(255),
     
     -- Termos específicos
     professional_terms_accepted BOOLEAN DEFAULT FALSE,
@@ -92,6 +93,60 @@ CREATE TABLE IF NOT EXISTS drivers (
     INDEX idx_approval_status (approval_status),
     INDEX idx_specialty (specialty),
     INDEX idx_work_region (work_region)
+);
+
+-- Tabela de parceiros (estabelecimentos)
+CREATE TABLE IF NOT EXISTS partners (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    
+    -- Tipo de negócio
+    business_type ENUM('lava-rapido', 'mecanica', 'auto-eletrica') NOT NULL,
+    
+    -- Dados do estabelecimento
+    business_name VARCHAR(255) NOT NULL,
+    cnpj VARCHAR(18) UNIQUE NOT NULL,
+    address TEXT NOT NULL,
+    zip_code VARCHAR(9) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(2) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    hours VARCHAR(255) NOT NULL,
+    
+    -- Dados do proprietário
+    owner_name VARCHAR(255) NOT NULL,
+    owner_cpf VARCHAR(14) NOT NULL,
+    whatsapp VARCHAR(20) NOT NULL,
+    
+    -- Documentação
+    business_license_path VARCHAR(255),
+    business_photo_path VARCHAR(255),
+    
+    -- Termos específicos
+    partner_terms_accepted BOOLEAN DEFAULT FALSE,
+    data_sharing_authorized BOOLEAN DEFAULT FALSE,
+    
+    -- Status profissional
+    approval_status ENUM('pending', 'approved', 'rejected', 'suspended') DEFAULT 'pending',
+    approval_date TIMESTAMP NULL,
+    approved_by INT NULL,
+    
+    -- Ratings e estatísticas
+    rating DECIMAL(3,2) DEFAULT 0.00,
+    total_services INT DEFAULT 0,
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
+    
+    INDEX idx_user_id (user_id),
+    INDEX idx_cnpj (cnpj),
+    INDEX idx_business_type (business_type),
+    INDEX idx_approval_status (approval_status),
+    INDEX idx_city_state (city, state)
 );
 
 -- Tabela de sessões de usuário

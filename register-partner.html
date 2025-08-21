@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iguincho - Cadastro de Guincheiro</title>
+    <title>Iguincho - Cadastro de Parceiro</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -19,7 +19,7 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #28a745 0%, #495057 100%);
+            background: linear-gradient(135deg, #007bff 0%, #495057 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -250,6 +250,61 @@
             border-bottom-color: white;
         }
 
+        /* Business type selection */
+        .business-types {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .business-type-option {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .business-type-option:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .business-type-option.selected {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+        }
+
+        .business-type-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .business-type-content {
+            flex: 1;
+        }
+
+        .business-type-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .business-type-description {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+        }
+
         /* Checkbox styling */
         .checkbox-group {
             display: flex;
@@ -395,8 +450,8 @@
 
         /* Professional badge */
         .professional-badge {
-            background: rgba(40, 167, 69, 0.2);
-            border: 1px solid rgba(40, 167, 69, 0.4);
+            background: rgba(0, 123, 255, 0.2);
+            border: 1px solid rgba(0, 123, 255, 0.4);
             border-radius: 20px;
             padding: 6px 12px;
             font-size: 0.8rem;
@@ -407,7 +462,7 @@
 
         .professional-badge i {
             margin-right: 6px;
-            color: #28a745;
+            color: #007bff;
         }
     </style>
 </head>
@@ -420,62 +475,136 @@
         <!-- Header Section -->
         <div class="register-header">
             <div class="app-logo">
-                <i class="fas fa-truck"></i>
+                <i class="fas fa-store"></i>
             </div>
             <div class="professional-badge">
-                <i class="fas fa-shield-alt"></i>
-                Cadastro Profissional
+                <i class="fas fa-handshake"></i>
+                Cadastro de Parceiro
             </div>
-            <div class="app-title">Seja um Guincheiro</div>
-            <div class="app-subtitle">Cadastre-se como profissional do Iguincho</div>
+            <div class="app-title">Seja um Parceiro</div>
+            <div class="app-subtitle">Cadastre seu estabelecimento no Iguincho</div>
         </div>
 
         <!-- Form Section -->
-        <form class="register-form" id="registerDriverForm">
-            <!-- Personal Information -->
+        <form class="register-form" id="registerPartnerForm">
+            <!-- Business Type Selection -->
             <div class="form-section">
-                <div class="section-title">Dados Pessoais</div>
+                <div class="section-title">Tipo de Negócio</div>
+                
+                <div class="business-types">
+                    <div class="business-type-option" data-type="lava-rapido" onclick="selectBusinessType('lava-rapido')">
+                        <div class="business-type-icon">
+                            <i class="fas fa-spray-can"></i>
+                        </div>
+                        <div class="business-type-content">
+                            <div class="business-type-title">Lava Rápido</div>
+                            <div class="business-type-description">Lavagem e limpeza de veículos</div>
+                        </div>
+                    </div>
+
+                    <div class="business-type-option" data-type="mecanica" onclick="selectBusinessType('mecanica')">
+                        <div class="business-type-icon">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                        <div class="business-type-content">
+                            <div class="business-type-title">Mecânica</div>
+                            <div class="business-type-description">Serviços mecânicos e manutenção</div>
+                        </div>
+                    </div>
+
+                    <div class="business-type-option" data-type="auto-eletrica" onclick="selectBusinessType('auto-eletrica')">
+                        <div class="business-type-icon">
+                            <i class="fas fa-car-battery"></i>
+                        </div>
+                        <div class="business-type-content">
+                            <div class="business-type-title">Auto Elétrica</div>
+                            <div class="business-type-description">Serviços elétricos automotivos</div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="businessType" name="businessType" required>
+                <div class="error-message" id="businessTypeError">Selecione o tipo de negócio</div>
+            </div>
+
+            <!-- Business Information -->
+            <div class="form-section">
+                <div class="section-title">Dados do Estabelecimento</div>
                 
                 <div class="form-group">
-                    <label class="form-label">Nome Completo</label>
-                    <input type="text" class="form-input" id="fullName" name="fullName" placeholder="Seu nome completo" required>
-                    <div class="error-message" id="fullNameError">Por favor, insira seu nome completo</div>
+                    <label class="form-label">Nome do Estabelecimento</label>
+                    <input type="text" class="form-input" id="businessName" name="businessName" placeholder="Ex: Auto Center Silva" required>
+                    <div class="error-message" id="businessNameError">Nome do estabelecimento obrigatório</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">CNPJ</label>
+                    <input type="text" class="form-input" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" required>
+                    <div class="error-message" id="cnpjError">CNPJ inválido</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Endereço Completo</label>
+                    <input type="text" class="form-input" id="address" name="address" placeholder="Rua, número, bairro" required>
+                    <div class="error-message" id="addressError">Endereço obrigatório</div>
                 </div>
 
                 <div class="form-group half">
-                    <label class="form-label">CPF</label>
-                    <input type="text" class="form-input" id="cpf" name="cpf" placeholder="000.000.000-00" required>
-                    <div class="error-message" id="cpfError">CPF inválido</div>
+                    <label class="form-label">CEP</label>
+                    <input type="text" class="form-input" id="zipCode" name="zipCode" placeholder="00000-000" required>
+                    <div class="error-message" id="zipCodeError">CEP inválido</div>
                 </div>
 
                 <div class="form-group half">
-                    <label class="form-label">Data de Nascimento</label>
-                    <input type="date" class="form-input" id="birthDate" name="birthDate" required>
-                    <div class="error-message" id="birthDateError">Data inválida</div>
+                    <label class="form-label">Cidade</label>
+                    <input type="text" class="form-input" id="city" name="city" placeholder="São Paulo" required>
+                    <div class="error-message" id="cityError">Cidade obrigatória</div>
                 </div>
 
                 <div class="form-group half">
-                    <label class="form-label">CNH</label>
-                    <input type="text" class="form-input" id="cnh" name="cnh" placeholder="Número da CNH" required>
-                    <div class="error-message" id="cnhError">CNH obrigatória</div>
-                </div>
-
-                <div class="form-group half">
-                    <label class="form-label">Categoria da CNH</label>
-                    <select class="form-select" id="cnhCategory" name="cnhCategory" required>
-                        <option value="">Selecione a categoria</option>
-                        <option value="B">B - Veículos até 3.500kg</option>
-                        <option value="C">C - Veículos de 3.500kg a 6.000kg</option>
-                        <option value="D">D - Veículos acima de 6.000kg</option>
-                        <option value="E">E - Veículos com reboque</option>
+                    <label class="form-label">Estado</label>
+                    <select class="form-select" id="state" name="state" required>
+                        <option value="">Selecione</option>
+                        <option value="SP">São Paulo</option>
+                        <option value="RJ">Rio de Janeiro</option>
+                        <option value="MG">Minas Gerais</option>
+                        <option value="RS">Rio Grande do Sul</option>
+                        <option value="PR">Paraná</option>
+                        <option value="SC">Santa Catarina</option>
+                        <option value="BA">Bahia</option>
+                        <option value="GO">Goiás</option>
+                        <option value="ES">Espírito Santo</option>
+                        <option value="PE">Pernambuco</option>
                     </select>
-                    <div class="error-message" id="cnhCategoryError">Selecione uma categoria</div>
+                    <div class="error-message" id="stateError">Estado obrigatório</div>
                 </div>
 
                 <div class="form-group half">
                     <label class="form-label">Telefone</label>
-                    <input type="tel" class="form-input" id="phone" name="phone" placeholder="(11) 99999-9999" required>
+                    <input type="tel" class="form-input" id="phone" name="phone" placeholder="(11) 3333-3333" required>
                     <div class="error-message" id="phoneError">Telefone inválido</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Horário de Funcionamento</label>
+                    <input type="text" class="form-input" id="hours" name="hours" placeholder="Ex: Seg-Sex 8h-18h, Sáb 8h-12h" required>
+                    <div class="error-message" id="hoursError">Horário obrigatório</div>
+                </div>
+            </div>
+
+            <!-- Owner Information -->
+            <div class="form-section">
+                <div class="section-title">Dados do Proprietário</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nome Completo do Proprietário</label>
+                    <input type="text" class="form-input" id="ownerName" name="ownerName" placeholder="Seu nome completo" required>
+                    <div class="error-message" id="ownerNameError">Nome do proprietário obrigatório</div>
+                </div>
+
+                <div class="form-group half">
+                    <label class="form-label">CPF do Proprietário</label>
+                    <input type="text" class="form-input" id="ownerCpf" name="ownerCpf" placeholder="000.000.000-00" required>
+                    <div class="error-message" id="ownerCpfError">CPF inválido</div>
                 </div>
 
                 <div class="form-group half">
@@ -485,104 +614,13 @@
                 </div>
             </div>
 
-            <!-- Professional Information -->
-            <div class="form-section">
-                <div class="section-title">Informações Profissionais</div>
-                
-                <div class="form-group half">
-                    <label class="form-label">Experiência (anos)</label>
-                    <select class="form-select" id="experience" name="experience" required>
-                        <option value="">Selecione</option>
-                        <option value="0-1">Menos de 1 ano</option>
-                        <option value="1-3">1 a 3 anos</option>
-                        <option value="3-5">3 a 5 anos</option>
-                        <option value="5-10">5 a 10 anos</option>
-                        <option value="10+">Mais de 10 anos</option>
-                    </select>
-                    <div class="error-message" id="experienceError">Selecione a experiência</div>
-                </div>
-
-                <div class="form-group half">
-                    <label class="form-label">Especialidade</label>
-                    <select class="form-select" id="specialty" name="specialty" required>
-                        <option value="">Selecione</option>
-                        <option value="carros">Carros de Passeio</option>
-                        <option value="motos">Motocicletas</option>
-                        <option value="suv">SUVs e Utilitários</option>
-                        <option value="caminhoes">Caminhões</option>
-                        <option value="todos">Todos os Veículos</option>
-                    </select>
-                    <div class="error-message" id="specialtyError">Selecione uma especialidade</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Região de Atuação</label>
-                    <input type="text" class="form-input" id="workRegion" name="workRegion" placeholder="Ex: São Paulo - Centro, Zona Sul" required>
-                    <div class="error-message" id="workRegionError">Região de atuação obrigatória</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Disponibilidade</label>
-                    <select class="form-select" id="availability" name="availability" required>
-                        <option value="">Selecione</option>
-                        <option value="24h">24 horas</option>
-                        <option value="comercial">Horário Comercial (8h-18h)</option>
-                        <option value="noturno">Período Noturno (18h-6h)</option>
-                        <option value="fds">Finais de Semana</option>
-                        <option value="personalizado">Personalizado</option>
-                    </select>
-                    <div class="error-message" id="availabilityError">Selecione a disponibilidade</div>
-                </div>
-            </div>
-
-            <!-- Vehicle Information -->
-            <div class="form-section">
-                <div class="section-title">Guincho / Veículo de Trabalho</div>
-                
-                <div class="form-group">
-                    <label class="form-label">Placa do Guincho</label>
-                    <input type="text" class="form-input" id="truckPlate" name="truckPlate" placeholder="ABC-1234" required>
-                    <div class="error-message" id="truckPlateError">Placa obrigatória</div>
-                </div>
-
-                <div class="form-group half">
-                    <label class="form-label">Marca do Guincho</label>
-                    <input type="text" class="form-input" id="truckBrand" name="truckBrand" placeholder="Ex: Ford, Mercedes" required>
-                    <div class="error-message" id="truckBrandError">Marca obrigatória</div>
-                </div>
-
-                <div class="form-group half">
-                    <label class="form-label">Modelo</label>
-                    <input type="text" class="form-input" id="truckModel" name="truckModel" placeholder="Ex: Cargo, Atego" required>
-                    <div class="error-message" id="truckModelError">Modelo obrigatório</div>
-                </div>
-
-                <div class="form-group half">
-                    <label class="form-label">Ano</label>
-                    <input type="number" class="form-input" id="truckYear" name="truckYear" placeholder="2020" min="1990" max="2025" required>
-                    <div class="error-message" id="truckYearError">Ano inválido</div>
-                </div>
-
-                <div class="form-group half">
-                    <label class="form-label">Capacidade de Carga</label>
-                    <select class="form-select" id="truckCapacity" name="truckCapacity" required>
-                        <option value="">Selecione</option>
-                        <option value="leve">Até 1.500kg (carros pequenos)</option>
-                        <option value="media">1.500kg - 3.000kg (carros médios/SUVs)</option>
-                        <option value="pesada">3.000kg - 6.000kg (caminhonetes/utilitários)</option>
-                        <option value="extra">Acima de 6.000kg (caminhões)</option>
-                    </select>
-                    <div class="error-message" id="truckCapacityError">Selecione a capacidade</div>
-                </div>
-            </div>
-
-            <!-- Contact Information -->
+            <!-- Access Information -->
             <div class="form-section">
                 <div class="section-title">Acesso à Plataforma</div>
                 
                 <div class="form-group">
-                    <label class="form-label">E-mail Profissional</label>
-                    <input type="email" class="form-input" id="email" name="email" placeholder="seu@email.com" required>
+                    <label class="form-label">E-mail do Estabelecimento</label>
+                    <input type="email" class="form-input" id="email" name="email" placeholder="contato@seuestablecimento.com" required>
                     <div class="error-message" id="emailError">E-mail inválido</div>
                 </div>
 
@@ -610,39 +648,25 @@
                 <div class="section-title">Documentação</div>
                 
                 <div class="form-group">
-                    <label class="form-label">Foto da CNH</label>
+                    <label class="form-label">Alvará de Funcionamento</label>
                     <div class="file-upload">
-                        <input type="file" id="cnhPhoto" name="cnhPhoto" accept="image/*" required>
-                        <label for="cnhPhoto" class="file-upload-label" id="cnhPhotoLabel">
-                            <i class="fas fa-upload"></i> Selecionar foto da CNH
+                        <input type="file" id="businessLicense" name="businessLicense" accept="image/*,application/pdf" required>
+                        <label for="businessLicense" class="file-upload-label" id="businessLicenseLabel">
+                            <i class="fas fa-upload"></i> Selecionar Alvará
                         </label>
                     </div>
-                    <div class="error-message" id="cnhPhotoError">Foto da CNH obrigatória</div>
+                    <div class="error-message" id="businessLicenseError">Alvará obrigatório</div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">CRLV do Guincho</label>
+                    <label class="form-label">Foto da Fachada do Estabelecimento</label>
                     <div class="file-upload">
-                        <input type="file" id="crlvPhoto" name="crlvPhoto" accept="image/*" required>
-                        <label for="crlvPhoto" class="file-upload-label" id="crlvPhotoLabel">
-                            <i class="fas fa-upload"></i> Selecionar CRLV
+                        <input type="file" id="businessPhoto" name="businessPhoto" accept="image/*" required>
+                        <label for="businessPhoto" class="file-upload-label" id="businessPhotoLabel">
+                            <i class="fas fa-camera"></i> Foto da fachada
                         </label>
                     </div>
-                    <div class="error-message" id="crlvPhotoError">CRLV obrigatório</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Foto do Veículo com Placa Visível</label>
-                    <div class="file-upload">
-                        <input type="file" id="vehiclePhoto" name="vehiclePhoto" accept="image/*" required>
-                        <label for="vehiclePhoto" class="file-upload-label" id="vehiclePhotoLabel">
-                            <i class="fas fa-camera"></i> Foto do veículo mostrando a placa
-                        </label>
-                    </div>
-                    <div class="error-message" id="vehiclePhotoError">Foto do veículo com placa obrigatória</div>
-                    <small style="color: rgba(255,255,255,0.7); font-size: 0.8rem; display: block; margin-top: 4px;">
-                        <i class="fas fa-info-circle"></i> A placa deve estar claramente visível na foto
-                    </small>
+                    <div class="error-message" id="businessPhotoError">Foto da fachada obrigatória</div>
                 </div>
             </div>
 
@@ -655,17 +679,17 @@
                     </label>
                 </div>
 
-                <div class="checkbox-group" onclick="toggleCheckbox('professionalTerms')">
-                    <div class="custom-checkbox" id="professionalTerms"></div>
+                <div class="checkbox-group" onclick="toggleCheckbox('partnerTerms')">
+                    <div class="custom-checkbox" id="partnerTerms"></div>
                     <label class="checkbox-label">
-                        Aceito os termos específicos para prestadores de serviço e declaro que todas as informações são verdadeiras
+                        Aceito os termos específicos para parceiros e declaro que todas as informações são verdadeiras
                     </label>
                 </div>
 
-                <div class="checkbox-group" onclick="toggleCheckbox('backgroundCheck')">
-                    <div class="custom-checkbox" id="backgroundCheck"></div>
+                <div class="checkbox-group" onclick="toggleCheckbox('dataSharing')">
+                    <div class="custom-checkbox" id="dataSharing"></div>
                     <label class="checkbox-label">
-                        Autorizo a verificação de antecedentes e validação dos documentos fornecidos
+                        Autorizo o compartilhamento dos dados do estabelecimento com clientes da plataforma
                     </label>
                 </div>
             </div>
@@ -681,7 +705,8 @@
 
             <!-- Login Link -->
             <div class="login-link">
-                Já é um guincheiro cadastrado? <a href="index.html">Entrar</a><br>
+                Já tem uma conta? <a href="index.html">Entrar</a><br>
+                É um guincheiro? <a href="register-driver.html">Cadastrar como Guincheiro</a><br>
                 É um cliente? <a href="register.html">Cadastrar como Cliente</a>
             </div>
         </form>
@@ -690,6 +715,7 @@
     <script>
         // Form validation and functionality
         let isFormValid = false;
+        let selectedBusinessType = '';
 
         // Initialize form
         document.addEventListener('DOMContentLoaded', function() {
@@ -698,9 +724,24 @@
             setupFileUploads();
         });
 
+        // Business type selection
+        function selectBusinessType(type) {
+            // Remove previous selection
+            document.querySelectorAll('.business-type-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Select new type
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            document.getElementById('businessType').value = type;
+            selectedBusinessType = type;
+            
+            validateForm();
+        }
+
         // Setup file upload handlers
         function setupFileUploads() {
-            ['cnhPhoto', 'crlvPhoto', 'vehiclePhoto'].forEach(id => {
+            ['businessLicense', 'businessPhoto'].forEach(id => {
                 const input = document.getElementById(id);
                 const label = document.getElementById(id + 'Label');
                 
@@ -710,7 +751,8 @@
                         label.innerHTML = `<i class="fas fa-check"></i> ${this.files[0].name}`;
                     } else {
                         label.classList.remove('has-file');
-                        label.innerHTML = `<i class="fas fa-upload"></i> Selecionar arquivo`;
+                        const icon = id === 'businessPhoto' ? 'camera' : 'upload';
+                        label.innerHTML = `<i class="fas fa-${icon}"></i> Selecionar arquivo`;
                     }
                     validateForm();
                 });
@@ -719,8 +761,18 @@
 
         // Setup input masks
         function setupMasks() {
+            // CNPJ mask
+            document.getElementById('cnpj').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                value = value.replace(/(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1/$2');
+                value = value.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+                e.target.value = value;
+            });
+
             // CPF mask
-            document.getElementById('cpf').addEventListener('input', function(e) {
+            document.getElementById('ownerCpf').addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 value = value.replace(/(\d{3})(\d)/, '$1.$2');
                 value = value.replace(/(\d{3})(\d)/, '$1.$2');
@@ -728,40 +780,34 @@
                 e.target.value = value;
             });
 
+            // CEP mask
+            document.getElementById('zipCode').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                e.target.value = value;
+            });
+
             // Phone masks
             ['phone', 'whatsapp'].forEach(id => {
                 document.getElementById(id).addEventListener('input', function(e) {
                     let value = e.target.value.replace(/\D/g, '');
-                    value = value.replace(/(\d{2})(\d)/, '($1) $2');
-                    value = value.replace(/(\d{4,5})(\d{4})$/, '$1-$2');
-                    e.target.value = value;
-                });
-            });
-
-            // License plate mask
-            ['truckPlate'].forEach(id => {
-                document.getElementById(id).addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                    if (value.length > 3) {
-                        value = value.replace(/(\w{3})(\w)/, '$1-$2');
+                    if (value.length <= 10) {
+                        // Fixed line: (11) 3333-3333
+                        value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                        value = value.replace(/(\d{4})(\d{4})$/, '$1-$2');
+                    } else {
+                        // Mobile: (11) 99999-9999
+                        value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                        value = value.replace(/(\d{4,5})(\d{4})$/, '$1-$2');
                     }
                     e.target.value = value;
                 });
-            });
-
-            // CNH mask
-            document.getElementById('cnh').addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length > 11) {
-                    value = value.substring(0, 11);
-                }
-                e.target.value = value;
             });
         }
 
         // Setup form validation
         function setupFormValidation() {
-            const form = document.getElementById('registerDriverForm');
+            const form = document.getElementById('registerPartnerForm');
             const submitButton = document.getElementById('submitButton');
 
             // Add event listeners to all inputs
@@ -784,7 +830,7 @@
 
         // Check if all required checkboxes are checked
         function allRequiredCheckboxesChecked() {
-            return ['termsAccepted', 'professionalTerms', 'backgroundCheck'].every(id => 
+            return ['termsAccepted', 'partnerTerms', 'dataSharing'].every(id => 
                 document.getElementById(id).classList.contains('checked')
             );
         }
@@ -797,19 +843,20 @@
             let errorMessage = '';
 
             switch (fieldName) {
-                case 'fullName':
-                    isValid = value.length >= 3 && value.includes(' ');
-                    errorMessage = 'Por favor, insira seu nome completo';
+                case 'businessName':
+                case 'ownerName':
+                    isValid = value.length >= 3;
+                    errorMessage = 'Nome muito curto';
                     break;
                 
-                case 'cpf':
+                case 'cnpj':
+                    isValid = validateCNPJ(value);
+                    errorMessage = 'CNPJ inválido';
+                    break;
+                
+                case 'ownerCpf':
                     isValid = validateCPF(value);
                     errorMessage = 'CPF inválido';
-                    break;
-                
-                case 'cnh':
-                    isValid = value.replace(/\D/g, '').length >= 9;
-                    errorMessage = 'CNH deve ter pelo menos 9 dígitos';
                     break;
                 
                 case 'email':
@@ -833,20 +880,20 @@
                     errorMessage = 'Telefone inválido';
                     break;
                 
-                case 'truckPlate':
-                    isValid = /^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$/.test(value.replace('-', ''));
-                    errorMessage = 'Placa inválida';
-                    break;
-                
-                case 'truckYear':
-                    const year = parseInt(value);
-                    isValid = year >= 1990 && year <= 2025;
-                    errorMessage = 'Ano inválido';
+                case 'zipCode':
+                    isValid = /^\d{5}-?\d{3}$/.test(value.replace('-', ''));
+                    errorMessage = 'CEP inválido';
                     break;
                 
                 default:
                     isValid = value.length > 0;
                     errorMessage = 'Campo obrigatório';
+            }
+
+            // Check business type
+            if (fieldName === 'businessType') {
+                isValid = selectedBusinessType !== '';
+                errorMessage = 'Selecione o tipo de negócio';
             }
 
             // Check file uploads
@@ -873,12 +920,20 @@
 
         // Validate entire form
         function validateForm() {
-            const form = document.getElementById('registerDriverForm');
+            const form = document.getElementById('registerPartnerForm');
             const requiredInputs = form.querySelectorAll('input[required], select[required]');
             let allValid = true;
 
+            // Validate business type selection
+            if (!selectedBusinessType) {
+                allValid = false;
+                document.getElementById('businessTypeError').style.display = 'block';
+            } else {
+                document.getElementById('businessTypeError').style.display = 'none';
+            }
+
             requiredInputs.forEach(input => {
-                if (!validateField(input)) {
+                if (input.id !== 'businessType' && !validateField(input)) {
                     allValid = false;
                 }
             });
@@ -890,6 +945,39 @@
             document.getElementById('submitButton').disabled = !isFormValid;
             
             return isFormValid;
+        }
+
+        // CNPJ validation
+        function validateCNPJ(cnpj) {
+            cnpj = cnpj.replace(/\D/g, '');
+            if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
+            
+            let length = cnpj.length - 2;
+            let numbers = cnpj.substring(0, length);
+            let digits = cnpj.substring(length);
+            let sum = 0;
+            let pos = length - 7;
+            
+            for (let i = length; i >= 1; i--) {
+                sum += numbers.charAt(length - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            
+            let result = sum % 11 < 2 ? 0 : 11 - sum % 11;
+            if (result !== parseInt(digits.charAt(0))) return false;
+            
+            length = length + 1;
+            numbers = cnpj.substring(0, length);
+            sum = 0;
+            pos = length - 7;
+            
+            for (let i = length; i >= 1; i--) {
+                sum += numbers.charAt(length - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            
+            result = sum % 11 < 2 ? 0 : 11 - sum % 11;
+            return result === parseInt(digits.charAt(1));
         }
 
         // CPF validation
@@ -949,28 +1037,29 @@
             submitButton.disabled = true;
             
             // Collect form data
-            const formData = new FormData(document.getElementById('registerDriverForm'));
+            const formData = new FormData(document.getElementById('registerPartnerForm'));
             const userData = {};
             
             for (let [key, value] of formData.entries()) {
                 userData[key] = value;
             }
             
-            // Add checkbox states
-            userData.userType = 'driver';
+            // Add additional data
+            userData.userType = 'partner';
+            userData.businessType = selectedBusinessType;
             userData.termsAccepted = document.getElementById('termsAccepted').classList.contains('checked');
-            userData.professionalTerms = document.getElementById('professionalTerms').classList.contains('checked');
-            userData.backgroundCheck = document.getElementById('backgroundCheck').classList.contains('checked');
+            userData.partnerTerms = document.getElementById('partnerTerms').classList.contains('checked');
+            userData.dataSharing = document.getElementById('dataSharing').classList.contains('checked');
             userData.registrationDate = new Date().toISOString();
             userData.status = 'pending_approval';
             
             // Simulate API call
             setTimeout(() => {
                 // Store user data (in real app, send to backend)
-                localStorage.setItem('driverData', JSON.stringify(userData));
+                localStorage.setItem('partnerData', JSON.stringify(userData));
                 
                 // Show success message and redirect
-                alert('Cadastro enviado com sucesso!\n\nSeu cadastro será analisado em até 48 horas.\nVocê receberá um e-mail com o resultado da análise.');
+                alert('Cadastro enviado com sucesso!\n\nSeu estabelecimento será analisado em até 72 horas.\nVocê receberá um e-mail com o resultado da análise.');
                 
                 // Redirect to login page
                 window.location.href = 'index.html';

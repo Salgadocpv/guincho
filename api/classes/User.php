@@ -195,6 +195,77 @@ class User {
     }
     
     /**
+     * Registrar novo parceiro
+     */
+    public function registerPartner($userData, $partnerData) {
+        try {
+            $this->conn->beginTransaction();
+            
+            // Validar se email já existe
+            if ($this->emailExists($userData['email'])) {
+                throw new Exception("E-mail já cadastrado no sistema", 409);
+            }
+            
+            // Hash da senha
+            $password_hash = password_hash($userData['password'], PASSWORD_ARGON2I);
+            
+            // Inserir usuário
+            $query = "INSERT INTO " . $this->table . " 
+                     SET user_type = 'partner',
+                         full_name = :full_name,
+                         cpf = :cpf,
+                         phone = :phone,
+                         whatsapp = :whatsapp,
+                         email = :email,
+                         password_hash = :password_hash,
+                         terms_accepted = :terms_accepted,
+                         status = 'pending_approval'";
+            
+            $stmt = $this->conn->prepare($query);
+            
+            $stmt->bindParam(':full_name', $userData['full_name']);
+            $stmt->bindParam(':cpf', $this->cleanCPF($userData['cpf']));
+            $stmt->bindParam(':phone', $this->cleanPhone($userData['phone']));
+            $stmt->bindParam(':whatsapp', $this->cleanPhone($userData['whatsapp']));
+            $stmt->bindParam(':email', strtolower(trim($userData['email'])));
+            $stmt->bindParam(':password_hash', $password_hash);
+            $stmt->bindParam(':terms_accepted', $userData['terms_accepted'], PDO::PARAM_BOOL);
+            
+            if (!$stmt->execute()) {
+                throw new Exception("Erro ao cadastrar usuário", 500);
+            }
+            
+            $user_id = $this->conn->lastInsertId();
+            
+            // Inserir dados do parceiro
+            $partnerData['user_id'] = $user_id;
+            $partner = new Partner();
+            $partner_result = $partner->create($partnerData);
+            
+            if (!$partner_result || !isset($partner_result['partner_id'])) {
+                throw new Exception("Erro ao cadastrar dados do parceiro", 500);
+            }
+            
+            $this->conn->commit();
+            
+            // Log da auditoria
+            $this->logAction($user_id, 'partner_registered', 'users', $user_id, null, $userData);
+            
+            return [
+                'success' => true,
+                'message' => 'Parceiro cadastrado com sucesso. Aguarde aprovação.',
+                'user_id' => $user_id,
+                'partner_id' => $partner_result['partner_id']
+            ];
+            
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log("Erro no cadastro de parceiro: " . $e->getMessage());
+            throw $e;
+        }
+    }
+    
+    /**
      * Login do usuário
      */
     public function login($email, $password) {
