@@ -3,14 +3,15 @@
  * Classe SystemSettings - Gerenciamento de Parâmetros do Sistema
  */
 
-require_once 'Database.php';
+require_once dirname(__DIR__) . '/config/database.php';
 
 class SystemSettings {
     private $db;
     private $table = 'system_settings';
     
     public function __construct() {
-        $this->db = Database::getInstance()->getConnection();
+        $database = new Database();
+        $this->db = $database->getConnection();
     }
     
     /**

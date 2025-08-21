@@ -418,14 +418,48 @@
 
                 <div class="settings-row">
                     <div class="form-group">
-                        <label class="form-label">Preço Mínimo do Serviço (R$)</label>
-                        <div class="form-description">Valor mínimo que pode ser cobrado</div>
-                        <input type="number" class="form-input" id="min_service_price" data-key="min_service_price" min="0" step="0.01">
+                        <label class="form-label">Valor Mínimo da Viagem (R$)</label>
+                        <div class="form-description">Valor mínimo para uma viagem de guincho</div>
+                        <input type="number" class="form-input" id="minimum_trip_value" data-key="minimum_trip_value" min="0" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Preço Máximo do Serviço (R$)</label>
-                        <div class="form-description">Valor máximo que pode ser cobrado</div>
-                        <input type="number" class="form-input" id="max_service_price" data-key="max_service_price" min="0" step="0.01">
+                        <label class="form-label">Preço por Quilômetro (R$)</label>
+                        <div class="form-description">Valor cobrado por quilômetro rodado</div>
+                        <input type="number" class="form-input" id="price_per_km" data-key="price_per_km" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Taxa Base do Serviço (R$)</label>
+                        <div class="form-description">Taxa fixa cobrada em todos os serviços</div>
+                        <input type="number" class="form-input" id="base_service_fee" data-key="base_service_fee" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Distância Máxima (km)</label>
+                        <div class="form-description">Distância máxima de atendimento</div>
+                        <input type="number" class="form-input" id="max_distance_km" data-key="max_distance_km" min="1" max="200">
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Multiplicador Emergencial</label>
+                        <div class="form-description">Multiplicador para atendimentos emergenciais</div>
+                        <input type="number" class="form-input" id="emergency_multiplier" data-key="emergency_multiplier" min="1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Multiplicador Noturno</label>
+                        <div class="form-description">Multiplicador para atendimentos noturnos (22h-6h)</div>
+                        <input type="number" class="form-input" id="night_shift_multiplier" data-key="night_shift_multiplier" min="1" step="0.1">
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Multiplicador de Fim de Semana</label>
+                        <div class="form-description">Multiplicador para finais de semana</div>
+                        <input type="number" class="form-input" id="weekend_multiplier" data-key="weekend_multiplier" min="1" step="0.1">
                     </div>
                 </div>
 
@@ -565,7 +599,7 @@
             // Get user data for authentication
             const userData = JSON.parse(localStorage.getItem('userData'));
             
-            fetch('../api/admin/settings.php', {
+            fetch('../api/admin/get_settings.php', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -578,7 +612,7 @@
                     const settings = {};
                     
                     // Convert API response to simple key-value format
-                    for (const [key, config] of Object.entries(data.data)) {
+                    for (const [key, config] of Object.entries(data.data.settings)) {
                         settings[key] = config.value;
                     }
 
@@ -652,15 +686,14 @@
             // Get user data for authentication
             const userData = JSON.parse(localStorage.getItem('userData'));
 
-            fetch('../api/admin/settings.php', {
+            fetch('../api/admin/update_settings.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${userData.session_token}`
                 },
                 body: JSON.stringify({
-                    settings: currentSettings,
-                    updated_by: userData.user.id
+                    settings: currentSettings
                 })
             })
             .then(response => response.json())

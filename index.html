@@ -1108,16 +1108,7 @@
                         logged_in: true
                     }));
                     
-                    // Show welcome message
-                    const userTypeNames = {
-                        'client': 'Cliente',
-                        'driver': 'Guincheiro', 
-                        'partner': 'Parceiro',
-                        'admin': 'Administrador'
-                    };
-                    
                     const userType = data.data.user.user_type;
-                    alert(`Bem-vindo, ${data.data.user.full_name}!\nTipo: ${userTypeNames[userType] || 'Usuário'}\nRedirecionando para: ${userType}`);
                     
                     // Redirect based on user type
                     console.log('Redirecting based on user_type:', userType);

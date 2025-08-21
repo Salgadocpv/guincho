@@ -430,6 +430,16 @@
         .trip-input[type=number] {
             -moz-appearance: textfield;
         }
+        
+        .trip-input.error {
+            border-color: #dc3545;
+            background: rgba(220,53,69,0.15);
+        }
+        
+        .trip-item.error {
+            border-color: #dc3545;
+            background: rgba(220,53,69,0.05);
+        }
 
         /* Location Method Choice Modal */
         .location-modal-overlay {
@@ -1047,9 +1057,103 @@
         let originMarker = null;
         let destinationMarker = null;
         
+        // Pricing configuration
+        let pricingConfig = {
+            minimum_trip_value: 25.00,
+            price_per_km: 3.50,
+            base_service_fee: 15.00,
+            emergency_multiplier: 1.5,
+            night_shift_multiplier: 1.3,
+            weekend_multiplier: 1.2
+        };
+        
         // Modal state
         let currentSelectionType = ''; // 'origin' or 'destination'
         let isSelectingOnMap = false;
+        
+        // Load pricing configuration from API
+        async function loadPricingConfig() {
+            try {
+                const response = await fetch('api/public/get_pricing.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    pricingConfig = { ...pricingConfig, ...data.data };
+                    console.log('Pricing configuration loaded:', pricingConfig);
+                } else {
+                    console.warn('Failed to load pricing config, using defaults');
+                }
+            } catch (error) {
+                console.error('Error loading pricing config:', error);
+            }
+        }
+        
+        // Calculate trip price based on distance
+        function calculateTripPrice(distanceKm) {
+            const now = new Date();
+            const hour = now.getHours();
+            const isWeekend = [0, 6].includes(now.getDay()); // 0 = Sunday, 6 = Saturday
+            const isNightShift = hour >= 22 || hour < 6;
+            
+            // Base calculation: base fee + distance
+            let price = pricingConfig.base_service_fee + (distanceKm * pricingConfig.price_per_km);
+            
+            // Apply multipliers
+            if (isNightShift) {
+                price *= pricingConfig.night_shift_multiplier;
+            }
+            
+            if (isWeekend) {
+                price *= pricingConfig.weekend_multiplier;
+            }
+            
+            // Ensure minimum value
+            price = Math.max(price, pricingConfig.minimum_trip_value);
+            
+            return Math.round(price * 100) / 100; // Round to 2 decimal places
+        }
+        
+        // Validate minimum price
+        function validateMinimumPrice(inputValue) {
+            const minValue = pricingConfig.minimum_trip_value;
+            return inputValue >= minValue;
+        }
+        
+        // Show error message
+        function showError(message) {
+            // Create or update error message element
+            let errorElement = document.getElementById('priceError');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.id = 'priceError';
+                errorElement.style.cssText = `
+                    position: fixed;
+                    top: 120px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(220,53,69,0.9);
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    z-index: 1000;
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    animation: slideDown 0.3s ease-out;
+                `;
+                document.body.appendChild(errorElement);
+            }
+            
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+            }, 3000);
+        }
         
         // Map state
         let mapInitialized = false;
@@ -1076,7 +1180,10 @@
         }
 
         // Initialize Google Maps - New System
-        function initMap() {
+        async function initMap() {
+            // Load pricing configuration first
+            await loadPricingConfig();
+            
             // Default location (São Paulo center)
             const defaultLocation = { lat: -23.5505, lng: -46.6333 };
             
@@ -1736,12 +1843,12 @@
                     // Show route info and calculate suggested price
                     const route = result.routes[0].legs[0];
                     const distanceInKm = route.distance.value / 1000; // Convert meters to km
-                    const suggestedPrice = Math.max(10, Math.round(distanceInKm * 3)); // Min R$ 10, R$ 3 por km
+                    const suggestedPrice = calculateTripPrice(distanceInKm);
                     
                     // Update offer input with suggested value
                     const offerInput = document.getElementById('offerInput');
                     offerInput.value = suggestedPrice;
-                    offerInput.placeholder = `Sugestão: R$ ${suggestedPrice} (R$ 3/km)`;
+                    offerInput.placeholder = `Sugestão: R$ ${suggestedPrice.toFixed(2)}`;
                     
                     // Trigger update to check if can confirm trip
                     updateOfferValue();
@@ -1756,16 +1863,33 @@
         function updateOfferValue() {
             const offerInput = document.getElementById('offerInput');
             const value = parseFloat(offerInput.value);
+            const offerItem = document.getElementById('offerItem');
+            
+            // Remove previous error styling
+            offerInput.classList.remove('error');
             
             if (value > 0) {
-                const offerItem = document.getElementById('offerItem');
-                offerItem.classList.add('completed');
-                
-                // Update placeholder to show formatted value
-                offerInput.placeholder = `R$ ${value.toFixed(2)}`;
+                // Check if value meets minimum requirement
+                if (validateMinimumPrice(value)) {
+                    offerItem.classList.add('completed');
+                    offerItem.classList.remove('error');
+                    
+                    // Update placeholder to show formatted value
+                    offerInput.placeholder = `R$ ${value.toFixed(2)}`;
+                } else {
+                    // Value is below minimum
+                    offerItem.classList.remove('completed');
+                    offerItem.classList.add('error');
+                    offerInput.classList.add('error');
+                    
+                    const minValue = pricingConfig.minimum_trip_value;
+                    offerInput.placeholder = `Valor mínimo: R$ ${minValue.toFixed(2)}`;
+                    
+                    // Show error message
+                    showError(`O valor mínimo para uma viagem é R$ ${minValue.toFixed(2)}`);
+                }
             } else {
-                const offerItem = document.getElementById('offerItem');
-                offerItem.classList.remove('completed');
+                offerItem.classList.remove('completed', 'error');
                 offerInput.placeholder = 'R$ 0,00';
             }
             
@@ -1777,12 +1901,16 @@
             const offerInput = document.getElementById('offerInput');
             const offerValue = parseFloat(offerInput.value);
             
-            if (originLocation && destinationLocation && offerValue > 0) {
+            if (originLocation && destinationLocation && offerValue > 0 && validateMinimumPrice(offerValue)) {
                 confirmItem.classList.remove('disabled');
                 confirmItem.querySelector('.trip-value').textContent = `Confirmar viagem - R$ ${offerValue.toFixed(2)}`;
             } else {
                 confirmItem.classList.add('disabled');
-                confirmItem.querySelector('.trip-value').textContent = 'Defina origem, destino e oferta';
+                if (originLocation && destinationLocation && offerValue > 0 && !validateMinimumPrice(offerValue)) {
+                    confirmItem.querySelector('.trip-value').textContent = `Valor mínimo: R$ ${pricingConfig.minimum_trip_value.toFixed(2)}`;
+                } else {
+                    confirmItem.querySelector('.trip-value').textContent = 'Defina origem, destino e oferta';
+                }
             }
         }
 
