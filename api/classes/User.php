@@ -204,7 +204,8 @@ class User {
                      WHERE email = :email AND status IN ('active', 'pending_approval')";
             
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':email', strtolower(trim($email)));
+            $email_clean = strtolower(trim($email));
+            $stmt->bindParam(':email', $email_clean);
             $stmt->execute();
             
             if ($stmt->rowCount() === 0) {
@@ -401,8 +402,10 @@ class User {
             $stmt->bindParam(':action', $action);
             $stmt->bindParam(':table_name', $table_name);
             $stmt->bindParam(':record_id', $record_id);
-            $stmt->bindParam(':old_values', json_encode($old_values));
-            $stmt->bindParam(':new_values', json_encode($new_values));
+            $old_values_json = json_encode($old_values);
+            $new_values_json = json_encode($new_values);
+            $stmt->bindParam(':old_values', $old_values_json);
+            $stmt->bindParam(':new_values', $new_values_json);
             $stmt->bindParam(':ip_address', $_SERVER['REMOTE_ADDR']);
             $stmt->bindParam(':user_agent', $_SERVER['HTTP_USER_AGENT']);
             $stmt->execute();
