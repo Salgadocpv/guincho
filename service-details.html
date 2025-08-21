@@ -998,6 +998,10 @@
         let destinationAddress = '';
         let selectedService = '';
         
+        // Map markers
+        let originMarker = null;
+        let destinationMarker = null;
+        
         // Modal state
         let currentSelectionType = ''; // 'origin' or 'destination'
         let isSelectingOnMap = false;
@@ -1040,6 +1044,16 @@
                     {
                         featureType: 'poi',
                         elementType: 'labels',
+                        stylers: [{ visibility: 'off' }]
+                    },
+                    {
+                        featureType: 'poi',
+                        elementType: 'geometry',
+                        stylers: [{ visibility: 'off' }]
+                    },
+                    {
+                        featureType: 'transit',
+                        elementType: 'all',
                         stylers: [{ visibility: 'off' }]
                     }
                 ],
@@ -1519,10 +1533,71 @@
             originLocation = location;
             map.setCenter(location);
             map.setZoom(16);
+            
+            // Add origin marker with car icon
+            addOriginMarker(location);
         }
 
         function setDestinationLocation(location) {
             destinationLocation = location;
+            
+            // Add destination marker with flag icon
+            addDestinationMarker(location);
+        }
+        
+        // Marker functions
+        function addOriginMarker(location) {
+            // Remove existing origin marker
+            if (originMarker) {
+                originMarker.setMap(null);
+            }
+            
+            // Create car icon for origin
+            const carIcon = {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40">
+                        <circle cx="50" cy="50" r="45" fill="#28a745" stroke="#ffffff" stroke-width="4"/>
+                        <text x="50" y="58" text-anchor="middle" font-family="Arial" font-size="32" fill="white">🚗</text>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(40, 40),
+                anchor: new google.maps.Point(20, 40)
+            };
+            
+            originMarker = new google.maps.Marker({
+                position: location,
+                map: map,
+                icon: carIcon,
+                title: 'Origem - Ponto de Partida',
+                zIndex: 1000
+            });
+        }
+        
+        function addDestinationMarker(location) {
+            // Remove existing destination marker
+            if (destinationMarker) {
+                destinationMarker.setMap(null);
+            }
+            
+            // Create flag icon for destination
+            const flagIcon = {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40">
+                        <circle cx="50" cy="50" r="45" fill="#dc3545" stroke="#ffffff" stroke-width="4"/>
+                        <text x="50" y="58" text-anchor="middle" font-family="Arial" font-size="32" fill="white">🏁</text>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(40, 40),
+                anchor: new google.maps.Point(20, 40)
+            };
+            
+            destinationMarker = new google.maps.Marker({
+                position: location,
+                map: map,
+                icon: flagIcon,
+                title: 'Destino - Ponto de Chegada',
+                zIndex: 1000
+            });
         }
 
         // Address getter
@@ -1587,11 +1662,22 @@
             
             directionsService.route(request, function(result, status) {
                 if (status === 'OK') {
+                    // Set directions without default markers (suppressMarkers: true is already set)
                     directionsRenderer.setDirections(result);
                     
-                    // Center map on destination with appropriate zoom
-                    map.setCenter(destinationLocation);
-                    map.setZoom(15);
+                    // Fit map to show both origin and destination with route
+                    const bounds = new google.maps.LatLngBounds();
+                    bounds.extend(originLocation);
+                    bounds.extend(destinationLocation);
+                    map.fitBounds(bounds);
+                    
+                    // Add some padding around the route
+                    setTimeout(() => {
+                        const currentZoom = map.getZoom();
+                        if (currentZoom > 16) {
+                            map.setZoom(16);
+                        }
+                    }, 100);
                     
                     // Show route info and calculate suggested price
                     const route = result.routes[0].legs[0];
