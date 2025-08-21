@@ -20,13 +20,14 @@
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #007bff 0%, #495057 100%);
-            min-height: 100vh;
+            height: 100vh;
+            max-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
             position: relative;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         /* Subtle background pattern */
@@ -46,40 +47,46 @@
         .login-container {
             width: 100%;
             max-width: 400px;
+            max-height: 100vh;
             position: relative;
             z-index: 1;
             box-sizing: border-box;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         /* Header Section */
         .login-header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 30px;
             color: white;
+            flex-shrink: 0;
         }
 
         .app-logo {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 24px;
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             color: rgba(255,255,255,0.9);
         }
 
         .app-title {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: 300;
             color: white;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             letter-spacing: -0.5px;
         }
 
         .app-subtitle {
             color: rgba(255,255,255,0.7);
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 400;
         }
 
@@ -89,7 +96,7 @@
         }
 
         .form-group {
-            margin-bottom: 32px;
+            margin-bottom: 20px;
             position: relative;
         }
 
@@ -104,11 +111,11 @@
 
         .form-input {
             width: 100%;
-            padding: 20px 0;
+            padding: 16px 0;
             border: none;
             border-bottom: 1px solid rgba(255,255,255,0.3);
             background: transparent;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: white;
             transition: all 0.3s ease;
         }
@@ -156,9 +163,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 12px;
         }
 
         .remember-me {
@@ -215,7 +222,7 @@
         /* Login Button */
         .login-btn {
             width: 100%;
-            padding: 20px;
+            padding: 16px;
             background: white;
             color: #495057;
             border: none;
@@ -223,7 +230,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-bottom: 32px;
+            margin-bottom: 20px;
             position: relative;
             letter-spacing: 0.5px;
         }
@@ -263,7 +270,7 @@
         /* Divider */
         .divider {
             text-align: center;
-            margin: 32px 0;
+            margin: 20px 0;
             position: relative;
             color: rgba(255,255,255,0.5);
             font-size: 0.85rem;
@@ -288,12 +295,12 @@
 
         /* Social Login */
         .social-login {
-            margin-bottom: 32px;
+            margin-bottom: 20px;
         }
 
         .social-btn {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             border: 1px solid rgba(255,255,255,0.2);
             background: transparent;
             color: rgba(255,255,255,0.7);
@@ -322,24 +329,25 @@
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(20px);
             border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 32px;
+            padding: 24px;
+            margin-bottom: 20px;
             border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
         /* Register Button */
         .register-btn {
             width: 100%;
-            padding: 18px;
+            padding: 16px;
             background: linear-gradient(135deg, #28a745, #20c997);
             border: none;
             color: white;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 24px;
+            margin-top: 16px;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -367,8 +375,8 @@
         /* Security Features */
         .security-info {
             text-align: center;
-            margin-top: 24px;
-            font-size: 0.8rem;
+            margin-top: 16px;
+            font-size: 0.75rem;
             color: rgba(255,255,255,0.5);
         }
 
@@ -404,25 +412,61 @@
         /* Responsive Design */
         @media (max-width: 480px) {
             body {
-                padding: 16px;
-                min-height: 100vh;
-                align-items: flex-start;
-                padding-top: 40px;
+                padding: 8px;
+                height: 100vh;
+                align-items: center;
+                justify-content: center;
             }
 
             .login-container {
                 max-width: 100%;
                 width: 100%;
+                max-height: 100vh;
+                justify-content: center;
+            }
+
+            .login-header {
+                margin-bottom: 20px;
+            }
+
+            .app-logo {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 12px;
+                font-size: 1.3rem;
             }
 
             .app-title {
-                font-size: 2rem;
+                font-size: 1.6rem;
+            }
+
+            .app-subtitle {
+                font-size: 0.8rem;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
             }
 
             .form-options {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 16px;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .register-btn {
+                font-size: 0.9rem;
+                padding: 14px;
+            }
+
+            .security-info {
+                font-size: 0.7rem;
+                margin-top: 12px;
             }
         }
 
@@ -884,13 +928,6 @@
                 Entrar
             </button>
         </form>
-
-        <!-- Install App Button -->
-                <button class="install-app" id="installBtn" onclick="installApp()">
-                    <i class="fas fa-download"></i>
-                    Instalar App
-                </button>
-            </form>
         </div>
 
         <!-- Divider -->
