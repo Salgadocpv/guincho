@@ -268,6 +268,10 @@
         let lastPosition = null;
         let movementBearing = 0;
         let isMovementBasedRotation = true;
+        
+        // Animation variables
+        let animationId = null;
+        let isAnimating = false;
 
         function initNavigation() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -338,9 +342,9 @@
 
             // Store current position as last position for next update
             lastPosition = userLocation ? { ...userLocation } : null;
-            userLocation = newLocation;
-
+            
             if (!userMarker) {
+                userLocation = newLocation;
                 document.getElementById('mapLoading').style.display = 'none';
                 document.getElementById('topInstructionPanel').style.display = 'block';
                 document.getElementById('bottomInfoPanel').style.display = 'block';
@@ -350,11 +354,11 @@
                 setTimeout(() => {
                     autoActivateMovementRotation();
                 }, 1000);
+                map.setCenter(userLocation);
             } else {
-                userMarker.setPosition(userLocation);
+                // Animate smooth transition between GPS points
+                animateToNewPosition(newLocation);
             }
-
-            map.setCenter(userLocation);
 
             // Apply rotation based on movement direction or device orientation
             if (isMapRotationActive) {
@@ -395,6 +399,73 @@
 
         function handleGpsError(error) {
             console.error('GPS Error: ' + error.message);
+        }
+
+        // Animate smooth transition between GPS positions
+        function animateToNewPosition(newLocation) {
+            // If already animating, cancel previous animation
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            const startLocation = { ...userLocation };
+            
+            // Calculate distance to determine animation duration
+            const distance = calculateDistance(
+                startLocation.lat, startLocation.lng,
+                newLocation.lat, newLocation.lng
+            );
+            
+            // Skip animation for very small movements (< 2 meters)
+            if (distance < 2) {
+                userLocation = newLocation;
+                userMarker.setPosition(userLocation);
+                map.setCenter(userLocation);
+                return;
+            }
+            
+            // Adjust duration based on distance (min 300ms, max 1000ms)
+            // Shorter distances get faster animations
+            const duration = Math.max(300, Math.min(1000, distance * 8));
+            const startTime = Date.now();
+            
+            isAnimating = true;
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Use easing function for smooth animation (ease-out)
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                // Interpolate between start and end positions
+                const currentLat = startLocation.lat + (newLocation.lat - startLocation.lat) * easeProgress;
+                const currentLng = startLocation.lng + (newLocation.lng - startLocation.lng) * easeProgress;
+                
+                const interpolatedLocation = {
+                    lat: currentLat,
+                    lng: currentLng
+                };
+                
+                // Update user location and marker position
+                userLocation = interpolatedLocation;
+                userMarker.setPosition(userLocation);
+                map.setCenter(userLocation);
+                
+                // Continue animation if not complete
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    // Animation complete - set final position
+                    userLocation = newLocation;
+                    userMarker.setPosition(userLocation);
+                    map.setCenter(userLocation);
+                    isAnimating = false;
+                    animationId = null;
+                }
+            }
+            
+            animate();
         }
 
         function createUserMarker() {
@@ -844,6 +915,14 @@
             if (confirm('Deseja parar a navegação?')) {
                 if (locationWatcherId) navigator.geolocation.clearWatch(locationWatcherId);
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
+                
+                // Cancel any ongoing animations
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                    isAnimating = false;
+                }
+                
                 stopSimulation();
                 clearRoutePolylines();
                 goBack();
