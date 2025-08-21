@@ -901,7 +901,7 @@
                         id="email" 
                         class="form-input" 
                         placeholder="seu@email.com ou (11) 99999-9999"
-                        value="cliente@iguincho.com"
+                        value="admin@iguincho.com"
                         required
                         autocomplete="username"
                         aria-describedby="email-help"
@@ -917,7 +917,7 @@
                             id="password" 
                             class="form-input" 
                             placeholder="Digite sua senha"
-                            value="123456"
+                            value="admin123"
                             required
                             autocomplete="current-password"
                             aria-describedby="password-help"
@@ -1096,6 +1096,10 @@
                 loginBtn.textContent = 'Entrar';
                 
                 if (data.success) {
+                    // Debug - log response data
+                    console.log('Login response:', data);
+                    console.log('User type:', data.data.user.user_type);
+                    
                     // Store user session data
                     localStorage.setItem('userData', JSON.stringify({
                         user: data.data.user,
@@ -1105,15 +1109,36 @@
                     }));
                     
                     // Show welcome message
-                    alert(`Bem-vindo, ${data.data.user.full_name}!\nTipo: ${data.data.user.user_type === 'client' ? 'Cliente' : 'Guincheiro'}`);
+                    const userTypeNames = {
+                        'client': 'Cliente',
+                        'driver': 'Guincheiro', 
+                        'partner': 'Parceiro',
+                        'admin': 'Administrador'
+                    };
+                    
+                    const userType = data.data.user.user_type;
+                    alert(`Bem-vindo, ${data.data.user.full_name}!\nTipo: ${userTypeNames[userType] || 'Usuário'}\nRedirecionando para: ${userType}`);
                     
                     // Redirect based on user type
-                    if (data.data.user.user_type === 'driver') {
-                        // Redirect to driver dashboard (when implemented)
-                        window.location.href = 'services.html'; // Temporary
-                    } else {
-                        // Redirect to client services
-                        window.location.href = 'services.html';
+                    console.log('Redirecting based on user_type:', userType);
+                    switch(userType) {
+                        case 'admin':
+                            console.log('Redirecting to admin dashboard');
+                            window.location.href = 'admin/dashboard.html';
+                            break;
+                        case 'driver':
+                            console.log('Redirecting to driver dashboard');
+                            window.location.href = 'driver/dashboard.html';
+                            break;
+                        case 'partner':
+                            console.log('Redirecting to partner dashboard');
+                            window.location.href = 'partner/dashboard.html';
+                            break;
+                        case 'client':
+                        default:
+                            console.log('Redirecting to client services');
+                            window.location.href = 'services.html';
+                            break;
                     }
                 } else {
                     throw new Error(data.message);

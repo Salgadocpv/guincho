@@ -409,6 +409,44 @@
             margin-right: 6px;
             color: #28a745;
         }
+
+        /* Google Places Autocomplete Styling */
+        .pac-container {
+            z-index: 99999 !important;
+            border-radius: 8px !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2) !important;
+            background: rgba(73, 80, 87, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            margin-top: 2px !important;
+        }
+
+        .pac-item {
+            padding: 12px 16px !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+            cursor: pointer !important;
+            font-size: 14px !important;
+            background: transparent !important;
+            color: white !important;
+        }
+
+        .pac-item:hover {
+            background: rgba(255,255,255,0.1) !important;
+            color: white !important;
+        }
+
+        .pac-item:last-child {
+            border-bottom: none !important;
+        }
+
+        .pac-item-query {
+            font-weight: 600 !important;
+            color: white !important;
+        }
+
+        .pac-matched {
+            color: rgba(255,255,255,0.8) !important;
+        }
     </style>
 </head>
 <body>
@@ -687,9 +725,45 @@
         </form>
     </div>
 
+    <!-- Google Maps Places API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&callback=initGooglePlaces&libraries=places">
+    </script>
+
     <script>
         // Form validation and functionality
         let isFormValid = false;
+        let workRegionAutocomplete = null;
+
+        // Initialize Google Places
+        function initGooglePlaces() {
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                setupWorkRegionAutocomplete();
+            }
+        }
+        
+        // Setup Work Region Autocomplete
+        function setupWorkRegionAutocomplete() {
+            const workRegionInput = document.getElementById('workRegion');
+            
+            if (workRegionInput) {
+                workRegionAutocomplete = new google.maps.places.Autocomplete(workRegionInput, {
+                    types: ['(regions)'],
+                    componentRestrictions: { country: 'BR' },
+                    fields: ['formatted_address', 'geometry', 'name', 'address_components']
+                });
+                
+                workRegionAutocomplete.addListener('place_changed', function() {
+                    const place = workRegionAutocomplete.getPlace();
+                    if (place.formatted_address) {
+                        workRegionInput.value = place.formatted_address;
+                        validateField(workRegionInput);
+                    }
+                });
+                
+                console.log('Work region autocomplete initialized');
+            }
+        }
 
         // Initialize form
         document.addEventListener('DOMContentLoaded', function() {

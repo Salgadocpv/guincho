@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Painel do Guincheiro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+        
+        .action-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .action-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .user-info {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            text-align: right;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-info">
+        <div id="userName">Carregando...</div>
+        <div style="font-size: 0.9rem; opacity: 0.8;">Guincheiro</div>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-truck"></i>
+        </div>
+        <h1>Painel do Guincheiro</h1>
+        <p class="subtitle">Gerencie seus serviços e mantenha-se disponível para atendimentos</p>
+        
+        <div class="actions">
+            <a href="../services.html" class="action-btn">
+                <i class="fas fa-list-alt"></i> Ver Chamados
+            </a>
+            <a href="profile.html" class="action-btn">
+                <i class="fas fa-user"></i> Meu Perfil
+            </a>
+            <a href="earnings.html" class="action-btn">
+                <i class="fas fa-dollar-sign"></i> Meus Ganhos
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+
+        function checkAuth() {
+            const userData = localStorage.getItem('userData');
+            
+            if (!userData) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            
+            if (user.user.user_type !== 'driver') {
+                alert('Acesso negado.');
+                window.location.href = '../index.html';
+                return;
+            }
+
+            document.getElementById('userName').textContent = user.user.full_name;
+        }
+
+        function logout() {
+            if (confirm('Deseja sair do sistema?')) {
+                localStorage.removeItem('userData');
+                window.location.href = '../index.html';
+            }
+        }
+    </script>
+</body>
+</html>

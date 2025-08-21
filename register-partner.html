@@ -464,6 +464,44 @@
             margin-right: 6px;
             color: #007bff;
         }
+
+        /* Google Places Autocomplete Styling */
+        .pac-container {
+            z-index: 99999 !important;
+            border-radius: 8px !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2) !important;
+            background: rgba(73, 80, 87, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            margin-top: 2px !important;
+        }
+
+        .pac-item {
+            padding: 12px 16px !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+            cursor: pointer !important;
+            font-size: 14px !important;
+            background: transparent !important;
+            color: white !important;
+        }
+
+        .pac-item:hover {
+            background: rgba(255,255,255,0.1) !important;
+            color: white !important;
+        }
+
+        .pac-item:last-child {
+            border-bottom: none !important;
+        }
+
+        .pac-item-query {
+            font-weight: 600 !important;
+            color: white !important;
+        }
+
+        .pac-matched {
+            color: rgba(255,255,255,0.8) !important;
+        }
     </style>
 </head>
 <body>
@@ -712,10 +750,106 @@
         </form>
     </div>
 
+    <!-- Google Maps Places API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&callback=initGooglePlaces&libraries=places">
+    </script>
+
     <script>
         // Form validation and functionality
         let isFormValid = false;
         let selectedBusinessType = '';
+        let addressAutocomplete = null;
+
+        // Initialize Google Places
+        function initGooglePlaces() {
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                setupAddressAutocomplete();
+            }
+        }
+        
+        // Setup Address Autocomplete
+        function setupAddressAutocomplete() {
+            const addressInput = document.getElementById('address');
+            const zipCodeInput = document.getElementById('zipCode');
+            const cityInput = document.getElementById('city');
+            const stateSelect = document.getElementById('state');
+            
+            if (addressInput) {
+                addressAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+                    types: ['address'],
+                    componentRestrictions: { country: 'BR' },
+                    fields: ['formatted_address', 'geometry', 'name', 'address_components']
+                });
+                
+                addressAutocomplete.addListener('place_changed', function() {
+                    const place = addressAutocomplete.getPlace();
+                    
+                    if (place.address_components) {
+                        // Extract address components
+                        let streetNumber = '';
+                        let streetName = '';
+                        let neighborhood = '';
+                        let city = '';
+                        let state = '';
+                        let zipCode = '';
+                        
+                        place.address_components.forEach(component => {
+                            const types = component.types;
+                            
+                            if (types.includes('street_number')) {
+                                streetNumber = component.long_name;
+                            }
+                            if (types.includes('route')) {
+                                streetName = component.long_name;
+                            }
+                            if (types.includes('sublocality') || types.includes('neighborhood')) {
+                                neighborhood = component.long_name;
+                            }
+                            if (types.includes('administrative_area_level_2')) {
+                                city = component.long_name;
+                            }
+                            if (types.includes('administrative_area_level_1')) {
+                                state = component.short_name;
+                            }
+                            if (types.includes('postal_code')) {
+                                zipCode = component.long_name;
+                            }
+                        });
+                        
+                        // Build full address
+                        let fullAddress = '';
+                        if (streetName) fullAddress += streetName;
+                        if (streetNumber) fullAddress += ', ' + streetNumber;
+                        if (neighborhood) fullAddress += ', ' + neighborhood;
+                        
+                        if (fullAddress) {
+                            addressInput.value = fullAddress;
+                        }
+                        
+                        // Fill other fields
+                        if (zipCode && zipCodeInput) {
+                            zipCodeInput.value = zipCode.replace(/(\d{5})(\d{3})/, '$1-$2');
+                            validateField(zipCodeInput);
+                        }
+                        
+                        if (city && cityInput) {
+                            cityInput.value = city;
+                            validateField(cityInput);
+                        }
+                        
+                        if (state && stateSelect) {
+                            stateSelect.value = state;
+                            validateField(stateSelect);
+                        }
+                        
+                        validateField(addressInput);
+                    }
+                });
+                
+                console.log('Address autocomplete initialized');
+            }
+        }
 
         // Initialize form
         document.addEventListener('DOMContentLoaded', function() {

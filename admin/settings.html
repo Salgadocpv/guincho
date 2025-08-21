@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Parâmetros do Sistema</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#dc3545">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .page-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .save-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .save-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .settings-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-description {
+            color: #666;
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .form-input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+        }
+
+        .form-select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #dc3545;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .settings-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .category-tab {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .category-tab:hover {
+            border-color: #dc3545;
+        }
+
+        .category-tab.active {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar
+                </a>
+                <h1 class="page-title">Parâmetros do Sistema</h1>
+            </div>
+            <button class="save-btn" onclick="saveSettings()" id="saveBtn">
+                <i class="fas fa-save"></i> Salvar Alterações
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="message" id="messageBox"></div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <div class="category-tab active" onclick="showCategory('general')">Geral</div>
+            <div class="category-tab" onclick="showCategory('business')">Negócio</div>
+            <div class="category-tab" onclick="showCategory('integrations')">Integrações</div>
+            <div class="category-tab" onclick="showCategory('system')">Sistema</div>
+            <div class="category-tab" onclick="showCategory('contact')">Contato</div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <i class="fas fa-spinner"></i>
+            <div>Carregando configurações...</div>
+        </div>
+
+        <div class="settings-grid" id="settingsGrid">
+            <!-- General Settings -->
+            <div class="settings-section" data-category="general">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h2 class="section-title">Configurações Gerais</h2>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Nome da Aplicação</label>
+                        <div class="form-description">Nome exibido na interface e comunicações</div>
+                        <input type="text" class="form-input" id="app_name" data-key="app_name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Versão da Aplicação</label>
+                        <div class="form-description">Versão atual do sistema</div>
+                        <input type="text" class="form-input" id="app_version" data-key="app_version">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Settings -->
+            <div class="settings-section" data-category="business" style="display: none;">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h2 class="section-title">Configurações de Negócio</h2>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Comissão do Sistema (%)</label>
+                        <div class="form-description">Percentual cobrado sobre cada serviço</div>
+                        <input type="number" class="form-input" id="service_commission" data-key="service_commission" min="0" max="50" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Raio Máximo de Busca (km)</label>
+                        <div class="form-description">Distância máxima para buscar guincheiros</div>
+                        <input type="number" class="form-input" id="max_driver_radius" data-key="max_driver_radius" min="1" max="200">
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Preço Mínimo do Serviço (R$)</label>
+                        <div class="form-description">Valor mínimo que pode ser cobrado</div>
+                        <input type="number" class="form-input" id="min_service_price" data-key="min_service_price" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Preço Máximo do Serviço (R$)</label>
+                        <div class="form-description">Valor máximo que pode ser cobrado</div>
+                        <input type="number" class="form-input" id="max_service_price" data-key="max_service_price" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Aprovação Automática - Guincheiros</label>
+                        <div class="form-description">Aprovar guincheiros automaticamente após cadastro</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="auto_approve_drivers" data-key="auto_approve_drivers">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Aprovação Automática - Parceiros</label>
+                        <div class="form-description">Aprovar parceiros automaticamente após cadastro</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="auto_approve_partners" data-key="auto_approve_partners">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integrations Settings -->
+            <div class="settings-section" data-category="integrations" style="display: none;">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-plug"></i>
+                    </div>
+                    <h2 class="section-title">Integrações</h2>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Google Maps API Key</label>
+                        <div class="form-description">Chave de API para serviços de mapas</div>
+                        <input type="password" class="form-input" id="google_maps_api_key" data-key="google_maps_api_key">
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="settings-section" data-category="system" style="display: none;">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h2 class="section-title">Configurações do Sistema</h2>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Modo de Manutenção</label>
+                        <div class="form-description">Ativar quando o sistema estiver em manutenção</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="maintenance_mode" data-key="maintenance_mode">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notificações Habilitadas</label>
+                        <div class="form-description">Enviar notificações push e por e-mail</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notification_enabled" data-key="notification_enabled">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Backup Automático</label>
+                        <div class="form-description">Realizar backup automático do banco de dados</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="backup_enabled" data-key="backup_enabled">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Settings -->
+            <div class="settings-section" data-category="contact" style="display: none;">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h2 class="section-title">Informações de Contato</h2>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">E-mail de Suporte</label>
+                        <div class="form-description">E-mail para contato dos usuários</div>
+                        <input type="email" class="form-input" id="support_email" data-key="support_email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Telefone de Suporte</label>
+                        <div class="form-description">Telefone para contato dos usuários</div>
+                        <input type="tel" class="form-input" id="support_phone" data-key="support_phone">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let originalSettings = {};
+        let currentSettings = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadSettings();
+        });
+
+        function checkAuth() {
+            const userData = localStorage.getItem('userData');
+            
+            if (!userData) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            
+            if (user.user.user_type !== 'admin') {
+                alert('Acesso negado. Apenas administradores podem acessar esta área.');
+                window.location.href = '../index.html';
+                return;
+            }
+        }
+
+        function loadSettings() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('settingsGrid').style.display = 'none';
+
+            // Get user data for authentication
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            
+            fetch('../api/admin/settings.php', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userData.session_token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const settings = {};
+                    
+                    // Convert API response to simple key-value format
+                    for (const [key, config] of Object.entries(data.data)) {
+                        settings[key] = config.value;
+                    }
+
+                    originalSettings = { ...settings };
+                    currentSettings = { ...settings };
+                    populateForm(settings);
+
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    document.getElementById('settingsGrid').style.display = 'block';
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar configurações:', error);
+                showMessage('Erro ao carregar configurações: ' + error.message, 'error');
+                
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('settingsGrid').style.display = 'block';
+            });
+        }
+
+        function populateForm(settings) {
+            for (const [key, value] of Object.entries(settings)) {
+                const input = document.querySelector(`[data-key="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = value === true || value === 'true';
+                    } else {
+                        input.value = value;
+                    }
+
+                    // Add change listener
+                    input.addEventListener('change', function() {
+                        currentSettings[key] = input.type === 'checkbox' ? input.checked : input.value;
+                        checkForChanges();
+                    });
+                }
+            }
+        }
+
+        function checkForChanges() {
+            const hasChanges = JSON.stringify(originalSettings) !== JSON.stringify(currentSettings);
+            document.getElementById('saveBtn').disabled = !hasChanges;
+        }
+
+        function showCategory(category) {
+            // Update tabs
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show/hide sections
+            document.querySelectorAll('.settings-section').forEach(section => {
+                if (section.dataset.category === category) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        function saveSettings() {
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.innerHTML;
+            
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            saveBtn.disabled = true;
+
+            // Get user data for authentication
+            const userData = JSON.parse(localStorage.getItem('userData'));
+
+            fetch('../api/admin/settings.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userData.session_token}`
+                },
+                body: JSON.stringify({
+                    settings: currentSettings,
+                    updated_by: userData.user.id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    originalSettings = { ...currentSettings };
+                    showMessage('Configurações salvas com sucesso!', 'success');
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao salvar configurações:', error);
+                showMessage('Erro ao salvar configurações: ' + error.message, 'error');
+            })
+            .finally(() => {
+                saveBtn.innerHTML = originalText;
+                checkForChanges();
+            });
+        }
+
+        function showMessage(text, type) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = text;
+            messageBox.className = `message ${type}`;
+            messageBox.style.display = 'block';
+
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
