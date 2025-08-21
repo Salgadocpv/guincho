@@ -22,9 +22,9 @@
             background: linear-gradient(135deg, #007bff 0%, #495057 100%);
             height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 5vh;
+            padding: 10vh 5vw 5vh 5vw;
             position: relative;
             overflow: hidden;
         }
@@ -46,15 +46,12 @@
         .login-container {
             width: 100%;
             max-width: 400px;
-            height: 90vh;
-            max-height: 90vh;
             position: relative;
             z-index: 1;
             box-sizing: border-box;
-            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
         }
 
         /* Header Section */
@@ -412,18 +409,16 @@
         /* Responsive Design */
         @media (max-width: 480px) {
             body {
-                padding: 5vh 4vw;
+                padding: 10vh 4vw 5vh 4vw;
                 height: 100vh;
-                align-items: center;
+                align-items: flex-start;
                 justify-content: center;
             }
 
             .login-container {
                 max-width: 100%;
                 width: 100%;
-                height: 90vh;
-                max-height: 90vh;
-                justify-content: center;
+                justify-content: flex-start;
             }
 
             .login-header {
