@@ -1211,10 +1211,13 @@
             }
             
             showCurrentPositionIndicator();
-            updateCurrentPositionIndicator(`👆 Toque no mapa para definir ${currentSelectionType === 'origin' ? 'origem' : 'destino'}`);
+            updateCurrentPositionIndicator(`👆 Toque no mapa ou arraste para definir ${currentSelectionType === 'origin' ? 'origem' : 'destino'}`);
             
             // Add visual feedback
             document.body.classList.add('map-selection-mode');
+            
+            // Add center marker for drag selection
+            addCenterMarker();
         }
 
         function typeAddressNew() {
@@ -1370,47 +1373,101 @@
                         lng: event.latLng.lng()
                     };
                     
-                    isSelectingOnMap = false;
-                    document.getElementById('map').style.cursor = '';
-                    document.body.classList.remove('map-selection-mode');
-                    
-                    if (currentSelectionType === 'origin') {
-                        setOriginLocation(location);
-                        getAddressFromLocation(location, function(address) {
-                            originAddress = address;
-                            updateOriginDisplay();
-                            showCurrentPositionIndicator();
-                            updateCurrentPositionIndicator('Origem selecionada! ✓');
-                            
-                            // Expandir painel após seleção
-                            if (panelCollapsed) {
-                                expandPanel();
-                            }
-                            
-                            // Não abrir modal de destino automaticamente quando selecionando no mapa
-                            // Limpar o tipo de seleção após processar
-                            currentSelectionType = '';
-                        });
-                    } else if (currentSelectionType === 'destination') {
-                        setDestinationLocation(location);
-                        getAddressFromLocation(location, function(address) {
-                            destinationAddress = address;
-                            updateDestinationDisplay();
-                            showCurrentPositionIndicator();
-                            updateCurrentPositionIndicator('Destino selecionado! ✓');
-                            drawRoute();
-                            
-                            // Expandir painel após seleção
-                            if (panelCollapsed) {
-                                expandPanel();
-                            }
-                            
-                            // Limpar o tipo de seleção após processar
-                            currentSelectionType = '';
-                        });
-                    }
+                    processMapSelection(location);
                 }
             });
+            
+            // Map drag listener - for drag to select functionality
+            google.maps.event.addListener(map, 'dragend', function() {
+                if (isSelectingOnMap) {
+                    const center = map.getCenter();
+                    const location = {
+                        lat: center.lat(),
+                        lng: center.lng()
+                    };
+                    
+                    processMapSelection(location);
+                }
+            });
+        }
+        
+        // Center marker for drag selection
+        let centerMarker = null;
+        
+        function addCenterMarker() {
+            removeCenterMarker();
+            
+            centerMarker = new google.maps.Marker({
+                position: map.getCenter(),
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: '#007bff',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 2
+                },
+                draggable: false,
+                zIndex: 1000
+            });
+            
+            // Update marker position when map moves
+            google.maps.event.addListener(map, 'center_changed', function() {
+                if (centerMarker && isSelectingOnMap) {
+                    centerMarker.setPosition(map.getCenter());
+                }
+            });
+        }
+        
+        function removeCenterMarker() {
+            if (centerMarker) {
+                centerMarker.setMap(null);
+                centerMarker = null;
+            }
+        }
+        
+        // Process map selection (common function for click and drag)
+        function processMapSelection(location) {
+            isSelectingOnMap = false;
+            document.getElementById('map').style.cursor = '';
+            document.body.classList.remove('map-selection-mode');
+            removeCenterMarker();
+            
+            if (currentSelectionType === 'origin') {
+                setOriginLocation(location);
+                getAddressFromLocation(location, function(address) {
+                    originAddress = address;
+                    updateOriginDisplay();
+                    showCurrentPositionIndicator();
+                    updateCurrentPositionIndicator('Origem selecionada! ✓');
+                    
+                    // Expandir painel após seleção
+                    if (panelCollapsed) {
+                        expandPanel();
+                    }
+                    
+                    // Limpar o tipo de seleção após processar
+                    currentSelectionType = '';
+                });
+            } else if (currentSelectionType === 'destination') {
+                setDestinationLocation(location);
+                getAddressFromLocation(location, function(address) {
+                    destinationAddress = address;
+                    updateDestinationDisplay();
+                    showCurrentPositionIndicator();
+                    updateCurrentPositionIndicator('Destino selecionado! ✓');
+                    drawRoute();
+                    
+                    // Expandir painel após seleção
+                    if (panelCollapsed) {
+                        expandPanel();
+                    }
+                    
+                    // Limpar o tipo de seleção após processar
+                    currentSelectionType = '';
+                });
+            }
         }
 
         // Location setters
