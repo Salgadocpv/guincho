@@ -622,6 +622,9 @@
         </div>
     </div>
 
+    <!-- Auth Helper -->
+    <script src="js/auth-helper.js"></script>
+
     <script>
         // Global variables
         let tripRequestId = null;
@@ -680,11 +683,12 @@
 
         async function createTripRequest() {
             try {
+                const token = await window.authHelper.getAuthToken();
                 const response = await fetch('api/trips/create_request.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({
                         service_type: tripData.service,
@@ -718,9 +722,10 @@
             if (!tripRequestId) return;
 
             try {
+                const token = await window.authHelper.getAuthToken();
                 const response = await fetch(`api/trips/get_bids.php?trip_request_id=${tripRequestId}`, {
                     headers: {
-                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                        'Authorization': 'Bearer ' + token
                     }
                 });
 
@@ -827,11 +832,12 @@
             if (!confirm('Tem certeza que deseja aceitar esta proposta?')) return;
             
             try {
+                const token = await window.authHelper.getAuthToken();
                 const response = await fetch('api/trips/accept_bid.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({
                         bid_id: selectedProposal

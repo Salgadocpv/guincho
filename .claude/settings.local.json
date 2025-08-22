@@ -20,7 +20,8 @@
       "Bash(start \"http://localhost/guincho/api/database/setup_local.php\")",
       "Bash(start \"http://localhost/guincho/api/test/api-test.php\")",
       "Bash(start:*)",
-      "Bash(\"C:\\xampp\\php\\php.exe\":*)"
+      "Bash(\"C:\\xampp\\php\\php.exe\":*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"CREATE DATABASE IF NOT EXISTS iguincho CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")"
     ],
     "deny": [],
     "ask": []
