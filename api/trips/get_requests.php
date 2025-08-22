@@ -4,6 +4,9 @@
  * Returns nearby trip requests for drivers
  */
 
+// Suppress notices and warnings to ensure clean JSON output
+error_reporting(E_ERROR | E_PARSE);
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET");
@@ -90,7 +93,8 @@ try {
     }
     
     // Clean up expired requests
-    $trip_request->expireOldRequests();
+    $trip_request_obj = new TripRequest($db);
+    $trip_request_obj->expireOldRequests();
     
     echo json_encode([
         'success' => true,
