@@ -94,15 +94,15 @@
             resultDiv.innerHTML = '<div class="info">Testando conectividade...</div>';
             
             try {
-                // Test basic PHP execution
-                const response = await fetch('api/index.php');
-                const text = await response.text();
+                // Test simple JSON endpoint first
+                const response = await fetch('api/test_trip.php');
+                const data = await response.json();
                 
                 resultDiv.innerHTML = `
                     <div class="success">
                         ✅ Conectividade OK!
                         <br>Status: ${response.status}
-                        <br>Resposta: ${text.substring(0, 200)}...
+                        <br>Response: ${JSON.stringify(data, null, 2)}
                     </div>
                 `;
             } catch (error) {

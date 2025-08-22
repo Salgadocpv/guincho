@@ -33,18 +33,11 @@ class TripRequest {
      */
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                SET client_id = :client_id,
-                    service_type = :service_type,
-                    origin_lat = :origin_lat,
-                    origin_lng = :origin_lng,
-                    origin_address = :origin_address,
-                    destination_lat = :destination_lat,
-                    destination_lng = :destination_lng,
-                    destination_address = :destination_address,
-                    client_offer = :client_offer,
-                    distance_km = :distance_km,
-                    estimated_duration_minutes = :estimated_duration_minutes,
-                    expires_at = DATE_ADD(NOW(), INTERVAL :timeout_minutes MINUTE)";
+                (client_id, service_type, origin_lat, origin_lng, origin_address, 
+                 destination_lat, destination_lng, destination_address, client_offer,
+                 distance_km, estimated_duration_minutes, expires_at)
+                VALUES 
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))";
 
         $stmt = $this->conn->prepare($query);
 
@@ -54,21 +47,23 @@ class TripRequest {
         $this->origin_address = htmlspecialchars(strip_tags($this->origin_address));
         $this->destination_address = htmlspecialchars(strip_tags($this->destination_address));
 
-        // Bind data
-        $stmt->bindParam(":client_id", $this->client_id);
-        $stmt->bindParam(":service_type", $this->service_type);
-        $stmt->bindParam(":origin_lat", $this->origin_lat);
-        $stmt->bindParam(":origin_lng", $this->origin_lng);
-        $stmt->bindParam(":origin_address", $this->origin_address);
-        $stmt->bindParam(":destination_lat", $this->destination_lat);
-        $stmt->bindParam(":destination_lng", $this->destination_lng);
-        $stmt->bindParam(":destination_address", $this->destination_address);
-        $stmt->bindParam(":client_offer", $this->client_offer);
-        $stmt->bindParam(":distance_km", $this->distance_km);
-        $stmt->bindParam(":estimated_duration_minutes", $this->estimated_duration_minutes);
-        $stmt->bindParam(":timeout_minutes", $this->getRequestTimeoutMinutes());
+        // Execute with array of values
+        $success = $stmt->execute([
+            $this->client_id,
+            $this->service_type,
+            $this->origin_lat,
+            $this->origin_lng,
+            $this->origin_address,
+            $this->destination_lat,
+            $this->destination_lng,
+            $this->destination_address,
+            $this->client_offer,
+            $this->distance_km,
+            $this->estimated_duration_minutes,
+            $this->getRequestTimeoutMinutes()
+        ]);
 
-        if ($stmt->execute()) {
+        if ($success) {
             $this->id = $this->conn->lastInsertId();
             return true;
         }
@@ -81,24 +76,20 @@ class TripRequest {
      */
     public function getNearbyRequests($driver_lat, $driver_lng, $radius_km = 25) {
         $query = "SELECT tr.*, u.full_name as client_name, u.phone as client_phone,
-                         (6371 * acos(cos(radians(:driver_lat)) * cos(radians(tr.origin_lat)) 
-                         * cos(radians(tr.origin_lng) - radians(:driver_lng)) 
-                         + sin(radians(:driver_lat)) * sin(radians(tr.origin_lat)))) AS distance
+                         (6371 * acos(cos(radians(?)) * cos(radians(tr.origin_lat)) 
+                         * cos(radians(tr.origin_lng) - radians(?)) 
+                         + sin(radians(?)) * sin(radians(tr.origin_lat)))) AS distance
                   FROM " . $this->table_name . " tr
                   JOIN users u ON tr.client_id = u.id
                   WHERE tr.status = 'pending' 
                     AND tr.expires_at > NOW()
-                    AND (6371 * acos(cos(radians(:driver_lat)) * cos(radians(tr.origin_lat)) 
-                         * cos(radians(tr.origin_lng) - radians(:driver_lng)) 
-                         + sin(radians(:driver_lat)) * sin(radians(tr.origin_lat)))) <= :radius_km
+                    AND (6371 * acos(cos(radians(?)) * cos(radians(tr.origin_lat)) 
+                         * cos(radians(tr.origin_lng) - radians(?)) 
+                         + sin(radians(?)) * sin(radians(tr.origin_lat)))) <= ?
                   ORDER BY distance ASC, tr.created_at DESC";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":driver_lat", $driver_lat);
-        $stmt->bindParam(":driver_lng", $driver_lng);
-        $stmt->bindParam(":radius_km", $radius_km);
-
-        $stmt->execute();
+        $stmt->execute([$driver_lat, $driver_lng, $driver_lat, $driver_lat, $driver_lng, $driver_lat, $radius_km]);
         return $stmt;
     }
 

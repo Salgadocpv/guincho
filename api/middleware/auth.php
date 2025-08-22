@@ -5,6 +5,11 @@
  */
 
 function authenticate() {
+    // Handle CLI mode where getallheaders() is not available
+    if (php_sapi_name() === 'cli') {
+        return authenticateTestUser();
+    }
+    
     $headers = getallheaders();
     $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? '';
     
@@ -68,34 +73,91 @@ function authenticateTestUser() {
         $database = new Database();
         $db = $database->getConnection();
         
-        // Get or create a test client user
-        $stmt = $db->prepare("SELECT * FROM users WHERE email = 'cliente@teste.com' LIMIT 1");
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Check if request needs driver mode (based on auth header or request path)
+        $headers = function_exists('getallheaders') ? getallheaders() : [];
+        $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        $needsDriverMode = (strpos($authHeader, 'driver_test_token') !== false) || 
+                          (strpos($requestUri, 'get_requests') !== false) ||
+                          (strpos($requestUri, 'place_bid') !== false);
         
-        if (!$user) {
-            // Create test user if doesn't exist
-            $stmt = $db->prepare("
-                INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-                VALUES ('client', 'Cliente Teste', '123.456.789-00', '1990-01-01', '(11) 99999-9999', 'cliente@teste.com', ?, TRUE, 'active', TRUE)
-            ");
-            $passwordHash = password_hash('teste123', PASSWORD_ARGON2I);
-            $stmt->execute([$passwordHash]);
-            
-            $userId = $db->lastInsertId();
-            
-            // Get the created user
-            $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
-            $stmt->execute([$userId]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($needsDriverMode) {
+            return authenticateTestDriver($db);
+        } else {
+            return authenticateTestClient($db);
         }
-        
-        return ['success' => true, 'user' => $user];
         
     } catch (Exception $e) {
         error_log('Test auth error: ' . $e->getMessage());
         return ['success' => false, 'message' => 'Erro na autenticação de teste'];
     }
+}
+
+function authenticateTestClient($db) {
+    // Get or create a test client user
+    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'cliente@teste.com' LIMIT 1");
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$user) {
+        // Create test user if doesn't exist
+        $stmt = $db->prepare("
+            INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
+            VALUES ('client', 'Cliente Teste', '123.456.789-00', '1990-01-01', '(11) 99999-9999', 'cliente@teste.com', ?, TRUE, 'active', TRUE)
+        ");
+        $passwordHash = password_hash('teste123', PASSWORD_ARGON2I);
+        $stmt->execute([$passwordHash]);
+        
+        $userId = $db->lastInsertId();
+        
+        // Get the created user
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    return ['success' => true, 'user' => $user];
+}
+
+function authenticateTestDriver($db) {
+    // Get or create a test driver user
+    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'guincheiro@teste.com' LIMIT 1");
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$user) {
+        // Create test driver user
+        $stmt = $db->prepare("
+            INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
+            VALUES ('driver', 'Guincheiro Teste', '987.654.321-00', '1985-05-15', '(11) 88888-8888', 'guincheiro@teste.com', ?, TRUE, 'active', TRUE)
+        ");
+        $passwordHash = password_hash('teste123', PASSWORD_ARGON2I);
+        $stmt->execute([$passwordHash]);
+        
+        $userId = $db->lastInsertId();
+        
+        // Get the created user
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    // Ensure driver record exists
+    $stmt = $db->prepare("SELECT id FROM drivers WHERE user_id = ?");
+    $stmt->execute([$user['id']]);
+    if (!$stmt->fetch()) {
+        $stmt = $db->prepare("
+            INSERT INTO drivers (user_id, cnh, cnh_category, experience, specialty, work_region, availability, 
+                               truck_plate, truck_brand, truck_model, truck_year, truck_capacity, 
+                               professional_terms_accepted, background_check_authorized, approval_status) 
+            VALUES (?, '12345678900', 'C', '3-5', 'guincho', 'São Paulo', '24h', 
+                   'ABC-1234', 'Ford', 'F-4000', 2018, 'media', 
+                   TRUE, TRUE, 'approved')
+        ");
+        $stmt->execute([$user['id']]);
+    }
+    
+    return ['success' => true, 'user' => $user];
 }
 
 function requireAuth() {

@@ -4,6 +4,9 @@
  * Creates a new trip request from client
  */
 
+// Suppress notices and warnings to ensure clean JSON output
+error_reporting(E_ERROR | E_PARSE);
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
@@ -72,18 +75,18 @@ try {
     
     $trip_request->client_id = $user['id'];
     $trip_request->service_type = $data->service_type;
-    $trip_request->origin_lat = $data->origin_lat;
-    $trip_request->origin_lng = $data->origin_lng;
+    $trip_request->origin_lat = (float)$data->origin_lat;
+    $trip_request->origin_lng = (float)$data->origin_lng;
     $trip_request->origin_address = $data->origin_address;
-    $trip_request->destination_lat = $data->destination_lat;
-    $trip_request->destination_lng = $data->destination_lng;
+    $trip_request->destination_lat = (float)$data->destination_lat;
+    $trip_request->destination_lng = (float)$data->destination_lng;
     $trip_request->destination_address = $data->destination_address;
-    $trip_request->client_offer = $data->client_offer;
+    $trip_request->client_offer = (float)$data->client_offer;
     
     // Calculate distance and estimated duration
     $trip_request->distance_km = TripRequest::calculateDistance(
-        $data->origin_lat, $data->origin_lng,
-        $data->destination_lat, $data->destination_lng
+        $trip_request->origin_lat, $trip_request->origin_lng,
+        $trip_request->destination_lat, $trip_request->destination_lng
     );
     
     // Estimate duration (assuming 30 km/h average speed in city)
@@ -108,23 +111,17 @@ try {
         $radius_result = $stmt->fetch(PDO::FETCH_ASSOC);
         $search_radius = $radius_result ? (float)$radius_result['setting_value'] : 25.0;
         
-        // Find nearby drivers
-        $query = "SELECT d.id as driver_id, d.user_id, u.full_name,
-                         (6371 * acos(cos(radians(:origin_lat)) * cos(radians(0)) 
-                         * cos(radians(0) - radians(:origin_lng)) 
-                         + sin(radians(:origin_lat)) * sin(radians(0)))) AS distance
+        // Find nearby drivers (simplified query for now - will calculate distance later)
+        $query = "SELECT d.id as driver_id, d.user_id, u.full_name
                   FROM drivers d
                   JOIN users u ON d.user_id = u.id
                   WHERE d.approval_status = 'approved' 
                     AND u.status = 'active'
-                    AND d.specialty IN (:service_type, 'todos')
-                  ORDER BY distance ASC";
+                    AND (d.specialty = ? OR d.specialty = 'todos')
+                  LIMIT 10";
         
         $stmt = $db->prepare($query);
-        $stmt->bindParam(':origin_lat', $data->origin_lat);
-        $stmt->bindParam(':origin_lng', $data->origin_lng);
-        $stmt->bindParam(':service_type', $data->service_type);
-        $stmt->execute();
+        $stmt->execute([$data->service_type]);
         
         $nearby_drivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
