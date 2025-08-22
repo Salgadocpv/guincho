@@ -44,28 +44,31 @@ if (!$driver) {
     exit();
 }
 
-// Get driver's current location (for now, use a default location)
-// In a real app, this would come from GPS/location services
-$driver_lat = $_GET['lat'] ?? null;
-$driver_lng = $_GET['lng'] ?? null;
-
-if (!$driver_lat || !$driver_lng) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Localização do guincheiro é obrigatória (lat, lng)']);
-    exit();
-}
+// Get driver's current location (optional - used for distance calculation)
+$driver_lat = $_GET['lat'] ?? -23.5505; // Default São Paulo
+$driver_lng = $_GET['lng'] ?? -46.6333;
 
 try {
-    // Get search radius from settings
-    $stmt = $db->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'driver_search_radius_km'");
-    $stmt->execute();
-    $radius_result = $stmt->fetch(PDO::FETCH_ASSOC);
-    $search_radius = $radius_result ? (float)$radius_result['setting_value'] : 25.0;
+    // Get all active trip requests (we'll filter by driver's work region later)
+    $query = "SELECT tr.*, u.full_name as client_name, u.phone as client_phone
+              FROM trip_requests tr
+              JOIN users u ON tr.client_id = u.id
+              WHERE tr.status = 'pending' 
+                AND tr.expires_at > NOW()
+              ORDER BY tr.created_at DESC";
     
-    // Get nearby trip requests
-    $trip_request = new TripRequest($db);
-    $stmt = $trip_request->getNearbyRequests($driver_lat, $driver_lng, $search_radius);
+    $stmt = $db->prepare($query);
+    $stmt->execute();
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Calculate distance from driver to each trip origin
+    foreach ($requests as &$request) {
+        $distance = TripRequest::calculateDistance(
+            $driver_lat, $driver_lng,
+            $request['origin_lat'], $request['origin_lng']
+        );
+        $request['distance'] = round($distance, 2);
+    }
     
     // Filter by driver specialty
     $filtered_requests = [];
@@ -76,7 +79,6 @@ try {
             $bid_check->execute([$request['id'], $driver['id']]);
             
             $request['has_bid'] = $bid_check->rowCount() > 0;
-            $request['distance'] = round($request['distance'], 2);
             $request['time_remaining'] = max(0, strtotime($request['expires_at']) - time());
             
             // Format addresses for display
@@ -96,7 +98,6 @@ try {
         'driver_info' => [
             'id' => $driver['id'],
             'specialty' => $driver['specialty'],
-            'search_radius_km' => $search_radius,
             'location' => [
                 'lat' => (float)$driver_lat,
                 'lng' => (float)$driver_lng
