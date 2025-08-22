@@ -761,9 +761,10 @@
         }
 
         async function loadRequests() {
+            // Use default location if GPS not available
             if (!currentLocation) {
-                console.log('No location available');
-                return;
+                currentLocation = { lat: -23.5505, lng: -46.6333 }; // Default São Paulo
+                console.log('Using default location for requests');
             }
 
             const refreshBtn = document.getElementById('refreshBtn');
@@ -787,7 +788,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    requests = data.data.filter(req => req.distance <= parseFloat(radiusFilter));
+                    // Show ALL requests without distance filtering for testing
+                    requests = data.data;
                     updateRequestsDisplay();
                     updateStats();
                 } else {
