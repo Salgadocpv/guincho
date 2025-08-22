@@ -1,9 +1,86 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15" version="28.1.0">
   <diagram name="Página-1" id="gbM7KEM0YgsXCYBwnzht">
-    <mxGraphModel dx="1019" dy="555" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1662" dy="905" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="bjKzxajJnMHmzWomb82E-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-1" target="bjKzxajJnMHmzWomb82E-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-1" target="bjKzxajJnMHmzWomb82E-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-1" value="Cliente coloca origem e destino e confirma viagem" style="whiteSpace=wrap;html=1;rotation=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="50" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-2" target="bjKzxajJnMHmzWomb82E-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-2" value="Abre tela aguardando proposta" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="425" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-3" target="bjKzxajJnMHmzWomb82E-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-3" value="É gerada uma solicitação da viagem no banco de dados" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="130" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-9" target="bjKzxajJnMHmzWomb82E-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-9" value="A proposta aparece para os guinchos disponíveis e que não estão executando serviços em um raio x, sendo x definido no sistema do administrador" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="130" y="270" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-12" target="bjKzxajJnMHmzWomb82E-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-12" value="Os guinchos colocam a proposta de valor para o serviço" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="425" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-14" target="bjKzxajJnMHmzWomb82E-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-14" value="São exibidas as propostas para realizar o serviço de guincho, as propostas duram 3 minutos na tela do cliente para aceitar, elas aparecem como barras que conforme o tempo passa o preenchimento em gradiente de dentro diminui como um timer" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="261" y="540" width="305" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-22" value="Sim" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-19" target="bjKzxajJnMHmzWomb82E-21">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="855" />
+              <mxPoint x="330" y="855" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-25" value="Sim" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-19" target="bjKzxajJnMHmzWomb82E-24">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="860" />
+              <mxPoint x="510" y="860" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-27" value="Nao" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-19" target="bjKzxajJnMHmzWomb82E-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-19" value="Usuário aceita o valor?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="692.5" width="120" height="107.5" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-21" value="Inicia a viagem para o guincheiro" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="940" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-24" value="Abre a tela mostrando o guincheiro vindo" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="940" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="bjKzxajJnMHmzWomb82E-26" target="bjKzxajJnMHmzWomb82E-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="710" y="455" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bjKzxajJnMHmzWomb82E-26" value="Cliente coloca uma proposta um pouco maior que havia colocado inicialmente" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="610" width="120" height="60" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
