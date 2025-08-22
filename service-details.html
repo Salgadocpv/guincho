@@ -1924,7 +1924,14 @@
                 return;
             }
             
-            // Create navigation parameters
+            // Validate minimum offer
+            if (!validateMinimumPrice(offerValue)) {
+                const minValue = pricingConfig.minimum_trip_value;
+                showError(`O valor mínimo para uma viagem é R$ ${minValue.toFixed(2)}`);
+                return;
+            }
+            
+            // Create trip parameters for proposals page
             const params = new URLSearchParams();
             params.set('originLat', originLocation.lat);
             params.set('originLng', originLocation.lng);
@@ -1935,8 +1942,8 @@
             params.set('service', selectedService);
             params.set('offerValue', offerValue.toFixed(2));
             
-            // Redirect to navigation page
-            window.location.href = `navigation.html?${params.toString()}`;
+            // Redirect to trip proposals page
+            window.location.href = `trip-proposals.html?${params.toString()}`;
         }
 
         // Utility functions
