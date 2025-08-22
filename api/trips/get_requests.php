@@ -73,23 +73,21 @@ try {
         $request['distance'] = round($distance, 2);
     }
     
-    // Filter by driver specialty
+    // Show ALL requests to driver (no filters for testing)
     $filtered_requests = [];
     foreach ($requests as $request) {
-        if ($driver['specialty'] === 'todos' || $driver['specialty'] === $request['service_type']) {
-            // Check if driver already has a bid for this request
-            $bid_check = $db->prepare("SELECT id FROM trip_bids WHERE trip_request_id = ? AND driver_id = ?");
-            $bid_check->execute([$request['id'], $driver['id']]);
-            
-            $request['has_bid'] = $bid_check->rowCount() > 0;
-            $request['time_remaining'] = max(0, strtotime($request['expires_at']) - time());
-            
-            // Format addresses for display
-            $request['origin_short'] = substr($request['origin_address'], 0, 50) . (strlen($request['origin_address']) > 50 ? '...' : '');
-            $request['destination_short'] = substr($request['destination_address'], 0, 50) . (strlen($request['destination_address']) > 50 ? '...' : '');
-            
-            $filtered_requests[] = $request;
-        }
+        // Check if driver already has a bid for this request
+        $bid_check = $db->prepare("SELECT id FROM trip_bids WHERE trip_request_id = ? AND driver_id = ?");
+        $bid_check->execute([$request['id'], $driver['id']]);
+        
+        $request['has_bid'] = $bid_check->rowCount() > 0;
+        $request['time_remaining'] = max(0, strtotime($request['expires_at']) - time());
+        
+        // Format addresses for display
+        $request['origin_short'] = substr($request['origin_address'], 0, 50) . (strlen($request['origin_address']) > 50 ? '...' : '');
+        $request['destination_short'] = substr($request['destination_address'], 0, 50) . (strlen($request['destination_address']) > 50 ? '...' : '');
+        
+        $filtered_requests[] = $request;
     }
     
     // Clean up expired requests
