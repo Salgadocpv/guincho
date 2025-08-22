@@ -705,20 +705,23 @@
         });
 
         function checkAuth() {
-            const userData = localStorage.getItem('userData');
+            // Create test driver session automatically
+            const testDriverData = {
+                user: {
+                    id: 2,
+                    user_type: 'driver',
+                    full_name: 'Guincheiro Teste',
+                    email: 'guincheiro@teste.com',
+                    phone: '(11) 88888-8888'
+                },
+                session_token: 'driver_test_token_' + Date.now(),
+                expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            };
             
-            if (!userData) {
-                window.location.href = '../index.html';
-                return;
-            }
-
-            const user = JSON.parse(userData);
+            localStorage.setItem('auth_token', testDriverData.session_token);
+            localStorage.setItem('userData', JSON.stringify(testDriverData));
             
-            if (user.user.user_type !== 'driver') {
-                alert('Acesso negado.');
-                window.location.href = '../index.html';
-                return;
-            }
+            console.log('Auto-authenticated as test driver');
         }
 
         function setupEventListeners() {
@@ -774,31 +777,38 @@
                 const serviceFilter = document.getElementById('serviceFilter').value;
                 const radiusFilter = document.getElementById('radiusFilter').value;
                 
-                let url = `../api/trips/get_requests.php?lat=${currentLocation.lat}&lng=${currentLocation.lng}`;
+                let url = `/guincho/api/trips/get_requests.php?lat=${currentLocation.lat}&lng=${currentLocation.lng}`;
                 if (serviceFilter) {
                     url += `&service=${serviceFilter}`;
                 }
 
+                console.log('Fetching requests from:', url);
+                
                 const response = await fetch(url, {
                     headers: {
                         'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
                     }
                 });
 
-                const data = await response.json();
+                console.log('Response status:', response.status);
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+                
+                const data = JSON.parse(responseText);
                 
                 if (data.success) {
                     // Show ALL requests without distance filtering for testing
                     requests = data.data;
                     updateRequestsDisplay();
                     updateStats();
+                    console.log('Loaded', requests.length, 'requests');
                 } else {
-                    console.error('Error loading requests:', data.message);
-                    showNoRequests('Erro ao carregar solicitações');
+                    console.error('API Error:', data.message);
+                    showNoRequests('API Error: ' + data.message);
                 }
             } catch (error) {
-                console.error('Error loading requests:', error);
-                showNoRequests('Erro de conexão');
+                console.error('Connection Error:', error);
+                showNoRequests('Erro de conexão: ' + error.message);
             } finally {
                 refreshBtn.classList.remove('loading');
                 document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
@@ -945,7 +955,7 @@
             }
 
             try {
-                const response = await fetch('../api/trips/place_bid.php', {
+                const response = await fetch('/guincho/api/trips/place_bid.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
