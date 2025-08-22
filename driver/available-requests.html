@@ -851,7 +851,7 @@
                                     <h3>${getServiceName(request.service_type)}</h3>
                                     <div class="service-meta">
                                         <span><i class="fas fa-user"></i> ${request.client_name}</span>
-                                        <span><i class="fas fa-map-marker-alt"></i> ${request.distance.toFixed(1)} km</span>
+                                        <span><i class="fas fa-map-marker-alt"></i> ${request.distance ? parseFloat(request.distance).toFixed(1) : '0'} km</span>
                                         <span><i class="fas fa-clock"></i> ${formatTime(timeRemaining)}</span>
                                     </div>
                                 </div>
@@ -878,7 +878,7 @@
 
                         <div class="request-details">
                             <div class="detail-item">
-                                <div class="detail-value">${request.distance_km ? request.distance_km.toFixed(1) : '-'} km</div>
+                                <div class="detail-value">${request.distance_km ? parseFloat(request.distance_km).toFixed(1) : '-'} km</div>
                                 <div class="detail-label">Distância Viagem</div>
                             </div>
                             <div class="detail-item">
@@ -926,7 +926,7 @@
             // Pre-fill modal with request data
             document.getElementById('clientOfferValue').textContent = `R$ ${parseFloat(selectedRequest.client_offer).toFixed(2).replace('.', ',')}`;
             document.getElementById('bidAmount').value = selectedRequest.client_offer;
-            document.getElementById('arrivalTime').value = Math.ceil(selectedRequest.distance * 2); // Estimate 2 min per km
+            document.getElementById('arrivalTime').value = Math.ceil((selectedRequest.distance || 10) * 2); // Estimate 2 min per km
             document.getElementById('bidMessage').value = '';
 
             document.getElementById('bidModal').style.display = 'flex';
@@ -988,7 +988,7 @@
             const request = requests.find(r => r.id == requestId);
             if (!request) return;
 
-            alert(`Detalhes da Solicitação:\n\nServiço: ${getServiceName(request.service_type)}\nCliente: ${request.client_name}\nDistância: ${request.distance.toFixed(1)} km\nOferta: R$ ${parseFloat(request.client_offer).toFixed(2)}\n\nOrigem: ${request.origin_address}\nDestino: ${request.destination_address}`);
+            alert(`Detalhes da Solicitação:\n\nServiço: ${getServiceName(request.service_type)}\nCliente: ${request.client_name}\nDistância: ${request.distance ? parseFloat(request.distance).toFixed(1) : '0'} km\nOferta: R$ ${parseFloat(request.client_offer).toFixed(2)}\n\nOrigem: ${request.origin_address}\nDestino: ${request.destination_address}`);
         }
 
         function startPolling() {
