@@ -56,74 +56,176 @@
 
         /* Main Layout */
         .main-container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
         }
 
         /* Grids */
-        .stats-grid, .actions-grid {
+        .stats-grid {
             display: grid;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            grid-template-columns: 1fr; /* Mobile-first: 1 coluna */
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .actions-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         }
 
         /* Cards */
-        .stat-card, .action-card {
+        .stat-card {
             background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border: 1px solid #e9ecef;
             transition: all 0.3s ease;
         }
 
-        .stat-card:hover, .action-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .action-card {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            text-align: center;
+            cursor: pointer;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .action-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            background: #f8f9fa;
         }
 
         .stat-value {
-            font-size: clamp(1.5rem, 5vw, 2rem);
+            font-size: 1.5rem;
             font-weight: 700;
         }
 
         .action-title {
-            font-size: clamp(1rem, 4vw, 1.1rem);
+            font-size: 0.8rem;
             font-weight: 600;
+            margin-top: 0.5rem;
+            color: #495057;
         }
 
         .action-description {
-            font-size: 0.9rem;
-            flex-grow: 1;
+            display: none; /* Ocultar descrições para economizar espaço */
         }
 
-        /* Tablet Breakpoint */
-        @media (min-width: 600px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .actions-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* Desktop Breakpoint */
-        @media (min-width: 992px) {
-            .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .actions-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        /* Large Desktop Breakpoint */
-        @media (min-width: 1200px) {
+        /* Responsive Grid */
+        @media (min-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
+            .actions-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .actions-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        /* Action card specific styles */
+        .action-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc3545;
+            font-size: 1.2rem;
+        }
+
+        .action-btn {
+            display: none; /* Remover botões para economizar espaço */
+        }
+
+        /* Stats card specific styles */
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .stat-icon.clients { background: rgba(0, 123, 255, 0.1); color: #007bff; }
+        .stat-icon.drivers { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+        .stat-icon.partners { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+        .stat-icon.services { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+
+        .stat-change {
+            font-size: 0.7rem;
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        /* User info styles */
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
         }
     </style>
 </head>
@@ -159,7 +261,7 @@
                 </div>
                 <div class="stat-value" id="clientsCount">-</div>
                 <div class="stat-label">Clientes Cadastrados</div>
-                <div class="stat-change">+12% este mês</div>
+                <div class="stat-change" id="clientsGrowth">Carregando...</div>
             </div>
 
             <div class="stat-card">
@@ -170,7 +272,7 @@
                 </div>
                 <div class="stat-value" id="driversCount">-</div>
                 <div class="stat-label">Guincheiros Ativos</div>
-                <div class="stat-change">+8% este mês</div>
+                <div class="stat-change" id="driversGrowth">Carregando...</div>
             </div>
 
             <div class="stat-card">
@@ -181,7 +283,7 @@
                 </div>
                 <div class="stat-value" id="partnersCount">-</div>
                 <div class="stat-label">Parceiros Ativos</div>
-                <div class="stat-change">+15% este mês</div>
+                <div class="stat-change" id="partnersGrowth">Carregando...</div>
             </div>
 
             <div class="stat-card">
@@ -192,100 +294,80 @@
                 </div>
                 <div class="stat-value" id="servicesCount">-</div>
                 <div class="stat-label">Serviços Realizados</div>
-                <div class="stat-change">+25% este mês</div>
+                <div class="stat-change" id="servicesGrowth">Carregando...</div>
             </div>
         </div>
 
         <!-- Actions Grid -->
         <div class="actions-grid">
-            <div class="action-card">
-                <div class="action-header">
-                    <div class="action-icon">
-                        <i class="fas fa-cog"></i>
-                    </div>
-                    <div class="action-title">Parâmetros do Sistema</div>
+            <div class="action-card" onclick="window.location.href='settings.html'">
+                <div class="action-icon">
+                    <i class="fas fa-cog"></i>
                 </div>
-                <div class="action-description">
-                    Configure as definições gerais da plataforma, comissões, preços e integrações.
-                </div>
-                <a href="settings.html" class="action-btn">
-                    <i class="fas fa-arrow-right"></i> Acessar
-                </a>
+                <div class="action-title">Configurações</div>
             </div>
 
-            <div class="action-card">
-                <div class="action-header">
-                    <div class="action-icon">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                    <div class="action-title">Aprovar Usuários</div>
+            <div class="action-card" id="pendingApprovalsCard" style="display: none;" onclick="showPendingApprovals()">
+                <div class="action-icon">
+                    <i class="fas fa-user-check"></i>
                 </div>
-                <div class="action-description">
-                    Revisar e aprovar cadastros de guincheiros e parceiros pendentes.
-                </div>
-                <a href="approvals.html" class="action-btn">
-                    <i class="fas fa-arrow-right"></i> Acessar
-                </a>
+                <div class="action-title">Aprovações (<span id="pendingCount">0</span>)</div>
             </div>
 
-            <div class="action-card">
-                <div class="action-header">
-                    <div class="action-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="action-title">Relatórios</div>
+            <div class="action-card" onclick="showUsers('client')">
+                <div class="action-icon">
+                    <i class="fas fa-users"></i>
                 </div>
-                <div class="action-description">
-                    Visualizar relatórios de performance, financeiro e uso da plataforma.
-                </div>
-                <a href="reports.html" class="action-btn">
-                    <i class="fas fa-arrow-right"></i> Acessar
-                </a>
+                <div class="action-title">Clientes</div>
             </div>
 
-            <div class="action-card">
-                <div class="action-header">
-                    <div class="action-icon">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <div class="action-title">Gestão de Dados</div>
+            <div class="action-card" onclick="showUsers('driver')">
+                <div class="action-icon">
+                    <i class="fas fa-truck"></i>
                 </div>
-                <div class="action-description">
-                    Backup, restauração e manutenção da base de dados do sistema.
-                </div>
-                <a href="database.html" class="action-btn">
-                    <i class="fas fa-arrow-right"></i> Acessar
-                </a>
+                <div class="action-title">Guincheiros</div>
             </div>
 
-            <div class="action-card">
-                <div class="action-header">
-                    <div class="action-icon">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <div class="action-title">Notificações</div>
+            <div class="action-card" onclick="showUsers('partner')">
+                <div class="action-icon">
+                    <i class="fas fa-store"></i>
                 </div>
-                <div class="action-description">
-                    Gerenciar notificações push, e-mails e comunicações do sistema.
-                </div>
-                <a href="notifications.html" class="action-btn">
-                    <i class="fas fa-arrow-right"></i> Acessar
-                </a>
+                <div class="action-title">Parceiros</div>
             </div>
 
-            <div class="action-card">
-                <div class="action-header">
-                    <div class="action-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="action-title">Segurança</div>
+            <div class="action-card" onclick="showTrips()">
+                <div class="action-icon">
+                    <i class="fas fa-route"></i>
                 </div>
-                <div class="action-description">
-                    Logs de auditoria, controle de acesso e configurações de segurança.
+                <div class="action-title">Viagens</div>
+            </div>
+
+            <div class="action-card" onclick="showLogs()">
+                <div class="action-icon">
+                    <i class="fas fa-history"></i>
                 </div>
-                <a href="security.html" class="action-btn">
-                    <i class="fas fa-arrow-right"></i> Acessar
-                </a>
+                <div class="action-title">Logs</div>
+            </div>
+
+            <div class="action-card" onclick="showDatabase()">
+                <div class="action-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="action-title">Banco</div>
+            </div>
+
+            <div class="action-card" onclick="showBackup()">
+                <div class="action-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div class="action-title">Backup</div>
+            </div>
+
+            <div class="action-card" onclick="showSupport()">
+                <div class="action-icon">
+                    <i class="fas fa-life-ring"></i>
+                </div>
+                <div class="action-title">Suporte</div>
             </div>
         </div>
 
@@ -321,69 +403,57 @@
 
             // Load dashboard data
             loadDashboardStats();
-            loadRecentActivity();
         }
 
-        function loadDashboardStats() {
-            // Simulate loading stats (replace with real API calls)
-            setTimeout(() => {
-                document.getElementById('clientsCount').textContent = '1,247';
-                document.getElementById('driversCount').textContent = '89';
-                document.getElementById('partnersCount').textContent = '156';
-                document.getElementById('servicesCount').textContent = '3,421';
-            }, 1000);
-        }
-
-        function loadRecentActivity() {
-            // Simulate loading recent activity (replace with real API calls)
-            setTimeout(() => {
-                const activities = [
-                    {
-                        icon: 'fas fa-user-plus',
-                        text: 'Novo guincheiro cadastrado: João Silva',
-                        time: 'Há 2 minutos',
-                        color: '#28a745'
-                    },
-                    {
-                        icon: 'fas fa-store',
-                        text: 'Parceiro aprovado: Auto Center Santos',
-                        time: 'Há 15 minutos',
-                        color: '#ffc107'
-                    },
-                    {
-                        icon: 'fas fa-cog',
-                        text: 'Configuração alterada: Taxa de comissão',
-                        time: 'Há 1 hora',
-                        color: '#dc3545'
-                    },
-                    {
-                        icon: 'fas fa-chart-line',
-                        text: 'Relatório mensal gerado automaticamente',
-                        time: 'Há 2 horas',
-                        color: '#17a2b8'
-                    },
-                    {
-                        icon: 'fas fa-database',
-                        text: 'Backup automático concluído',
-                        time: 'Há 3 horas',
-                        color: '#6c757d'
+        async function loadDashboardStats() {
+            try {
+                const userData = localStorage.getItem('userData');
+                const user = JSON.parse(userData);
+                
+                const response = await fetch('../api/admin/get_dashboard_stats.php', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + user.session_token
                     }
-                ];
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('clientsCount').textContent = data.stats.clients.count.toLocaleString();
+                    document.getElementById('driversCount').textContent = data.stats.drivers.count.toLocaleString();
+                    document.getElementById('partnersCount').textContent = data.stats.partners.count.toLocaleString();
+                    document.getElementById('servicesCount').textContent = data.stats.services.count.toLocaleString();
+                    
+                    document.getElementById('clientsGrowth').textContent = data.stats.clients.growth + ' este mês';
+                    document.getElementById('driversGrowth').textContent = data.stats.drivers.growth + ' este mês';
+                    document.getElementById('partnersGrowth').textContent = data.stats.partners.growth + ' este mês';
+                    document.getElementById('servicesGrowth').textContent = data.stats.services.growth + ' este mês';
+                    
+                    // Mostrar card de aprovações pendentes se houver
+                    if (data.stats.pending_approvals > 0) {
+                        document.getElementById('pendingCount').textContent = data.stats.pending_approvals;
+                        document.getElementById('pendingApprovalsCard').style.display = 'block';
+                    }
+                    
+                    loadRecentActivity(data.recent_activity);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+                modalSystem.error('Erro ao carregar dados do dashboard.');
+            }
+        }
 
-                const activityHtml = activities.map(activity => `
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background: ${activity.color}">
-                            <i class="${activity.icon}"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">${activity.text}</div>
-                            <div class="activity-time">${activity.time}</div>
-                        </div>
-                    </div>
-                `).join('');
-
-                document.getElementById('recentActivity').innerHTML = activityHtml;
-            }, 1500);
+        function loadRecentActivity(activities) {
+            if (!activities || activities.length === 0) {
+                return;
+            }
+            
+            // Esta função agora recebe as atividades da API
+            // Pode ser expandida para mostrar atividades em uma seção específica se necessário
         }
 
         async function logout() {
@@ -392,6 +462,39 @@
                 localStorage.removeItem('userData');
                 window.location.href = '../index.html';
             }
+        }
+
+        async function showPendingApprovals() {
+            modalSystem.info('Funcionalidade de aprovações em desenvolvimento. Por enquanto, você pode verificar os usuários com status "pending_approval" diretamente no banco de dados.');
+        }
+
+        function showUsers(type) {
+            const typeNames = {
+                'client': 'clientes',
+                'driver': 'guincheiros', 
+                'partner': 'parceiros'
+            };
+            modalSystem.info(`Listagem de ${typeNames[type]} em desenvolvimento. Por enquanto, você pode consultar a tabela "users" no banco de dados filtrando por user_type = '${type}'.`);
+        }
+
+        function showTrips() {
+            modalSystem.info('Relatório de viagens em desenvolvimento. Por enquanto, você pode consultar as tabelas "trip_requests" e "trip_bids" no banco de dados.');
+        }
+
+        function showLogs() {
+            modalSystem.info('Visualização de logs em desenvolvimento. Por enquanto, você pode consultar a tabela "audit_logs" no banco de dados.');
+        }
+
+        function showDatabase() {
+            modalSystem.info('Ferramentas de banco em desenvolvimento. Acesse diretamente o phpMyAdmin para gerenciar o banco de dados.');
+        }
+
+        function showBackup() {
+            modalSystem.info('Sistema de backup em desenvolvimento. Use as ferramentas do cPanel ou mysqldump para fazer backup do banco.');
+        }
+
+        function showSupport() {
+            modalSystem.info('Sistema de suporte em desenvolvimento. Para questões técnicas, entre em contato com o desenvolvedor.');
         }
     </script>
 </body>

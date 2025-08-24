@@ -75,31 +75,6 @@
             margin-bottom: 15px;
         }
 
-        .my-requests-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 0 auto;
-            max-width: fit-content;
-        }
-
-        .my-requests-btn:hover {
-            background: rgba(255,255,255,0.2);
-            border-color: rgba(255,255,255,0.5);
-            transform: translateY(-1px);
-        }
-
-        .my-requests-btn i {
-            font-size: 0.9rem;
-        }
 
         /* Services Grid */
         .services-grid {
@@ -107,6 +82,13 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-bottom: 32px;
+        }
+
+        /* Ajuste para 7 itens */
+        @media (min-width: 480px) {
+            .services-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
         .service-item {
@@ -286,7 +268,7 @@
             }
 
             .services-grid {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: repeat(2, 1fr);
                 gap: 12px;
             }
 
@@ -350,10 +332,6 @@
             <div class="user-greeting">Bem-vindo!</div>
             <h1 class="services-title">Selecionar Serviço</h1>
             <p class="services-subtitle">Escolha o tipo de socorro necessário</p>
-            <button class="my-requests-btn" onclick="goToMyRequests()">
-                <i class="fas fa-history"></i>
-                Minhas Solicitações
-            </button>
         </div>
 
         <!-- Location Info -->
@@ -376,7 +354,12 @@
 
         <!-- Services Grid -->
         <div class="services-grid">
-                <div class="service-item" onclick="goToService('guincho')" data-service="guincho">
+            <div class="service-item" onclick="goToMyRequests()" data-service="historico">
+                <i class="fas fa-history service-icon"></i>
+                <div class="service-name">Histórico</div>
+            </div>
+
+            <div class="service-item" onclick="goToService('guincho')" data-service="guincho">
                 <i class="fas fa-truck service-icon"></i>
                 <div class="service-name">Guincho</div>
             </div>
