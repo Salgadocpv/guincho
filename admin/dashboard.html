@@ -163,7 +163,7 @@
         /* Action Grid */
         .actions-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: 1fr; /* Mobile-first: 1 coluna por padrão */
             gap: 1rem;
             margin-bottom: 2rem;
         }
@@ -301,15 +301,21 @@
         }
 
         /* Responsive */
-        @media (max-width: 1200px) {
+        @media (min-width: 600px) {
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 992px) {
             .actions-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
 
-        @media (max-width: 992px) {
+        @media (min-width: 1200px) {
             .actions-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -324,7 +330,7 @@
                 padding: 1rem;
             }
 
-            .stats-grid, .actions-grid {
+            .stats-grid {
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
