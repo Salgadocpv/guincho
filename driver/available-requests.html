@@ -1081,7 +1081,8 @@
                         </button>
                     </div>
                     <div class="modal-content">
-                        <div class="trip-info">
+                        <div class="modal-body">
+                            <div class="trip-info">
                             <div class="service-type">
                                 <i class="fas fa-wrench"></i>
                                 <span>${getServiceName(request.service_type)}</span>
@@ -1178,6 +1179,7 @@
                                 <div class="address-text">${request.destination_address}</div>
                             </div>
                         </div>
+                        </div>
                         
                         <div class="modal-actions">
                             <button onclick="closeTripDetailsModal()" class="btn btn-secondary">
@@ -1199,23 +1201,25 @@
                     bottom: 0;
                     background: rgba(0,0,0,0.8);
                     display: flex;
-                    align-items: flex-start;
+                    align-items: stretch;
                     justify-content: center;
                     z-index: 10000;
-                    padding: 10px;
-                    overflow-y: auto;
-                    -webkit-overflow-scrolling: touch;
+                    padding: 0;
+                    overflow: hidden;
                 }
                 
                 .trip-details-modal .modal-content {
                     background: white;
-                    border-radius: 12px;
-                    max-width: 600px;
+                    border-radius: 0;
                     width: 100%;
-                    max-height: none;
-                    overflow-y: visible;
+                    max-width: 600px;
+                    height: 100vh;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
                     color: #333;
-                    margin: 10px 0;
+                    margin: 0;
+                    display: flex;
+                    flex-direction: column;
                 }
                 
                 .modal-header {
@@ -1226,7 +1230,11 @@
                     align-items: center;
                     background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
                     color: white;
-                    border-radius: 12px 12px 0 0;
+                    border-radius: 0;
+                    flex-shrink: 0;
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
                 }
                 
                 .modal-header h3 {
@@ -1431,6 +1439,12 @@
                     display: flex;
                     gap: 10px;
                     justify-content: flex-end;
+                    flex-shrink: 0;
+                    background: white;
+                    border-top: 1px solid #eee;
+                    position: sticky;
+                    bottom: 0;
+                    margin-top: auto;
                 }
                 
                 .btn {
@@ -1463,25 +1477,35 @@
                     background: #218838;
                 }
                 
+                .modal-body {
+                    flex: 1;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
                 @media (max-width: 768px) {
                     .trip-details-modal {
-                        padding: 5px;
-                        align-items: flex-start;
+                        padding: 0;
+                        align-items: stretch;
                     }
                     
                     .trip-details-modal .modal-content {
                         max-width: none;
-                        border-radius: 8px;
-                        margin: 5px 0;
+                        border-radius: 0;
+                        margin: 0;
+                        width: 100vw;
+                        height: 100vh;
                     }
                     
                     .modal-header {
-                        padding: 15px;
-                        border-radius: 8px 8px 0 0;
+                        padding: 15px 20px;
+                        border-radius: 0;
+                        position: sticky;
+                        top: 0;
                     }
                     
                     .modal-header h3 {
-                        font-size: 1rem;
+                        font-size: 1.1rem;
                     }
                     
                     .trip-info {
@@ -1550,9 +1574,11 @@
                     }
                     
                     .modal-actions {
-                        padding: 15px;
+                        padding: 15px 20px;
                         flex-direction: column;
                         gap: 8px;
+                        position: sticky;
+                        bottom: 0;
                     }
                     
                     .btn {
