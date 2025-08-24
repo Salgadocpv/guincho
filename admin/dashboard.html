@@ -64,9 +64,9 @@
         /* Grids */
         .stats-grid {
             display: grid;
-            gap: 1rem;
+            gap: 0.75rem;
             margin-bottom: 1.5rem;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
         }
 
         .actions-grid {
@@ -79,11 +79,12 @@
         /* Cards */
         .stat-card {
             background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 0.75rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             border: 1px solid #e9ecef;
             transition: all 0.3s ease;
+            min-height: 90px;
         }
 
         .action-card {
@@ -114,7 +115,7 @@
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
         }
 
@@ -131,9 +132,6 @@
 
         /* Responsive Grid */
         @media (min-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
             .actions-grid {
                 grid-template-columns: repeat(6, 1fr);
             }
@@ -170,13 +168,13 @@
         }
 
         .stat-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         .stat-icon.clients { background: rgba(0, 123, 255, 0.1); color: #007bff; }
@@ -443,7 +441,7 @@
                 }
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error);
-                modalSystem.error('Erro ao carregar dados do dashboard.');
+                alert('Erro ao carregar dados do dashboard.');
             }
         }
 
@@ -457,7 +455,7 @@
         }
 
         async function logout() {
-            const confirmed = await modalSystem.confirm('Deseja sair do sistema?');
+            const confirmed = confirm('Deseja sair do sistema?');
             if (confirmed) {
                 localStorage.removeItem('userData');
                 window.location.href = '../index.html';
@@ -465,7 +463,7 @@
         }
 
         async function showPendingApprovals() {
-            modalSystem.info('Funcionalidade de aprovações em desenvolvimento. Por enquanto, você pode verificar os usuários com status "pending_approval" diretamente no banco de dados.');
+            alert('Funcionalidade de aprovações em desenvolvimento. Por enquanto, você pode verificar os usuários com status "pending_approval" diretamente no banco de dados.');
         }
 
         function showUsers(type) {
@@ -474,27 +472,27 @@
                 'driver': 'guincheiros', 
                 'partner': 'parceiros'
             };
-            modalSystem.info(`Listagem de ${typeNames[type]} em desenvolvimento. Por enquanto, você pode consultar a tabela "users" no banco de dados filtrando por user_type = '${type}'.`);
+            alert(`Listagem de ${typeNames[type]} em desenvolvimento. Por enquanto, você pode consultar a tabela "users" no banco de dados filtrando por user_type = '${type}'.`);
         }
 
         function showTrips() {
-            modalSystem.info('Relatório de viagens em desenvolvimento. Por enquanto, você pode consultar as tabelas "trip_requests" e "trip_bids" no banco de dados.');
+            alert('Relatório de viagens em desenvolvimento. Por enquanto, você pode consultar as tabelas "trip_requests" e "trip_bids" no banco de dados.');
         }
 
         function showLogs() {
-            modalSystem.info('Visualização de logs em desenvolvimento. Por enquanto, você pode consultar a tabela "audit_logs" no banco de dados.');
+            alert('Visualização de logs em desenvolvimento. Por enquanto, você pode consultar a tabela "audit_logs" no banco de dados.');
         }
 
         function showDatabase() {
-            modalSystem.info('Ferramentas de banco em desenvolvimento. Acesse diretamente o phpMyAdmin para gerenciar o banco de dados.');
+            alert('Ferramentas de banco em desenvolvimento. Acesse diretamente o phpMyAdmin para gerenciar o banco de dados.');
         }
 
         function showBackup() {
-            modalSystem.info('Sistema de backup em desenvolvimento. Use as ferramentas do cPanel ou mysqldump para fazer backup do banco.');
+            alert('Sistema de backup em desenvolvimento. Use as ferramentas do cPanel ou mysqldump para fazer backup do banco.');
         }
 
         function showSupport() {
-            modalSystem.info('Sistema de suporte em desenvolvimento. Para questões técnicas, entre em contato com o desenvolvedor.');
+            alert('Sistema de suporte em desenvolvimento. Para questões técnicas, entre em contato com o desenvolvedor.');
         }
     </script>
 </body>

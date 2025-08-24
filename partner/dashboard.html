@@ -138,7 +138,7 @@
         }
 
         async function logout() {
-            const confirmed = await modalSystem.confirm('Deseja sair do sistema?');
+            const confirmed = confirm('Deseja sair do sistema?');
             if (confirmed) {
                 localStorage.removeItem('userData');
                 window.location.href = '../index.html';
