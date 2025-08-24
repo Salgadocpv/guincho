@@ -10,6 +10,20 @@ class AuthHelper {
     }
 
     /**
+     * Get the correct API path based on current location
+     */
+    getApiPath() {
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/client/')) {
+            return '../api';
+        } else if (currentPath.includes('/driver/')) {
+            return '../api';
+        } else {
+            return 'api';
+        }
+    }
+
+    /**
      * Get or create authentication token for testing
      */
     async getAuthToken() {
@@ -27,8 +41,11 @@ class AuthHelper {
      */
     async createTestSession() {
         try {
+            // Determine the correct API path based on current location
+            const apiPath = this.getApiPath();
+            
             // Try to login with test credentials
-            const response = await fetch('api/auth/login.php', {
+            const response = await fetch(`${apiPath}/auth/login.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
