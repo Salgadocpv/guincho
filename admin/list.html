@@ -500,6 +500,7 @@
         }
 
         async function loadData() {
+            let response, data;
             try {
                 showLoading();
                 
@@ -513,13 +514,24 @@
                     apiUrl = '../api/admin/get_users.php?type=' + listType.slice(0, -1); // Remove 's' from end
                 }
                 
-                const response = await fetch(apiUrl, {
+                console.log('Chamando API:', apiUrl);
+                
+                response = await fetch(apiUrl, {
                     headers: {
-                        'Authorization': 'Bearer ' + user.session_token
+                        'Authorization': 'Bearer ' + (user?.session_token || 'no-token')
                     }
                 });
                 
-                const data = await response.json();
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response error text:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                data = await response.json();
+                console.log('Response data:', data);
                 
                 if (data.success) {
                     allData = data.data || [];
@@ -535,7 +547,16 @@
                 console.error('Erro ao carregar dados:', error);
                 hideLoading();
                 showEmptyState();
-                alert('Erro ao carregar dados: ' + error.message);
+                
+                let errorMessage = 'Erro ao carregar dados';
+                if (error.message) {
+                    errorMessage += ': ' + error.message;
+                }
+                if (data && data.debug) {
+                    console.error('Debug info:', data.debug);
+                }
+                
+                alert(errorMessage);
             }
         }
 
