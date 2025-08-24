@@ -17,14 +17,14 @@ try {
     // Create test client user
     $stmt = $db->prepare("
         INSERT IGNORE INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-        VALUES ('client', 'Cliente Teste', '123.456.789-00', '1990-01-01', '(11) 99999-9999', 'cliente@teste.com', ?, TRUE, 'active', TRUE)
+        VALUES ('client', 'Cliente Teste', '123.456.789-00', '1990-01-01', '(11) 99999-9999', 'cliente@iguincho.com', ?, TRUE, 'active', TRUE)
     ");
     $passwordHash = password_hash('teste123', PASSWORD_ARGON2I);
     $stmt->execute([$passwordHash]);
     $results[] = "Cliente teste criado";
     
     // Get client ID
-    $stmt = $db->prepare("SELECT id FROM users WHERE email = 'cliente@teste.com'");
+    $stmt = $db->prepare("SELECT id FROM users WHERE email = 'cliente@iguincho.com'");
     $stmt->execute();
     $clientId = $stmt->fetchColumn();
     

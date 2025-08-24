@@ -114,7 +114,7 @@
         // Dados de teste
         const testData = {
             client: {
-                email: 'cliente@teste.com',
+                email: 'cliente@iguincho.com',
                 password: 'teste123'
             },
             driver: {

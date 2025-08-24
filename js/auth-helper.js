@@ -34,7 +34,7 @@ class AuthHelper {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    email: 'cliente@teste.com',
+                    email: 'cliente@iguincho.com',
                     password: 'teste123'
                 })
             });
@@ -72,7 +72,7 @@ class AuthHelper {
                 id: 1,
                 user_type: 'client',
                 full_name: 'Cliente Teste',
-                email: 'cliente@teste.com',
+                email: 'cliente@iguincho.com',
                 phone: '(11) 99999-9999'
             },
             session_token: testToken,
