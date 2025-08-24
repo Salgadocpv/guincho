@@ -361,7 +361,6 @@
         <div class="category-tabs">
             <div class="category-tab active" onclick="showCategory('general')">Geral</div>
             <div class="category-tab" onclick="showCategory('business')">Negócio</div>
-            <div class="category-tab" onclick="showCategory('integrations')">Integrações</div>
             <div class="category-tab" onclick="showCategory('system')">Sistema</div>
             <div class="category-tab" onclick="showCategory('contact')">Contato</div>
         </div>
@@ -406,101 +405,13 @@
 
                 <div class="settings-row">
                     <div class="form-group">
-                        <label class="form-label">Comissão do Sistema (%)</label>
-                        <div class="form-description">Percentual cobrado sobre cada serviço</div>
-                        <input type="number" class="form-input" id="service_commission" data-key="service_commission" min="0" max="50" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Raio Máximo de Busca (km)</label>
-                        <div class="form-description">Distância máxima para buscar guincheiros</div>
-                        <input type="number" class="form-input" id="max_driver_radius" data-key="max_driver_radius" min="1" max="200">
-                    </div>
-                </div>
-
-                <div class="settings-row">
-                    <div class="form-group">
-                        <label class="form-label">Valor Mínimo da Viagem (R$)</label>
-                        <div class="form-description">Valor mínimo para uma viagem de guincho</div>
-                        <input type="number" class="form-input" id="minimum_trip_value" data-key="minimum_trip_value" min="0" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Preço por Quilômetro (R$)</label>
-                        <div class="form-description">Valor cobrado por quilômetro rodado</div>
-                        <input type="number" class="form-input" id="price_per_km" data-key="price_per_km" min="0" step="0.01">
-                    </div>
-                </div>
-
-                <div class="settings-row">
-                    <div class="form-group">
-                        <label class="form-label">Taxa Base do Serviço (R$)</label>
-                        <div class="form-description">Taxa fixa cobrada em todos os serviços</div>
-                        <input type="number" class="form-input" id="base_service_fee" data-key="base_service_fee" min="0" step="0.01">
-                    </div>
-                    <div class="form-group">
                         <label class="form-label">Distância Máxima (km)</label>
                         <div class="form-description">Distância máxima de atendimento</div>
                         <input type="number" class="form-input" id="max_distance_km" data-key="max_distance_km" min="1" max="200">
                     </div>
                 </div>
-
-                <div class="settings-row">
-                    <div class="form-group">
-                        <label class="form-label">Multiplicador Emergencial</label>
-                        <div class="form-description">Multiplicador para atendimentos emergenciais</div>
-                        <input type="number" class="form-input" id="emergency_multiplier" data-key="emergency_multiplier" min="1" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Multiplicador Noturno</label>
-                        <div class="form-description">Multiplicador para atendimentos noturnos (22h-6h)</div>
-                        <input type="number" class="form-input" id="night_shift_multiplier" data-key="night_shift_multiplier" min="1" step="0.1">
-                    </div>
-                </div>
-
-                <div class="settings-row">
-                    <div class="form-group">
-                        <label class="form-label">Multiplicador de Fim de Semana</label>
-                        <div class="form-description">Multiplicador para finais de semana</div>
-                        <input type="number" class="form-input" id="weekend_multiplier" data-key="weekend_multiplier" min="1" step="0.1">
-                    </div>
-                </div>
-
-                <div class="settings-row">
-                    <div class="form-group">
-                        <label class="form-label">Aprovação Automática - Guincheiros</label>
-                        <div class="form-description">Aprovar guincheiros automaticamente após cadastro</div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="auto_approve_drivers" data-key="auto_approve_drivers">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Aprovação Automática - Parceiros</label>
-                        <div class="form-description">Aprovar parceiros automaticamente após cadastro</div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="auto_approve_partners" data-key="auto_approve_partners">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
             </div>
 
-            <!-- Integrations Settings -->
-            <div class="settings-section" data-category="integrations" style="display: none;">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-plug"></i>
-                    </div>
-                    <h2 class="section-title">Integrações</h2>
-                </div>
-
-                <div class="settings-row">
-                    <div class="form-group">
-                        <label class="form-label">Google Maps API Key</label>
-                        <div class="form-description">Chave de API para serviços de mapas</div>
-                        <input type="password" class="form-input" id="google_maps_api_key" data-key="google_maps_api_key">
-                    </div>
-                </div>
-            </div>
 
             <!-- System Settings -->
             <div class="settings-section" data-category="system" style="display: none;">
@@ -517,25 +428,6 @@
                         <div class="form-description">Ativar quando o sistema estiver em manutenção</div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="maintenance_mode" data-key="maintenance_mode">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Notificações Habilitadas</label>
-                        <div class="form-description">Enviar notificações push e por e-mail</div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="notification_enabled" data-key="notification_enabled">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="settings-row">
-                    <div class="form-group">
-                        <label class="form-label">Backup Automático</label>
-                        <div class="form-description">Realizar backup automático do banco de dados</div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="backup_enabled" data-key="backup_enabled">
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
