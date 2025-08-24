@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste de Autenticação</title>
+</head>
+<body>
+    <h1>Teste de Autenticação</h1>
+    <button onclick="testAuth()">Testar API</button>
+    <div id="result"></div>
+
+    <script src="js/auth-helper.js"></script>
+    <script>
+        // Initialize auth helper
+        window.authHelper = new AuthHelper();
+
+        async function testAuth() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testando...';
+
+            try {
+                console.log('1. Obtendo token...');
+                const token = await window.authHelper.getAuthToken();
+                console.log('Token obtido:', token);
+
+                console.log('2. Fazendo requisição para API...');
+                const response = await fetch('api/trips/get_client_requests.php', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Data recebida:', data);
+
+                resultDiv.innerHTML = `
+                    <h3>Resultado:</h3>
+                    <p><strong>Token:</strong> ${token}</p>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Sucesso:</strong> ${data.success}</p>
+                    <p><strong>Mensagem:</strong> ${data.message}</p>
+                    <p><strong>Dados:</strong> ${JSON.stringify(data.data, null, 2)}</p>
+                `;
+
+            } catch (error) {
+                console.error('Erro:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
