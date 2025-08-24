@@ -108,8 +108,8 @@ try {
         $stmt->execute();
         
         while ($row = $stmt->fetch()) {
-            $timeAgo = $this->timeAgo($row['created_at']);
-            $activity = $this->formatActivity($row['action'], $row['full_name'], $row['table_name'], $timeAgo);
+            $timeAgo = timeAgo($row['created_at']);
+            $activity = formatActivity($row['action'], $row['full_name'], $row['table_name'], $timeAgo);
             if ($activity) {
                 $recentActivity[] = $activity;
             }
@@ -126,12 +126,12 @@ try {
             $stmt->execute();
             
             while ($row = $stmt->fetch()) {
-                $timeAgo = $this->timeAgo($row['created_at']);
+                $timeAgo = timeAgo($row['created_at']);
                 $recentActivity[] = [
-                    'icon' => $this->getUserTypeIcon($row['user_type']),
-                    'text' => 'Novo ' . $this->getUserTypeName($row['user_type']) . ' cadastrado: ' . $row['full_name'],
+                    'icon' => getUserTypeIcon($row['user_type']),
+                    'text' => 'Novo ' . getUserTypeName($row['user_type']) . ' cadastrado: ' . $row['full_name'],
                     'time' => $timeAgo,
-                    'color' => $this->getUserTypeColor($row['user_type'])
+                    'color' => getUserTypeColor($row['user_type'])
                 ];
             }
         }
@@ -178,83 +178,83 @@ try {
     echo json_encode(['success' => false, 'message' => 'Erro interno do servidor']);
 }
 
-// Função para calcular tempo decorrido
-function timeAgo($datetime) {
-    $time = time() - strtotime($datetime);
-    
-    if ($time < 60) return 'Há poucos segundos';
-    if ($time < 3600) return 'Há ' . floor($time/60) . ' minutos';
-    if ($time < 86400) return 'Há ' . floor($time/3600) . ' horas';
-    if ($time < 604800) return 'Há ' . floor($time/86400) . ' dias';
-    
-    return date('d/m/Y H:i', strtotime($datetime));
-}
-
-// Função para formatar atividade
-function formatActivity($action, $userName, $tableName, $timeAgo) {
-    $activities = [
-        'user_registered' => [
-            'icon' => 'fas fa-user-plus',
-            'text' => 'Novo usuário cadastrado: ' . $userName,
-            'color' => '#28a745'
-        ],
-        'driver_registered' => [
-            'icon' => 'fas fa-truck',
-            'text' => 'Novo guincheiro cadastrado: ' . $userName,
-            'color' => '#28a745'
-        ],
-        'partner_registered' => [
-            'icon' => 'fas fa-store',
-            'text' => 'Novo parceiro cadastrado: ' . $userName,
-            'color' => '#ffc107'
-        ],
-        'user_login' => [
-            'icon' => 'fas fa-sign-in-alt',
-            'text' => 'Login realizado: ' . $userName,
-            'color' => '#17a2b8'
-        ]
-    ];
-    
-    if (isset($activities[$action])) {
-        return array_merge($activities[$action], ['time' => $timeAgo]);
+    // Função para calcular tempo decorrido
+    function timeAgo($datetime) {
+        $time = time() - strtotime($datetime);
+        
+        if ($time < 60) return 'Há poucos segundos';
+        if ($time < 3600) return 'Há ' . floor($time/60) . ' minutos';
+        if ($time < 86400) return 'Há ' . floor($time/3600) . ' horas';
+        if ($time < 604800) return 'Há ' . floor($time/86400) . ' dias';
+        
+        return date('d/m/Y H:i', strtotime($datetime));
     }
-    
-    return null;
-}
 
-// Função para obter ícone do tipo de usuário
-function getUserTypeIcon($userType) {
-    $icons = [
-        'client' => 'fas fa-user',
-        'driver' => 'fas fa-truck',
-        'partner' => 'fas fa-store',
-        'admin' => 'fas fa-shield-alt'
-    ];
-    
-    return $icons[$userType] ?? 'fas fa-user';
-}
+    // Função para formatar atividade
+    function formatActivity($action, $userName, $tableName, $timeAgo) {
+        $activities = [
+            'user_registered' => [
+                'icon' => 'fas fa-user-plus',
+                'text' => 'Novo usuário cadastrado: ' . $userName,
+                'color' => '#28a745'
+            ],
+            'driver_registered' => [
+                'icon' => 'fas fa-truck',
+                'text' => 'Novo guincheiro cadastrado: ' . $userName,
+                'color' => '#28a745'
+            ],
+            'partner_registered' => [
+                'icon' => 'fas fa-store',
+                'text' => 'Novo parceiro cadastrado: ' . $userName,
+                'color' => '#ffc107'
+            ],
+            'user_login' => [
+                'icon' => 'fas fa-sign-in-alt',
+                'text' => 'Login realizado: ' . $userName,
+                'color' => '#17a2b8'
+            ]
+        ];
+        
+        if (isset($activities[$action])) {
+            return array_merge($activities[$action], ['time' => $timeAgo]);
+        }
+        
+        return null;
+    }
 
-// Função para obter nome do tipo de usuário
-function getUserTypeName($userType) {
-    $names = [
-        'client' => 'cliente',
-        'driver' => 'guincheiro',
-        'partner' => 'parceiro',
-        'admin' => 'administrador'
-    ];
-    
-    return $names[$userType] ?? 'usuário';
-}
+    // Função para obter ícone do tipo de usuário
+    function getUserTypeIcon($userType) {
+        $icons = [
+            'client' => 'fas fa-user',
+            'driver' => 'fas fa-truck',
+            'partner' => 'fas fa-store',
+            'admin' => 'fas fa-shield-alt'
+        ];
+        
+        return $icons[$userType] ?? 'fas fa-user';
+    }
 
-// Função para obter cor do tipo de usuário
-function getUserTypeColor($userType) {
-    $colors = [
-        'client' => '#007bff',
-        'driver' => '#28a745',
-        'partner' => '#ffc107',
-        'admin' => '#dc3545'
-    ];
-    
-    return $colors[$userType] ?? '#6c757d';
-}
+    // Função para obter nome do tipo de usuário
+    function getUserTypeName($userType) {
+        $names = [
+            'client' => 'cliente',
+            'driver' => 'guincheiro',
+            'partner' => 'parceiro',
+            'admin' => 'administrador'
+        ];
+        
+        return $names[$userType] ?? 'usuário';
+    }
+
+    // Função para obter cor do tipo de usuário
+    function getUserTypeColor($userType) {
+        $colors = [
+            'client' => '#007bff',
+            'driver' => '#28a745',
+            'partner' => '#ffc107',
+            'admin' => '#dc3545'
+        ];
+        
+        return $colors[$userType] ?? '#6c757d';
+    }
 ?>

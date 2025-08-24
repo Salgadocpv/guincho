@@ -467,16 +467,17 @@
         }
 
         function showUsers(type) {
-            const typeNames = {
-                'client': 'clientes',
-                'driver': 'guincheiros', 
-                'partner': 'parceiros'
+            const typeMap = {
+                'client': 'clients',
+                'driver': 'drivers',
+                'partner': 'partners'
             };
-            alert(`Listagem de ${typeNames[type]} em desenvolvimento. Por enquanto, você pode consultar a tabela "users" no banco de dados filtrando por user_type = '${type}'.`);
+            const listType = typeMap[type] || 'clients';
+            window.location.href = `list.html?type=${listType}`;
         }
 
         function showTrips() {
-            alert('Relatório de viagens em desenvolvimento. Por enquanto, você pode consultar as tabelas "trip_requests" e "trip_bids" no banco de dados.');
+            window.location.href = 'list.html?type=services';
         }
 
         function showLogs() {
