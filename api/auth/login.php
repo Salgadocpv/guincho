@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 try {
     // Incluir dependências
+    require_once '../config/database_robust.php';
     require_once '../classes/User.php';
     
     // Obter dados JSON

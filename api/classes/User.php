@@ -4,6 +4,7 @@
  */
 
 require_once '../config/database.php';
+require_once '../config/database_robust.php';
 
 class User {
     private $conn;
@@ -31,8 +32,15 @@ class User {
     public $created_at;
     
     public function __construct() {
-        $database = new Database();
-        $this->conn = $database->getConnection();
+        try {
+            // Tentar conexão robusta primeiro
+            $this->conn = getDBConnectionRobust();
+        } catch (Exception $e) {
+            // Fallback para conexão normal
+            error_log("Conexão robusta falhou, tentando conexão padrão: " . $e->getMessage());
+            $database = new Database();
+            $this->conn = $database->getConnection();
+        }
     }
     
     /**
