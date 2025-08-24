@@ -305,13 +305,6 @@
                 <div class="action-title">Configurações</div>
             </div>
 
-            <div class="action-card" id="pendingApprovalsCard" style="display: none;" onclick="showPendingApprovals()">
-                <div class="action-icon">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="action-title">Aprovações (<span id="pendingCount">0</span>)</div>
-            </div>
-
             <div class="action-card" onclick="showUsers('client')">
                 <div class="action-icon">
                     <i class="fas fa-users"></i>
@@ -338,34 +331,6 @@
                     <i class="fas fa-route"></i>
                 </div>
                 <div class="action-title">Viagens</div>
-            </div>
-
-            <div class="action-card" onclick="showLogs()">
-                <div class="action-icon">
-                    <i class="fas fa-history"></i>
-                </div>
-                <div class="action-title">Logs</div>
-            </div>
-
-            <div class="action-card" onclick="showDatabase()">
-                <div class="action-icon">
-                    <i class="fas fa-database"></i>
-                </div>
-                <div class="action-title">Banco</div>
-            </div>
-
-            <div class="action-card" onclick="showBackup()">
-                <div class="action-icon">
-                    <i class="fas fa-download"></i>
-                </div>
-                <div class="action-title">Backup</div>
-            </div>
-
-            <div class="action-card" onclick="showSupport()">
-                <div class="action-icon">
-                    <i class="fas fa-life-ring"></i>
-                </div>
-                <div class="action-title">Suporte</div>
             </div>
         </div>
 
@@ -462,10 +427,6 @@
             }
         }
 
-        async function showPendingApprovals() {
-            alert('Funcionalidade de aprovações em desenvolvimento. Por enquanto, você pode verificar os usuários com status "pending_approval" diretamente no banco de dados.');
-        }
-
         function showUsers(type) {
             const typeMap = {
                 'client': 'clients',
@@ -478,22 +439,6 @@
 
         function showTrips() {
             window.location.href = 'list.html?type=services';
-        }
-
-        function showLogs() {
-            alert('Visualização de logs em desenvolvimento. Por enquanto, você pode consultar a tabela "audit_logs" no banco de dados.');
-        }
-
-        function showDatabase() {
-            alert('Ferramentas de banco em desenvolvimento. Acesse diretamente o phpMyAdmin para gerenciar o banco de dados.');
-        }
-
-        function showBackup() {
-            alert('Sistema de backup em desenvolvimento. Use as ferramentas do cPanel ou mysqldump para fazer backup do banco.');
-        }
-
-        function showSupport() {
-            alert('Sistema de suporte em desenvolvimento. Para questões técnicas, entre em contato com o desenvolvedor.');
         }
     </script>
 </body>
