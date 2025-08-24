@@ -72,7 +72,7 @@ try {
 
         // Adicionar filtro de busca se especificado
         if (!empty($search)) {
-            $whereClause .= " AND (u.full_name LIKE :search OR tr.service_type LIKE :search OR tr.pickup_address LIKE :search OR tr.destination_address LIKE :search)";
+            $whereClause .= " AND (u.full_name LIKE :search OR tr.service_type LIKE :search OR tr.origin_address LIKE :search OR tr.destination_address LIKE :search)";
             $params[':search'] = "%{$search}%";
         }
 
@@ -98,27 +98,24 @@ try {
                 u.full_name as client_name,
                 u.phone as client_phone,
                 tr.service_type,
-                tr.pickup_address,
+                tr.origin_address as pickup_address,
                 tr.destination_address,
-                tr.pickup_latitude,
-                tr.pickup_longitude,
-                tr.destination_latitude,
-                tr.destination_longitude,
-                tr.vehicle_info,
-                tr.problem_description,
-                tr.urgency_level,
-                tr.max_price,
+                tr.origin_lat as pickup_latitude,
+                tr.origin_lng as pickup_longitude,
+                tr.destination_lat as destination_latitude,
+                tr.destination_lng as destination_longitude,
+                tr.client_offer as max_price,
                 tr.status,
                 tr.created_at,
                 tr.updated_at,
                 tb.driver_id,
                 td.full_name as driver_name,
                 tb.bid_amount,
-                tb.estimated_arrival
+                tb.estimated_arrival_minutes as estimated_arrival
             FROM trip_requests tr
             LEFT JOIN users u ON tr.client_id = u.id
-            LEFT JOIN trip_bids tb ON tr.id = tb.trip_id AND tb.status = 'accepted'
-            LEFT JOIN users td ON tb.driver_id = td.id
+            LEFT JOIN trip_bids tb ON tr.id = tb.trip_request_id AND tb.status = 'accepted'
+            LEFT JOIN users td ON tb.driver_id = td.id AND td.user_type = 'driver'
             {$whereClause}
             ORDER BY tr.created_at DESC
             LIMIT {$limit} OFFSET {$offset}
