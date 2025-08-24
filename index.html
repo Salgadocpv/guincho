@@ -1132,6 +1132,8 @@
 
         // Quick Login for Testing
         function quickLogin(userType) {
+            console.log('quickLogin called with userType:', userType);
+            
             const credentials = {
                 client: {
                     email: 'cliente@iguincho.com',
@@ -1148,25 +1150,46 @@
             };
 
             if (!credentials[userType]) {
-                modalSystem.error('Tipo de usuário inválido');
+                console.error('Invalid user type:', userType);
+                if (typeof modalSystem !== 'undefined') {
+                    modalSystem.error('Tipo de usuário inválido');
+                } else {
+                    alert('Tipo de usuário inválido');
+                }
                 return;
             }
 
+            console.log('Using credentials:', credentials[userType]);
+
             // Fill the form fields
-            document.getElementById('email').value = credentials[userType].email;
-            document.getElementById('password').value = credentials[userType].password;
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            
+            if (!emailField || !passwordField) {
+                console.error('Email or password field not found');
+                alert('Campos de login não encontrados');
+                return;
+            }
+
+            emailField.value = credentials[userType].email;
+            passwordField.value = credentials[userType].password;
+
+            console.log('Fields filled, showing loading...');
 
             // Show loading
             showLoading();
 
             // Simulate login process
             setTimeout(() => {
+                console.log('Starting performLogin...');
                 performLogin(credentials[userType].email, credentials[userType].password);
             }, 500);
         }
 
         // Extracted login logic
         function performLogin(email, password) {
+            console.log('performLogin called with:', { email, password: '***' });
+            
             fetch('api/auth/login.php', {
                 method: 'POST',
                 headers: {
@@ -1177,38 +1200,60 @@
                     password: password
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Login response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Login response data:', data);
                 hideLoading();
                 
                 if (data.success) {
+                    console.log('Login successful, storing data and redirecting...');
+                    
                     // Store authentication data
                     localStorage.setItem('auth_token', data.data.session_token);
                     localStorage.setItem('userData', JSON.stringify(data.data));
                     
                     // Redirect based on user type
-                    switch (data.data.user.user_type) {
+                    const userType = data.data.user.user_type;
+                    console.log('User type:', userType);
+                    
+                    switch (userType) {
                         case 'client':
+                            console.log('Redirecting to services.html');
                             window.location.href = 'services.html';
                             break;
                         case 'driver':
+                            console.log('Redirecting to driver/dashboard.html');
                             window.location.href = 'driver/dashboard.html';
                             break;
                         case 'admin':
+                            console.log('Redirecting to admin/dashboard.html');
                             window.location.href = 'admin/dashboard.html';
                             break;
                         default:
+                            console.log('Unknown user type, defaulting to services.html');
                             window.location.href = 'services.html';
                     }
                 } else {
-                    modalSystem.error(data.message || 'Erro no login');
+                    console.error('Login failed:', data.message);
+                    if (typeof modalSystem !== 'undefined') {
+                        modalSystem.error(data.message || 'Erro no login');
+                    } else {
+                        alert(data.message || 'Erro no login');
+                    }
                     resetLoginButton();
                 }
             })
             .catch(error => {
-                hideLoading();
                 console.error('Login error:', error);
-                modalSystem.error('Erro de conexão. Tente novamente.');
+                hideLoading();
+                if (typeof modalSystem !== 'undefined') {
+                    modalSystem.error('Erro de conexão. Tente novamente.');
+                } else {
+                    alert('Erro de conexão. Tente novamente.');
+                }
                 resetLoginButton();
             });
         }
