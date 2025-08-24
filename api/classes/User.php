@@ -5,6 +5,7 @@
 
 require_once '../config/database.php';
 require_once '../config/database_robust.php';
+require_once '../config/database_auto.php';
 
 class User {
     private $conn;
@@ -33,13 +34,19 @@ class User {
     
     public function __construct() {
         try {
-            // Tentar conexão robusta primeiro
-            $this->conn = getDBConnectionRobust();
+            // Usar conexão automática (detecta ambiente)
+            $this->conn = getDBConnectionAuto();
         } catch (Exception $e) {
-            // Fallback para conexão normal
-            error_log("Conexão robusta falhou, tentando conexão padrão: " . $e->getMessage());
-            $database = new Database();
-            $this->conn = $database->getConnection();
+            // Fallback para conexão robusta
+            error_log("Conexão automática falhou, tentando conexão robusta: " . $e->getMessage());
+            try {
+                $this->conn = getDBConnectionRobust();
+            } catch (Exception $e2) {
+                // Fallback final para conexão normal
+                error_log("Conexão robusta falhou, tentando conexão padrão: " . $e2->getMessage());
+                $database = new Database();
+                $this->conn = $database->getConnection();
+            }
         }
     }
     
