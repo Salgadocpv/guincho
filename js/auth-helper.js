@@ -211,7 +211,7 @@ class AuthHelper {
                 id: 2,
                 user_type: 'driver',
                 full_name: 'Guincheiro Teste',
-                email: 'guincheiro@teste.com',
+                email: 'guincheiro@iguincho.com',
                 phone: '(11) 88888-8888'
             },
             session_token: 'driver_test_token_' + Date.now(),

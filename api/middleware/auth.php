@@ -121,7 +121,7 @@ function authenticateTestClient($db) {
 
 function authenticateTestDriver($db) {
     // Get or create a test driver user
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'guincheiro@teste.com' LIMIT 1");
+    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'guincheiro@iguincho.com' LIMIT 1");
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -129,7 +129,7 @@ function authenticateTestDriver($db) {
         // Create test driver user
         $stmt = $db->prepare("
             INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-            VALUES ('driver', 'Guincheiro Teste', '987.654.321-00', '1985-05-15', '(11) 88888-8888', 'guincheiro@teste.com', ?, TRUE, 'active', TRUE)
+            VALUES ('driver', 'Guincheiro Teste', '987.654.321-00', '1985-05-15', '(11) 88888-8888', 'guincheiro@iguincho.com', ?, TRUE, 'active', TRUE)
         ");
         $passwordHash = password_hash('teste123', PASSWORD_ARGON2I);
         $stmt->execute([$passwordHash]);

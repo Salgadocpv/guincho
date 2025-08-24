@@ -58,7 +58,7 @@ try {
     }
     
     // Verificar se o usuário guincheiro também existe
-    $stmt = $db->prepare("SELECT id, user_type, full_name, email, status, created_at FROM users WHERE email = 'guincheiro@teste.com' LIMIT 1");
+    $stmt = $db->prepare("SELECT id, user_type, full_name, email, status, created_at FROM users WHERE email = 'guincheiro@iguincho.com' LIMIT 1");
     $stmt->execute();
     $driver = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -95,7 +95,7 @@ try {
         // Criar usuário guincheiro
         $stmt = $db->prepare("
             INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified, created_at) 
-            VALUES ('driver', 'Guincheiro Teste Produção', '987.654.321-00', '1985-05-15', '(11) 88888-8888', 'guincheiro@teste.com', ?, TRUE, 'active', TRUE, NOW())
+            VALUES ('driver', 'Guincheiro Teste Produção', '987.654.321-00', '1985-05-15', '(11) 88888-8888', 'guincheiro@iguincho.com', ?, TRUE, 'active', TRUE, NOW())
         ");
         $passwordHash = password_hash('teste123', PASSWORD_ARGON2I);
         $success = $stmt->execute([$passwordHash]);

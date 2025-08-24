@@ -31,13 +31,13 @@ try {
     // Create test driver user
     $stmt = $db->prepare("
         INSERT IGNORE INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-        VALUES ('driver', 'Guincheiro Teste', '987.654.321-00', '1985-05-15', '(11) 88888-8888', 'guincheiro@teste.com', ?, TRUE, 'active', TRUE)
+        VALUES ('driver', 'Guincheiro Teste', '987.654.321-00', '1985-05-15', '(11) 88888-8888', 'guincheiro@iguincho.com', ?, TRUE, 'active', TRUE)
     ");
     $stmt->execute([$passwordHash]);
     $results[] = "Guincheiro teste criado";
     
     // Get driver user ID
-    $stmt = $db->prepare("SELECT id FROM users WHERE email = 'guincheiro@teste.com'");
+    $stmt = $db->prepare("SELECT id FROM users WHERE email = 'guincheiro@iguincho.com'");
     $stmt->execute();
     $driverUserId = $stmt->fetchColumn();
     

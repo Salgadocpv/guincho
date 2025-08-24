@@ -118,7 +118,7 @@
                 password: 'teste123'
             },
             driver: {
-                email: 'guincheiro@teste.com', 
+                email: 'guincheiro@iguincho.com', 
                 password: 'teste123'
             },
             tripRequest: {
