@@ -216,6 +216,56 @@
             color: white;
         }
 
+        /* Test Buttons */
+        .test-buttons-section {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .test-buttons-title {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.75rem;
+            text-align: center;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .test-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .test-btn {
+            padding: 10px 8px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .test-btn:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-1px);
+        }
+
+        .test-btn i {
+            font-size: 0.9rem;
+        }
+
         /* Login Button */
         .login-btn {
             width: 100%;
@@ -890,6 +940,25 @@
             <p class="app-subtitle">Socorro automotivo 24/7</p>
         </div>
 
+        <!-- Test Buttons Section -->
+        <div class="test-buttons-section">
+            <div class="test-buttons-title">Login Rápido para Testes</div>
+            <div class="test-buttons-grid">
+                <button type="button" class="test-btn" onclick="quickLogin('client')">
+                    <i class="fas fa-user"></i>
+                    Cliente
+                </button>
+                <button type="button" class="test-btn" onclick="quickLogin('driver')">
+                    <i class="fas fa-truck"></i>
+                    Guincheiro
+                </button>
+                <button type="button" class="test-btn" onclick="quickLogin('admin')">
+                    <i class="fas fa-user-shield"></i>
+                    Admin
+                </button>
+            </div>
+        </div>
+
         <!-- Login Form Container -->
         <div class="form-container">
             <form class="login-form" onsubmit="handleLogin(event)">
@@ -1060,6 +1129,98 @@
         }
 
 
+        // Quick Login for Testing
+        function quickLogin(userType) {
+            const credentials = {
+                client: {
+                    email: 'cliente@iguincho.com',
+                    password: 'teste123'
+                },
+                driver: {
+                    email: 'guincheiro@iguincho.com', 
+                    password: 'teste123'
+                },
+                admin: {
+                    email: 'admin@iguincho.com',
+                    password: 'admin123'
+                }
+            };
+
+            if (!credentials[userType]) {
+                alert('Tipo de usuário inválido');
+                return;
+            }
+
+            // Fill the form fields
+            document.getElementById('email').value = credentials[userType].email;
+            document.getElementById('password').value = credentials[userType].password;
+
+            // Show loading
+            showLoading();
+
+            // Simulate login process
+            setTimeout(() => {
+                performLogin(credentials[userType].email, credentials[userType].password);
+            }, 500);
+        }
+
+        // Extracted login logic
+        function performLogin(email, password) {
+            fetch('api/auth/login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                
+                if (data.success) {
+                    // Store authentication data
+                    localStorage.setItem('auth_token', data.data.session_token);
+                    localStorage.setItem('userData', JSON.stringify(data.data));
+                    
+                    // Redirect based on user type
+                    switch (data.data.user.user_type) {
+                        case 'client':
+                            window.location.href = 'services.html';
+                            break;
+                        case 'driver':
+                            window.location.href = 'driver/dashboard.html';
+                            break;
+                        case 'admin':
+                            window.location.href = 'admin/dashboard.html';
+                            break;
+                        default:
+                            window.location.href = 'services.html';
+                    }
+                } else {
+                    alert(data.message || 'Erro no login');
+                    resetLoginButton();
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Login error:', error);
+                alert('Erro de conexão. Tente novamente.');
+                resetLoginButton();
+            });
+        }
+
+        // Reset login button to default state
+        function resetLoginButton() {
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.classList.remove('loading');
+                loginBtn.textContent = 'Entrar';
+            }
+        }
+
         // Form Submission
         function handleLogin(event) {
             event.preventDefault();
@@ -1076,73 +1237,7 @@
             loginBtn.classList.add('loading');
             loginBtn.textContent = 'Entrando...';
             
-            showLoading();
-
-            // Call login API
-            fetch('api/auth/login.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                hideLoading();
-                loginBtn.classList.remove('loading');
-                loginBtn.textContent = 'Entrar';
-                
-                if (data.success) {
-                    // Debug - log response data
-                    console.log('Login response:', data);
-                    console.log('User type:', data.data.user.user_type);
-                    
-                    // Store user session data
-                    localStorage.setItem('userData', JSON.stringify({
-                        user: data.data.user,
-                        session_token: data.data.session_token,
-                        expires_at: data.data.expires_at,
-                        logged_in: true
-                    }));
-                    
-                    const userType = data.data.user.user_type;
-                    
-                    // Redirect based on user type
-                    console.log('Redirecting based on user_type:', userType);
-                    switch(userType) {
-                        case 'admin':
-                            console.log('Redirecting to admin dashboard');
-                            window.location.href = 'admin/dashboard.html';
-                            break;
-                        case 'driver':
-                            console.log('Redirecting to driver dashboard');
-                            window.location.href = 'driver/dashboard.html';
-                            break;
-                        case 'partner':
-                            console.log('Redirecting to partner dashboard');
-                            window.location.href = 'partner/dashboard.html';
-                            break;
-                        case 'client':
-                        default:
-                            console.log('Redirecting to client services');
-                            window.location.href = 'services.html';
-                            break;
-                    }
-                } else {
-                    throw new Error(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Erro no login:', error);
-                alert('Erro no login: ' + error.message);
-                
-                hideLoading();
-                loginBtn.classList.remove('loading');
-                loginBtn.textContent = 'Entrar';
-            });
+            performLogin(email, password);
         }
 
         // Social Login

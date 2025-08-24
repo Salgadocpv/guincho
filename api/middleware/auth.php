@@ -73,15 +73,21 @@ function authenticateTestUser() {
         $database = new Database();
         $db = $database->getConnection();
         
-        // Check if request needs driver mode (based on auth header or request path)
+        // Check if request needs specific user mode (based on auth header or request path)
         $headers = function_exists('getallheaders') ? getallheaders() : [];
         $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? '';
         $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        
+        $needsAdminMode = (strpos($authHeader, 'admin_test_token') !== false) || 
+                         (strpos($requestUri, '/admin/') !== false);
+        
         $needsDriverMode = (strpos($authHeader, 'driver_test_token') !== false) || 
                           (strpos($requestUri, 'get_requests') !== false) ||
                           (strpos($requestUri, 'place_bid') !== false);
         
-        if ($needsDriverMode) {
+        if ($needsAdminMode) {
+            return authenticateTestAdmin($db);
+        } else if ($needsDriverMode) {
             return authenticateTestDriver($db);
         } else {
             return authenticateTestClient($db);
@@ -155,6 +161,32 @@ function authenticateTestDriver($db) {
                    TRUE, TRUE, 'approved')
         ");
         $stmt->execute([$user['id']]);
+    }
+    
+    return ['success' => true, 'user' => $user];
+}
+
+function authenticateTestAdmin($db) {
+    // Get or create a test admin user
+    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'admin@iguincho.com' LIMIT 1");
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$user) {
+        // Create test admin user
+        $stmt = $db->prepare("
+            INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
+            VALUES ('admin', 'Admin Teste', '111.222.333-44', '1980-01-01', '(11) 77777-7777', 'admin@iguincho.com', ?, TRUE, 'active', TRUE)
+        ");
+        $passwordHash = password_hash('admin123', PASSWORD_ARGON2I);
+        $stmt->execute([$passwordHash]);
+        
+        $userId = $db->lastInsertId();
+        
+        // Get the created user
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
     return ['success' => true, 'user' => $user];
