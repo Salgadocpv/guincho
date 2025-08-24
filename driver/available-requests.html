@@ -1163,11 +1163,12 @@
                     bottom: 0;
                     background: rgba(0,0,0,0.8);
                     display: flex;
-                    align-items: center;
+                    align-items: flex-start;
                     justify-content: center;
                     z-index: 10000;
-                    padding: 20px;
+                    padding: 10px;
                     overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
                 }
                 
                 .trip-details-modal .modal-content {
@@ -1175,9 +1176,10 @@
                     border-radius: 12px;
                     max-width: 600px;
                     width: 100%;
-                    max-height: 90vh;
-                    overflow-y: auto;
+                    max-height: none;
+                    overflow-y: visible;
                     color: #333;
+                    margin: 10px 0;
                 }
                 
                 .modal-header {
@@ -1427,18 +1429,68 @@
                 
                 @media (max-width: 768px) {
                     .trip-details-modal {
-                        padding: 10px;
+                        padding: 5px;
+                        align-items: flex-start;
+                    }
+                    
+                    .trip-details-modal .modal-content {
+                        max-width: none;
+                        border-radius: 8px;
+                        margin: 5px 0;
+                    }
+                    
+                    .modal-header {
+                        padding: 15px;
+                        border-radius: 8px 8px 0 0;
+                    }
+                    
+                    .modal-header h3 {
+                        font-size: 1rem;
                     }
                     
                     .trip-info {
+                        padding: 15px;
                         flex-direction: column;
                         gap: 10px;
                     }
                     
-                    .segment-details {
+                    .map-container {
+                        padding: 15px;
+                    }
+                    
+                    #tripDetailsMap {
+                        height: 250px !important;
+                    }
+                    
+                    .route-info {
+                        padding: 15px;
+                    }
+                    
+                    .route-segment {
                         flex-direction: column;
-                        gap: 5px;
-                        text-align: right;
+                        align-items: stretch;
+                        gap: 8px;
+                        padding: 12px 0;
+                    }
+                    
+                    .segment-details {
+                        flex-direction: row;
+                        justify-content: space-between;
+                        gap: 10px;
+                        font-size: 0.85rem;
+                    }
+                    
+                    .price-calculations {
+                        padding: 15px;
+                    }
+                    
+                    .price-section {
+                        padding: 12px;
+                        margin-bottom: 12px;
+                    }
+                    
+                    .price-value {
+                        font-size: 1.2rem;
                     }
                     
                     .price-input-container {
@@ -1447,12 +1499,29 @@
                         gap: 10px;
                     }
                     
+                    .input-group {
+                        min-width: auto;
+                    }
+                    
+                    .addresses {
+                        padding: 15px;
+                    }
+                    
+                    .address-text {
+                        font-size: 0.85rem;
+                        line-height: 1.4;
+                        padding-left: 16px;
+                    }
+                    
                     .modal-actions {
+                        padding: 15px;
                         flex-direction: column;
+                        gap: 8px;
                     }
                     
                     .btn {
                         justify-content: center;
+                        padding: 12px 20px;
                     }
                 }
                 </style>
@@ -1465,8 +1534,24 @@
 
             // Initialize map after modal is in DOM
             setTimeout(() => {
-                initializeTripDetailsMap(request);
-            }, 100);
+                if (typeof google !== 'undefined' && google.maps) {
+                    initializeTripDetailsMap(request);
+                } else {
+                    // Google Maps not loaded, show fallback
+                    document.getElementById('tripDetailsMap').innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; color: #6c757d; text-align: center; padding: 20px; border-radius: 8px;">
+                            <div>
+                                <i class="fas fa-map-marked-alt" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                <div>Mapa não disponível no momento</div>
+                                <div style="font-size: 0.8rem; margin-top: 5px;">Dados de localização serão calculados</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Show approximate distances
+                    calculateApproximateDistances(request);
+                }
+            }, 300);
         }
 
         function closeTripDetailsModal() {
@@ -1476,18 +1561,69 @@
             }
         }
 
-        function initializeTripDetailsMap(request) {
+        function calculateApproximateDistances(request) {
             const driverPos = { lat: currentLocation.latitude, lng: currentLocation.longitude };
             const originPos = { lat: parseFloat(request.origin_lat), lng: parseFloat(request.origin_lng) };
             const destinationPos = { lat: parseFloat(request.destination_lat), lng: parseFloat(request.destination_lng) };
 
-            const map = new google.maps.Map(document.getElementById('tripDetailsMap'), {
-                zoom: 11,
-                center: originPos,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false
-            });
+            // Calculate straight-line distances (Haversine formula)
+            const driverToOriginKm = calculateDistance(driverPos.lat, driverPos.lng, originPos.lat, originPos.lng);
+            const originToDestinationKm = calculateDistance(originPos.lat, originPos.lng, destinationPos.lat, destinationPos.lng);
+            
+            // Estimate driving distance (usually 1.3x straight line)
+            const driverToOriginDriving = (driverToOriginKm * 1.3).toFixed(1);
+            const originToDestinationDriving = (originToDestinationKm * 1.3).toFixed(1);
+            const totalDistance = (parseFloat(driverToOriginDriving) + parseFloat(originToDestinationDriving)).toFixed(1);
+            
+            // Estimate time (assuming 40km/h average in city)
+            const driverToOriginTime = Math.round((parseFloat(driverToOriginDriving) / 40) * 60);
+            const originToDestinationTime = Math.round((parseFloat(originToDestinationDriving) / 40) * 60);
+            const totalTime = driverToOriginTime + originToDestinationTime;
+            
+            // Update UI
+            document.getElementById('driverToOriginDistance').textContent = driverToOriginDriving + ' km';
+            document.getElementById('driverToOriginDuration').textContent = driverToOriginTime + ' min';
+            document.getElementById('originToDestinationDistance').textContent = originToDestinationDriving + ' km';
+            document.getElementById('originToDestinationDuration').textContent = originToDestinationTime + ' min';
+            document.getElementById('totalDistance').textContent = totalDistance + ' km';
+            document.getElementById('totalDuration').textContent = totalTime > 60 ? 
+                Math.floor(totalTime / 60) + 'h ' + (totalTime % 60) + 'min' : 
+                totalTime + 'min';
+            
+            // Store service distance for calculations
+            window.currentTripServiceDistance = parseFloat(originToDestinationDriving);
+            
+            // Update price calculations
+            updateClientPricePerKm(request.client_offer);
+            updateDriverPricePerKm();
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the Earth in kilometers
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+            return distance;
+        }
+
+        function initializeTripDetailsMap(request) {
+            try {
+                const driverPos = { lat: currentLocation.latitude, lng: currentLocation.longitude };
+                const originPos = { lat: parseFloat(request.origin_lat), lng: parseFloat(request.origin_lng) };
+                const destinationPos = { lat: parseFloat(request.destination_lat), lng: parseFloat(request.destination_lng) };
+
+                const map = new google.maps.Map(document.getElementById('tripDetailsMap'), {
+                    zoom: 11,
+                    center: originPos,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
+                });
 
             // Driver marker (blue)
             const driverMarker = new google.maps.Marker({
@@ -1608,6 +1744,11 @@
                     updateTotalCalculations();
                 }
             });
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                // Fallback to approximate calculations
+                calculateApproximateDistances(request);
+            }
         }
 
         function updateTotalCalculations() {
