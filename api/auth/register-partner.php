@@ -55,9 +55,19 @@ try {
     }
     
     // Validar tipo de negócio
-    $validBusinessTypes = ['lava-rapido', 'mecanica', 'auto-eletrica'];
+    $validBusinessTypes = ['lava-rapido', 'mecanica', 'auto-eletrica', 'posto-combustivel', 'outros'];
     if (!in_array($data['businessType'], $validBusinessTypes)) {
         throw new Exception('Tipo de negócio inválido', 400);
+    }
+    
+    // Se o tipo é "outros", validar campo customBusinessType
+    if ($data['businessType'] === 'outros') {
+        if (!isset($data['customBusinessType']) || trim($data['customBusinessType']) === '') {
+            throw new Exception('Especifique o tipo de estabelecimento', 400);
+        }
+        if (strlen(trim($data['customBusinessType'])) < 3) {
+            throw new Exception('Tipo de estabelecimento deve ter pelo menos 3 caracteres', 400);
+        }
     }
     
     // Mapear dados do usuário
@@ -89,6 +99,14 @@ try {
         'partner_terms_accepted' => (bool)$data['partnerTerms'],
         'data_sharing_authorized' => (bool)$data['dataSharing']
     ];
+    
+    // Adicionar tipo de negócio personalizado se for "outros"
+    if ($data['businessType'] === 'outros') {
+        $partnerData['custom_business_type'] = trim($data['customBusinessType']);
+        $partnerData['business_type_display'] = trim($data['customBusinessType']);
+    } else {
+        $partnerData['business_type_display'] = $data['businessTypeDisplay'] ?? $data['businessType'];
+    }
     
     // Validar dados do parceiro
     $partner = new Partner();

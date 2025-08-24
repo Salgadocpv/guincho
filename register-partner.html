@@ -560,6 +560,33 @@
                             <div class="business-type-description">Serviços elétricos automotivos</div>
                         </div>
                     </div>
+
+                    <div class="business-type-option" data-type="posto-combustivel" onclick="selectBusinessType('posto-combustivel')">
+                        <div class="business-type-icon">
+                            <i class="fas fa-gas-pump"></i>
+                        </div>
+                        <div class="business-type-content">
+                            <div class="business-type-title">Posto de Combustível</div>
+                            <div class="business-type-description">Abastecimento e serviços automotivos</div>
+                        </div>
+                    </div>
+
+                    <div class="business-type-option" data-type="outros" onclick="selectBusinessType('outros')">
+                        <div class="business-type-icon">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </div>
+                        <div class="business-type-content">
+                            <div class="business-type-title">Outros</div>
+                            <div class="business-type-description">Especificar tipo de estabelecimento</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom business type input (shows when "outros" is selected) -->
+                <div class="form-group" id="customBusinessTypeGroup" style="display: none;">
+                    <label class="form-label">Especifique o tipo de estabelecimento</label>
+                    <input type="text" class="form-input" id="customBusinessType" name="customBusinessType" placeholder="Ex: Borracharia, Funilaria, etc.">
+                    <div class="error-message" id="customBusinessTypeError">Especifique o tipo de estabelecimento</div>
                 </div>
                 <input type="hidden" id="businessType" name="businessType" required>
                 <div class="error-message" id="businessTypeError">Selecione o tipo de negócio</div>
@@ -871,6 +898,26 @@
             document.getElementById('businessType').value = type;
             selectedBusinessType = type;
             
+            // Show/hide custom business type field
+            const customBusinessTypeGroup = document.getElementById('customBusinessTypeGroup');
+            const customBusinessTypeInput = document.getElementById('customBusinessType');
+            
+            if (type === 'outros') {
+                customBusinessTypeGroup.style.display = 'block';
+                customBusinessTypeInput.setAttribute('required', 'required');
+            } else {
+                customBusinessTypeGroup.style.display = 'none';
+                customBusinessTypeInput.removeAttribute('required');
+                customBusinessTypeInput.value = '';
+                
+                // Clear any validation error
+                const errorElement = document.getElementById('customBusinessTypeError');
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+                customBusinessTypeInput.classList.remove('error');
+            }
+            
             validateForm();
         }
 
@@ -1018,6 +1065,15 @@
                 case 'zipCode':
                     isValid = /^\d{5}-?\d{3}$/.test(value.replace('-', ''));
                     errorMessage = 'CEP inválido';
+                    break;
+                
+                case 'customBusinessType':
+                    if (selectedBusinessType === 'outros') {
+                        isValid = value.length >= 3;
+                        errorMessage = 'Especifique o tipo de estabelecimento';
+                    } else {
+                        isValid = true; // Not required if "outros" is not selected
+                    }
                     break;
                 
                 default:
@@ -1182,6 +1238,15 @@
             // Add additional data
             userData.userType = 'partner';
             userData.businessType = selectedBusinessType;
+            
+            // If "outros" is selected, use the custom business type
+            if (selectedBusinessType === 'outros') {
+                userData.customBusinessType = document.getElementById('customBusinessType').value;
+                userData.businessTypeDisplay = userData.customBusinessType;
+            } else {
+                userData.businessTypeDisplay = getBusinessTypeDisplayName(selectedBusinessType);
+            }
+            
             userData.termsAccepted = document.getElementById('termsAccepted').classList.contains('checked');
             userData.partnerTerms = document.getElementById('partnerTerms').classList.contains('checked');
             userData.dataSharing = document.getElementById('dataSharing').classList.contains('checked');
@@ -1202,6 +1267,18 @@
                 }, 3000);
                 window.location.href = 'index.html';
             }, 3000);
+        }
+
+        // Get display name for business type
+        function getBusinessTypeDisplayName(type) {
+            const displayNames = {
+                'lava-rapido': 'Lava Rápido',
+                'mecanica': 'Mecânica',
+                'auto-eletrica': 'Auto Elétrica',
+                'posto-combustivel': 'Posto de Combustível',
+                'outros': 'Outros'
+            };
+            return displayNames[type] || type;
         }
 
         // Go back to login
