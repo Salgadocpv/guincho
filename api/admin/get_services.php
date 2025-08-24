@@ -133,8 +133,15 @@ try {
                 $row['client_phone_masked'] = substr($row['client_phone'], 0, 2) . '****' . substr($row['client_phone'], -4);
             }
 
-            // Adicionar informação de preço final
-            $row['price'] = $row['bid_amount'] ?? $row['max_price'] ?? 0;
+            // Adicionar informação de preço final como número
+            $bidAmount = isset($row['bid_amount']) ? floatval($row['bid_amount']) : 0;
+            $maxPrice = isset($row['max_price']) ? floatval($row['max_price']) : 0;
+            $row['price'] = $bidAmount > 0 ? $bidAmount : $maxPrice;
+            
+            // Debug log para verificar o tipo de dados
+            error_log("Service price debug: bid_amount=" . var_export($row['bid_amount'], true) . 
+                     ", max_price=" . var_export($row['max_price'], true) . 
+                     ", final_price=" . var_export($row['price'], true));
             
             $services[] = $row;
         }

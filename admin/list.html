@@ -600,7 +600,7 @@
                             <td>${item.service_type || 'N/A'}</td>
                             <td><span class="status-badge status-${item.status || 'active'}">${formatStatus(item.status)}</span></td>
                             <td>${formatDate(item.created_at)}</td>
-                            <td>R$ ${(item.price || 0).toFixed(2)}</td>
+                            <td>R$ ${formatPrice(item.price)}</td>
                             <td>
                                 <button class="table-btn" onclick="viewItem(${item.id})">
                                     <i class="fas fa-eye"></i>
@@ -685,6 +685,26 @@
             if (!dateString) return 'N/A';
             const date = new Date(dateString);
             return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+        }
+
+        function formatPrice(price) {
+            // Converter para número de forma segura
+            let numPrice = 0;
+            
+            if (typeof price === 'string') {
+                // Remove caracteres não numéricos exceto ponto e vírgula
+                const cleanPrice = price.replace(/[^\d.,]/g, '');
+                numPrice = parseFloat(cleanPrice.replace(',', '.')) || 0;
+            } else if (typeof price === 'number') {
+                numPrice = price;
+            }
+            
+            // Garantir que é um número válido
+            if (isNaN(numPrice) || !isFinite(numPrice)) {
+                numPrice = 0;
+            }
+            
+            return numPrice.toFixed(2);
         }
 
         function showLoading() {
