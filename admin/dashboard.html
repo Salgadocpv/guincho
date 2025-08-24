@@ -163,17 +163,27 @@
         /* Action Grid */
         .actions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
             margin-bottom: 2rem;
         }
 
         .action-card {
-            background: white;
+            background: #3d3d3d;
+            color: white;
             padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 1px solid #4a4a4a;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         .action-header {
@@ -192,24 +202,25 @@
             justify-content: center;
             font-size: 1.2rem;
             color: white;
-            background: linear-gradient(135deg, #dc3545, #c82333);
+            background: rgba(255,255,255,0.1);
         }
 
         .action-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #333;
+            color: white;
         }
 
         .action-description {
-            color: #666;
+            color: rgba(255,255,255,0.8);
             font-size: 0.9rem;
             margin-bottom: 1rem;
             line-height: 1.5;
+            flex-grow: 1;
         }
 
         .action-btn {
-            background: linear-gradient(135deg, #dc3545, #c82333);
+            background: #007bff;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -219,11 +230,11 @@
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            text-align: center;
         }
 
         .action-btn:hover {
-            background: linear-gradient(135deg, #c82333, #bd2130);
-            transform: translateY(-1px);
+            background: #0056b3;
         }
 
         /* Recent Activity */
@@ -421,7 +432,80 @@
                 </a>
             </div>
 
-            
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="action-title">Aprovar Usuários</div>
+                </div>
+                <div class="action-description">
+                    Revisar e aprovar cadastros de guincheiros e parceiros pendentes.
+                </div>
+                <a href="approvals.html" class="action-btn">
+                    <i class="fas fa-arrow-right"></i> Acessar
+                </a>
+            </div>
+
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="action-title">Relatórios</div>
+                </div>
+                <div class="action-description">
+                    Visualizar relatórios de performance, financeiro e uso da plataforma.
+                </div>
+                <a href="reports.html" class="action-btn">
+                    <i class="fas fa-arrow-right"></i> Acessar
+                </a>
+            </div>
+
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="action-title">Gestão de Dados</div>
+                </div>
+                <div class="action-description">
+                    Backup, restauração e manutenção da base de dados do sistema.
+                </div>
+                <a href="database.html" class="action-btn">
+                    <i class="fas fa-arrow-right"></i> Acessar
+                </a>
+            </div>
+
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="action-title">Notificações</div>
+                </div>
+                <div class="action-description">
+                    Gerenciar notificações push, e-mails e comunicações do sistema.
+                </div>
+                <a href="notifications.html" class="action-btn">
+                    <i class="fas fa-arrow-right"></i> Acessar
+                </a>
+            </div>
+
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="action-title">Segurança</div>
+                </div>
+                <div class="action-description">
+                    Logs de auditoria, controle de acesso e configurações de segurança.
+                </div>
+                <a href="security.html" class="action-btn">
+                    <i class="fas fa-arrow-right"></i> Acessar
+                </a>
+            </div>
         </div>
 
         
