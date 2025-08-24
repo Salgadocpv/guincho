@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iguincho - Cadastro de Guincheiro</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="js/modal-system.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -798,14 +799,14 @@
                         
                         // Validar se é uma imagem
                         if (!file.type.startsWith('image/')) {
-                            alert('Por favor, selecione apenas arquivos de imagem.');
+                            modalSystem.warning('Por favor, selecione apenas arquivos de imagem.');
                             this.value = '';
                             return;
                         }
                         
                         // Validar tamanho do arquivo (máximo 5MB)
                         if (file.size > 5 * 1024 * 1024) {
-                            alert('A imagem deve ter no máximo 5MB.');
+                            modalSystem.warning('A imagem deve ter no máximo 5MB.');
                             this.value = '';
                             return;
                         }
@@ -1083,9 +1084,12 @@
                 localStorage.setItem('driverData', JSON.stringify(userData));
                 
                 // Show success message and redirect
-                alert('Cadastro enviado com sucesso!\n\nSeu cadastro será analisado em até 48 horas.\nVocê receberá um e-mail com o resultado da análise.');
+                modalSystem.success('Cadastro enviado com sucesso!\n\nSeu cadastro será analisado em até 48 horas.\nVocê receberá um e-mail com o resultado da análise.');
                 
                 // Redirect to login page
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
                 window.location.href = 'index.html';
             }, 3000);
         }
@@ -1104,7 +1108,7 @@
                     
                     // Verificar se a imagem tem proporções aceitáveis para um rosto
                     if (aspectRatio < 0.5 || aspectRatio > 2.0) {
-                        alert('A foto deve ser uma imagem do seu rosto. Evite fotos muito alongadas ou muito largas.');
+                        modalSystem.info('A foto deve ser uma imagem do seu rosto. Evite fotos muito alongadas ou muito largas.');
                         document.getElementById('profilePhoto').value = '';
                         label.classList.remove('has-file');
                         label.innerHTML = `<i class="fas fa-user"></i> Selecionar foto do rosto`;
@@ -1113,7 +1117,7 @@
                     
                     // Verificar resolução mínima
                     if (this.width < 200 || this.height < 200) {
-                        alert('A foto deve ter pelo menos 200x200 pixels para garantir boa qualidade.');
+                        modalSystem.info('A foto deve ter pelo menos 200x200 pixels para garantir boa qualidade.');
                         document.getElementById('profilePhoto').value = '';
                         label.classList.remove('has-file');
                         label.innerHTML = `<i class="fas fa-user"></i> Selecionar foto do rosto`;

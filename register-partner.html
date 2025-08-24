@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iguincho - Cadastro de Parceiro</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="js/modal-system.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1193,9 +1194,12 @@
                 localStorage.setItem('partnerData', JSON.stringify(userData));
                 
                 // Show success message and redirect
-                alert('Cadastro enviado com sucesso!\n\nSeu estabelecimento será analisado em até 72 horas.\nVocê receberá um e-mail com o resultado da análise.');
+                modalSystem.success('Cadastro enviado com sucesso!\n\nSeu estabelecimento será analisado em até 72 horas.\nVocê receberá um e-mail com o resultado da análise.');
                 
                 // Redirect to login page
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
                 window.location.href = 'index.html';
             }, 3000);
         }

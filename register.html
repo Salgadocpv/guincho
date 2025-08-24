@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iguincho - Cadastro</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="js/modal-system.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -799,9 +800,12 @@
                     }));
                     
                     // Show success message
-                    alert('Cadastro realizado com sucesso!\nBem-vindo ao Iguincho!');
+                    modalSystem.success('Cadastro realizado com sucesso!\nBem-vindo ao Iguincho!');
                     
                     // Redirect to services page
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
                     window.location.href = 'services.html';
                 } else {
                     throw new Error(data.message);
@@ -809,7 +813,7 @@
             })
             .catch(error => {
                 console.error('Erro no cadastro:', error);
-                alert('Erro no cadastro: ' + error.message);
+                modalSystem.error('Erro no cadastro: ' + error.message);
                 
                 // Reset button state
                 submitText.style.display = 'block';

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iguincho - Parâmetros do Sistema</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="../js/modal-system.js"></script>
     <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#dc3545">
     <style>
@@ -586,8 +587,10 @@
             const user = JSON.parse(userData);
             
             if (user.user.user_type !== 'admin') {
-                alert('Acesso negado. Apenas administradores podem acessar esta área.');
-                window.location.href = '../index.html';
+                modalSystem.error('Acesso negado. Apenas administradores podem acessar esta área.');
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 2000);
                 return;
             }
         }

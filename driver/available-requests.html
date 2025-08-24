@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iguincho - Solicitações Disponíveis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="../js/modal-system.js"></script>
     <style>
         * {
             margin: 0;
@@ -945,12 +946,12 @@
             const message = document.getElementById('bidMessage').value;
 
             if (!bidAmount || bidAmount <= 0) {
-                alert('Informe um valor válido para a proposta');
+                modalSystem.warning('Informe um valor válido para a proposta');
                 return;
             }
 
             if (!arrivalTime || arrivalTime <= 0) {
-                alert('Informe um tempo estimado de chegada');
+                modalSystem.warning('Informe um tempo estimado de chegada');
                 return;
             }
 
@@ -972,15 +973,15 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('Proposta enviada com sucesso!');
+                    modalSystem.success('Proposta enviada com sucesso!');
                     closeBidModal();
                     loadRequests(); // Refresh the list
                 } else {
-                    alert('Erro ao enviar proposta: ' + data.message);
+                    modalSystem.error('Erro ao enviar proposta: ' + data.message);
                 }
             } catch (error) {
                 console.error('Error submitting bid:', error);
-                alert('Erro ao enviar proposta');
+                modalSystem.error('Erro ao enviar proposta');
             }
         }
 
@@ -988,7 +989,7 @@
             const request = requests.find(r => r.id == requestId);
             if (!request) return;
 
-            alert(`Detalhes da Solicitação:\n\nServiço: ${getServiceName(request.service_type)}\nCliente: ${request.client_name}\nDistância: ${request.distance ? parseFloat(request.distance).toFixed(1) : '0'} km\nOferta: R$ ${parseFloat(request.client_offer).toFixed(2)}\n\nOrigem: ${request.origin_address}\nDestino: ${request.destination_address}`);
+            modalSystem.info(`Detalhes da Solicitação:\n\nServiço: ${getServiceName(request.service_type)}\nCliente: ${request.client_name}\nDistância: ${request.distance ? parseFloat(request.distance).toFixed(1) : '0'} km\nOferta: R$ ${parseFloat(request.client_offer).toFixed(2)}\n\nOrigem: ${request.origin_address}\nDestino: ${request.destination_address}`);
         }
 
         function startPolling() {

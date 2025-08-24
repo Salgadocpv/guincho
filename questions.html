@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Iguincho - Questionário</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="js/modal-system.js"></script>
     <style>
         * {
             margin: 0;
@@ -634,7 +635,7 @@
             const allAnswered = questions.every(q => answers[q.id] !== undefined);
             
             if (!allAnswered) {
-                alert('Por favor, responda todas as perguntas antes de finalizar.');
+                modalSystem.warning('Por favor, responda todas as perguntas antes de finalizar.');
                 return;
             }
             

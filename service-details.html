@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Iguincho - Localização</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="js/modal-system.js"></script>
     <style>
         * {
             margin: 0;
@@ -1316,7 +1317,7 @@
 
         function selectDestination() {
             if (!originLocation) {
-                alert('Defina a origem primeiro');
+                modalSystem.warning('Defina a origem primeiro');
                 return;
             }
             currentSelectionType = 'destination';
@@ -1325,7 +1326,7 @@
 
         function confirmTrip() {
             if (!originLocation || !destinationLocation) {
-                alert('Defina origem e destino primeiro');
+                modalSystem.warning('Defina origem e destino primeiro');
                 return;
             }
             // Proceed with trip confirmation
@@ -1384,7 +1385,7 @@
             
             if (!navigator.geolocation) {
                 hideLoading();
-                alert('GPS não disponível neste dispositivo');
+                modalSystem.warning('GPS não disponível neste dispositivo');
                 return;
             }
             
@@ -1412,7 +1413,7 @@
                 },
                 function(error) {
                     hideLoading();
-                    alert('Não foi possível obter sua localização. Tente outro método.');
+                    modalSystem.warning('Não foi possível obter sua localização. Tente outro método.');
                 }
             );
         }
@@ -1578,7 +1579,7 @@
                         
                         processSelectedLocation(location, results[0].formatted_address);
                     } else {
-                        alert('Endereço não encontrado. Tente novamente.');
+                        modalSystem.error('Endereço não encontrado. Tente novamente.');
                         // Restaurar currentSelectionType em caso de erro
                         // (não limpar para permitir tentar novamente)
                     }
@@ -1923,7 +1924,7 @@
             const offerValue = parseFloat(offerInput.value);
             
             if (!originLocation || !destinationLocation || !offerValue || offerValue <= 0) {
-                alert('Complete todos os campos antes de confirmar a viagem');
+                modalSystem.warning('Complete todos os campos antes de confirmar a viagem');
                 return;
             }
             

@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Navegação em Tempo Real</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="js/modal-system.js"></script>
     <style>
         * {
             margin: 0;
@@ -279,7 +280,7 @@
             const destLng = parseFloat(urlParams.get('destLng'));
 
             if (isNaN(destLat) || isNaN(destLng)) {
-                alert('Destino inválido.');
+                modalSystem.error('Destino inválido.');
                 goBack();
                 return;
             }
@@ -316,7 +317,7 @@
 
         function startGpsTracking() {
             if (!navigator.geolocation) {
-                alert('GPS não suportado neste navegador.');
+                modalSystem.warning('GPS não suportado neste navegador.');
                 return;
             }
             locationWatcherId = navigator.geolocation.watchPosition(
@@ -515,7 +516,7 @@
             } else {
                 // Switch to device orientation (compass) if available
                 if (!window.isSecureContext) {
-                    alert('REQUISITO DE SEGURANÇA: Para usar a bússola do dispositivo, esta página precisa ser acessada via HTTPS.');
+                    modalSystem.warning('REQUISITO DE SEGURANÇA: Para usar a bússola do dispositivo, esta página precisa ser acessada via HTTPS.');
                     return;
                 }
 
@@ -528,10 +529,10 @@
                                 compassBtn.title = 'Desativar rotação';
                                 console.log('Device orientation rotation activated');
                             } else {
-                                alert('Permissão para sensor de orientação foi negada.');
+                                modalSystem.warning('Permissão para sensor de orientação foi negada.');
                             }
                         })
-                        .catch(() => alert('Não foi possível ativar a bússola.'));
+                        .catch(() => modalSystem.error('Não foi possível ativar a bússola.'));
                 } else {
                     window.addEventListener('deviceorientation', handleDeviceOrientation, true);
                     isMovementBasedRotation = false;
@@ -567,7 +568,7 @@
                     currentRoute = result;
                     updateUiWithNewRoute();
                 } else {
-                    alert('Não foi possível calcular a rota: ' + status);
+                    modalSystem.error('Não foi possível calcular a rota: ' + status);
                     goBack();
                 }
             });
@@ -911,8 +912,9 @@
             window.history.back();
         }
 
-        function stopNavigation() {
-            if (confirm('Deseja parar a navegação?')) {
+        async function stopNavigation() {
+            const confirmed = await modalSystem.confirm('Deseja parar a navegação?');
+            if (confirmed) {
                 if (locationWatcherId) navigator.geolocation.clearWatch(locationWatcherId);
                 window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
                 
