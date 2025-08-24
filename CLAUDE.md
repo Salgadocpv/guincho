@@ -1,0 +1,2 @@
+- todos os testes devem ser realizados no ambiente de producao www.coppermane.com.br/guincho, para que as mudancas tenham efeito no ambiente de producao sempre deve ser feito push para atualização
+- URL correta da produção: www.coppermane.com.br/guincho (não iguincho)
