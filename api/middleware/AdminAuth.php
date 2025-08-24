@@ -4,8 +4,36 @@
  */
 
 require_once '../classes/User.php';
+require_once '../config/database.php';
 
 class AdminAuth {
+    
+    /**
+     * Verificar autenticação do usuário administrador
+     */
+    public function checkAuth() {
+        try {
+            $userData = $this->getCurrentUser();
+            
+            if (!$userData || $userData['user_type'] !== 'admin') {
+                return [
+                    'success' => false,
+                    'message' => 'Acesso negado. Apenas administradores podem acessar esta área.'
+                ];
+            }
+            
+            return [
+                'success' => true,
+                'user' => $userData
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Acesso não autorizado: ' . $e->getMessage()
+            ];
+        }
+    }
     
     /**
      * Verificar se o usuário é administrador
@@ -51,19 +79,19 @@ class AdminAuth {
     /**
      * Obter dados do usuário atual
      */
-    private static function getCurrentUser() {
+    private function getCurrentUser() {
         // Verificar token de sessão no header Authorization
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
         
         if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
             $token = $matches[1];
-            return self::getUserByToken($token);
+            return $this->getUserByToken($token);
         }
         
         // Verificar sessão PHP (fallback)
         session_start();
         if (isset($_SESSION['user_id'])) {
-            return self::getUserById($_SESSION['user_id']);
+            return $this->getUserById($_SESSION['user_id']);
         }
         
         throw new Exception('Token de acesso não encontrado');
@@ -72,9 +100,10 @@ class AdminAuth {
     /**
      * Obter usuário por token de sessão
      */
-    private static function getUserByToken($token) {
+    private function getUserByToken($token) {
         try {
-            $db = Database::getInstance()->getConnection();
+            $database = new Database();
+            $db = $database->getConnection();
             
             $sql = "SELECT u.id, u.user_type, u.full_name, u.email, u.status 
                    FROM users u
@@ -102,9 +131,10 @@ class AdminAuth {
     /**
      * Obter usuário por ID
      */
-    private static function getUserById($userId) {
+    private function getUserById($userId) {
         try {
-            $db = Database::getInstance()->getConnection();
+            $database = new Database();
+            $db = $database->getConnection();
             
             $sql = "SELECT id, user_type, full_name, email, status 
                    FROM users 
@@ -136,7 +166,8 @@ class AdminAuth {
                 $userId = $currentUser['id'];
             }
             
-            $db = Database::getInstance()->getConnection();
+            $database = new Database();
+            $db = $database->getConnection();
             
             $sql = "INSERT INTO audit_logs 
                    (user_id, action, table_name, new_values, ip_address, user_agent) 
