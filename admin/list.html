@@ -661,7 +661,12 @@
         }
 
         function viewItem(id) {
-            alert(`Visualizar item ${id} - funcionalidade em desenvolvimento.`);
+            const listType = getListType();
+            if (listType === 'services') {
+                window.location.href = `details.html?type=service&id=${id}`;
+            } else {
+                window.location.href = `details.html?type=${listType}&id=${id}`;
+            }
         }
 
         function approveItem(id) {

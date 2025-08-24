@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Detalhes Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="../js/modal-system.js"></script>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#dc3545">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Details Card */
+        .details-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* Info Sections */
+        .info-section {
+            margin-bottom: 2rem;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #dc3545;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #333;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #dc3545;
+        }
+
+        .info-value.empty {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-pending { 
+            background: #fff3cd; 
+            color: #856404; 
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-inactive { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-pending_approval { 
+            background: #e2e3e5; 
+            color: #383d41; 
+            border: 1px solid #d6d8db;
+        }
+
+        .status-completed { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border: 1px solid #bee5eb;
+        }
+
+        /* Actions */
+        .actions-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .action-btn.primary {
+            background: #dc3545;
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .action-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .action-btn.secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .action-btn.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-btn.success:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .action-btn.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .action-btn.warning:hover {
+            background: #e0a800;
+            transform: translateY(-1px);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6c757d;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error state */
+        .error-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #dc3545;
+        }
+
+        .error-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .card-header {
+                padding: 1.5rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .actions-section {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Specific content types */
+        .phone-value {
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .email-value {
+            word-break: break-all;
+        }
+
+        .date-value {
+            font-weight: 500;
+        }
+
+        .address-value {
+            line-height: 1.4;
+        }
+
+        .price-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        /* Vehicle info special styling */
+        .vehicle-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="#" class="back-btn" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="page-title" id="pageTitle">Carregando...</div>
+            </div>
+            <div class="user-menu">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Administrador</div>
+                    <div class="user-role">Admin</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <i class="fas fa-spinner"></i>
+            <h3>Carregando detalhes...</h3>
+            <p>Aguarde enquanto buscamos as informações.</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="error-state" id="errorState" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Erro ao carregar</h3>
+            <p id="errorMessage">Não foi possível carregar os detalhes.</p>
+            <button class="action-btn secondary" onclick="loadData()" style="margin-top: 1rem;">
+                <i class="fas fa-refresh"></i> Tentar novamente
+            </button>
+        </div>
+
+        <!-- Details Content -->
+        <div id="detailsContent" style="display: none;">
+            <div class="details-card">
+                <div class="card-header">
+                    <div class="card-icon" id="cardIcon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="card-title" id="cardTitle">Título</div>
+                    <div class="card-subtitle" id="cardSubtitle">Subtítulo</div>
+                </div>
+                <div class="card-body" id="cardBody">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                <div class="actions-section" id="actionsSection">
+                    <!-- Actions will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let itemType = '';
+        let itemId = '';
+        let itemData = {};
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            initializePage();
+        });
+
+        function checkAuth() {
+            const userData = localStorage.getItem('userData');
+            
+            if (!userData) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            
+            if (user.user.user_type !== 'admin') {
+                alert('Acesso negado. Apenas administradores podem acessar esta área.');
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 2000);
+                return;
+            }
+
+            // Update user name
+            document.getElementById('userName').textContent = user.user.full_name;
+        }
+
+        function initializePage() {
+            // Get parameters from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            itemType = urlParams.get('type') || 'user';
+            itemId = urlParams.get('id') || '';
+            
+            if (!itemId) {
+                showError('ID não fornecido');
+                return;
+            }
+            
+            // Configure page based on type
+            configurePage();
+            
+            // Load data
+            loadData();
+        }
+
+        function configurePage() {
+            const config = {
+                'client': {
+                    title: 'Detalhes do Cliente',
+                    icon: 'fas fa-user',
+                    backUrl: 'list.html?type=clients'
+                },
+                'driver': {
+                    title: 'Detalhes do Guincheiro',
+                    icon: 'fas fa-truck',
+                    backUrl: 'list.html?type=drivers'
+                },
+                'partner': {
+                    title: 'Detalhes do Parceiro',
+                    icon: 'fas fa-store',
+                    backUrl: 'list.html?type=partners'
+                },
+                'service': {
+                    title: 'Detalhes do Serviço',
+                    icon: 'fas fa-cogs',
+                    backUrl: 'list.html?type=services'
+                }
+            };
+
+            const currentConfig = config[itemType] || config['client'];
+            
+            document.getElementById('pageTitle').innerHTML = `<i class="${currentConfig.icon}"></i> ${currentConfig.title}`;
+            document.title = `Iguincho - ${currentConfig.title}`;
+            
+            // Store back URL for navigation
+            window.backUrl = currentConfig.backUrl;
+        }
+
+        async function loadData() {
+            try {
+                showLoading();
+                
+                const userData = localStorage.getItem('userData');
+                const user = JSON.parse(userData);
+                
+                let apiUrl = '';
+                if (itemType === 'service') {
+                    apiUrl = `../api/admin/get_service_details.php?id=${itemId}`;
+                } else {
+                    apiUrl = `../api/admin/get_user_details.php?id=${itemId}&type=${itemType}`;
+                }
+                
+                console.log('Loading details from:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': 'Bearer ' + (user?.session_token || 'no-token')
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    itemData = data.data;
+                    renderDetails();
+                    hideLoading();
+                } else {
+                    throw new Error(data.message || 'Erro ao carregar detalhes');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar detalhes:', error);
+                hideLoading();
+                showError(error.message);
+            }
+        }
+
+        function renderDetails() {
+            if (itemType === 'service') {
+                renderServiceDetails();
+            } else {
+                renderUserDetails();
+            }
+            showContent();
+        }
+
+        function renderUserDetails() {
+            const cardIcon = document.getElementById('cardIcon');
+            const cardTitle = document.getElementById('cardTitle');
+            const cardSubtitle = document.getElementById('cardSubtitle');
+            const cardBody = document.getElementById('cardBody');
+            const actionsSection = document.getElementById('actionsSection');
+
+            // Header
+            const icons = {
+                'client': 'fas fa-user',
+                'driver': 'fas fa-truck',
+                'partner': 'fas fa-store'
+            };
+            
+            cardIcon.innerHTML = `<i class="${icons[itemType]}"></i>`;
+            cardTitle.textContent = itemData.full_name || 'Nome não disponível';
+            cardSubtitle.textContent = `ID: #${itemData.id} • ${getTypeName(itemType)}`;
+
+            // Body - Personal Information
+            let bodyHTML = `
+                <div class="info-section">
+                    <div class="section-title">Informações Pessoais</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Nome Completo</div>
+                            <div class="info-value">${itemData.full_name || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">CPF</div>
+                            <div class="info-value">${formatCPF(itemData.cpf) || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value email-value">${itemData.email || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Telefone</div>
+                            <div class="info-value phone-value">${formatPhone(itemData.phone) || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">WhatsApp</div>
+                            <div class="info-value phone-value">${formatPhone(itemData.whatsapp) || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                <span class="status-badge status-${itemData.status}">${formatStatus(itemData.status)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Vehicle information for drivers
+            if (itemType === 'driver' && (itemData.license_plate || itemData.vehicle_brand)) {
+                bodyHTML += `
+                    <div class="info-section">
+                        <div class="section-title">Veículo</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Placa</div>
+                                <div class="info-value">${itemData.license_plate || 'N/A'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Marca</div>
+                                <div class="info-value">${itemData.vehicle_brand || 'N/A'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Modelo</div>
+                                <div class="info-value">${itemData.vehicle_model || 'N/A'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Ano</div>
+                                <div class="info-value">${itemData.vehicle_year || 'N/A'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Cor</div>
+                                <div class="info-value">${itemData.vehicle_color || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // System Information
+            bodyHTML += `
+                <div class="info-section">
+                    <div class="section-title">Informações do Sistema</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Data de Cadastro</div>
+                            <div class="info-value date-value">${formatDate(itemData.created_at)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Última Atualização</div>
+                            <div class="info-value date-value">${formatDate(itemData.updated_at)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email Verificado</div>
+                            <div class="info-value">${itemData.email_verified ? 'Sim' : 'Não'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Termos Aceitos</div>
+                            <div class="info-value">${itemData.terms_accepted ? 'Sim' : 'Não'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            cardBody.innerHTML = bodyHTML;
+
+            // Actions
+            let actionsHTML = `
+                <a href="${window.backUrl}" class="action-btn secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar à Lista
+                </a>
+            `;
+
+            if (itemData.status === 'pending_approval') {
+                actionsHTML += `
+                    <button class="action-btn success" onclick="approveUser()">
+                        <i class="fas fa-check"></i> Aprovar
+                    </button>
+                    <button class="action-btn warning" onclick="rejectUser()">
+                        <i class="fas fa-times"></i> Rejeitar
+                    </button>
+                `;
+            }
+
+            actionsSection.innerHTML = actionsHTML;
+        }
+
+        function renderServiceDetails() {
+            const cardIcon = document.getElementById('cardIcon');
+            const cardTitle = document.getElementById('cardTitle');
+            const cardSubtitle = document.getElementById('cardSubtitle');
+            const cardBody = document.getElementById('cardBody');
+            const actionsSection = document.getElementById('actionsSection');
+
+            // Header
+            cardIcon.innerHTML = '<i class="fas fa-cogs"></i>';
+            cardTitle.textContent = `Serviço ${itemData.service_type || 'Desconhecido'}`;
+            cardSubtitle.textContent = `ID: #${itemData.id} • ${itemData.client_name || 'Cliente desconhecido'}`;
+
+            // Body
+            let bodyHTML = `
+                <div class="info-section">
+                    <div class="section-title">Informações do Serviço</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Tipo de Serviço</div>
+                            <div class="info-value">${itemData.service_type || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Cliente</div>
+                            <div class="info-value">${itemData.client_name || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Guincheiro</div>
+                            <div class="info-value">${itemData.driver_name || 'Não atribuído'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                <span class="status-badge status-${itemData.status}">${formatStatus(itemData.status)}</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Valor</div>
+                            <div class="info-value price-value">R$ ${formatPrice(itemData.price)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Data da Solicitação</div>
+                            <div class="info-value date-value">${formatDate(itemData.created_at)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (itemData.pickup_address || itemData.destination_address) {
+                bodyHTML += `
+                    <div class="info-section">
+                        <div class="section-title">Localização</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Endereço de Origem</div>
+                                <div class="info-value address-value">${itemData.pickup_address || 'N/A'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Endereço de Destino</div>
+                                <div class="info-value address-value">${itemData.destination_address || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            cardBody.innerHTML = bodyHTML;
+
+            // Actions
+            let actionsHTML = `
+                <a href="${window.backUrl}" class="action-btn secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar à Lista
+                </a>
+            `;
+
+            actionsSection.innerHTML = actionsHTML;
+        }
+
+        // Utility functions
+        function getTypeName(type) {
+            const names = {
+                'client': 'Cliente',
+                'driver': 'Guincheiro', 
+                'partner': 'Parceiro'
+            };
+            return names[type] || 'Usuário';
+        }
+
+        function formatStatus(status) {
+            const statusMap = {
+                'active': 'Ativo',
+                'pending_approval': 'Pendente Aprovação',
+                'inactive': 'Inativo',
+                'pending': 'Pendente',
+                'completed': 'Concluído',
+                'cancelled': 'Cancelado'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatCPF(cpf) {
+            if (!cpf) return '';
+            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+
+        function formatPhone(phone) {
+            if (!phone) return '';
+            const cleaned = phone.replace(/\D/g, '');
+            if (cleaned.length === 10) {
+                return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            } else if (cleaned.length === 11) {
+                return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            }
+            return phone;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+        }
+
+        function formatPrice(price) {
+            let numPrice = 0;
+            
+            if (typeof price === 'string') {
+                const cleanPrice = price.replace(/[^\d.,]/g, '');
+                numPrice = parseFloat(cleanPrice.replace(',', '.')) || 0;
+            } else if (typeof price === 'number') {
+                numPrice = price;
+            }
+            
+            if (isNaN(numPrice) || !isFinite(numPrice)) {
+                numPrice = 0;
+            }
+            
+            return numPrice.toFixed(2);
+        }
+
+        function showLoading() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('detailsContent').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingState').style.display = 'none';
+        }
+
+        function showContent() {
+            document.getElementById('detailsContent').style.display = 'block';
+            document.getElementById('errorState').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('detailsContent').style.display = 'none';
+        }
+
+        function goBack() {
+            if (window.backUrl) {
+                window.location.href = window.backUrl;
+            } else {
+                window.history.back();
+            }
+        }
+
+        function logout() {
+            const confirmed = confirm('Deseja sair do sistema?');
+            if (confirmed) {
+                localStorage.removeItem('userData');
+                window.location.href = '../index.html';
+            }
+        }
+
+        // Action functions
+        function approveUser() {
+            if (confirm(`Deseja aprovar este ${getTypeName(itemType).toLowerCase()}?`)) {
+                alert('Funcionalidade em desenvolvimento.');
+                // TODO: Implement approval API
+            }
+        }
+
+        function rejectUser() {
+            const reason = prompt('Motivo da rejeição (opcional):');
+            if (reason !== null) {
+                alert('Funcionalidade em desenvolvimento.');
+                // TODO: Implement rejection API
+            }
+        }
+    </script>
+</body>
+</html>
