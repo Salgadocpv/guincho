@@ -514,6 +514,7 @@
             }
         }
     </style>
+    <script src="js/modal-system.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -650,8 +651,9 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             if (!validateTripData()) {
-                alert('Dados da viagem inválidos. Redirecionando...');
-                window.location.href = 'services.html';
+                modalSystem.error('Dados da viagem inválidos. Redirecionando...').then(() => {
+                    window.location.href = 'services.html';
+                });
                 return;
             }
             
@@ -728,7 +730,7 @@
                 }
             } catch (error) {
                 console.error('Error creating trip request:', error);
-                alert('Erro ao criar solicitação: ' + error.message);
+                modalSystem.error('Erro ao criar solicitação: ' + error.message);
                 
                 // Log detailed error information for debugging
                 console.error('Detailed error info:', {
@@ -852,7 +854,8 @@
         async function acceptSelectedProposal() {
             if (!selectedProposal) return;
             
-            if (!confirm('Tem certeza que deseja aceitar esta proposta?')) return;
+            const confirmed = await modalSystem.confirm('Tem certeza que deseja aceitar esta proposta?', 'Aceitar Proposta');
+            if (!confirmed) return;
             
             try {
                 const token = await window.authHelper.getAuthToken();
@@ -873,11 +876,11 @@
                     // Redirect to trip tracking page
                     window.location.href = `trip-tracking.html?trip_id=${data.data.active_trip_id}`;
                 } else {
-                    alert('Erro ao aceitar proposta: ' + data.message);
+                    modalSystem.error('Erro ao aceitar proposta: ' + data.message);
                 }
             } catch (error) {
                 console.error('Error accepting proposal:', error);
-                alert('Erro ao aceitar proposta');
+                modalSystem.error('Erro ao aceitar proposta');
             }
         }
 
@@ -903,7 +906,7 @@
             const newOffer = document.getElementById('counterOfferInput').value;
             
             if (!newOffer || parseFloat(newOffer) <= parseFloat(tripData.offerValue)) {
-                alert('A nova oferta deve ser maior que a oferta atual');
+                modalSystem.warning('A nova oferta deve ser maior que a oferta atual');
                 return;
             }
             

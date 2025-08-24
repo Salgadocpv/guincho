@@ -365,6 +365,7 @@
             }
         }
     </style>
+    <script src="../js/modal-system.js"></script>
 </head>
 <body>
     <div class="header">
@@ -656,7 +657,8 @@
         }
 
         async function cancelRequest(requestId) {
-            if (!confirm('Tem certeza que deseja cancelar esta solicitação?')) {
+            const confirmed = await modalSystem.confirm('Tem certeza que deseja cancelar esta solicitação?', 'Cancelar Solicitação');
+            if (!confirmed) {
                 return;
             }
 
@@ -674,7 +676,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('Solicitação cancelada com sucesso!');
+                    modalSystem.success('Solicitação cancelada com sucesso!');
                     await loadRequests(); // Reload to update status
                 } else {
                     throw new Error(data.message || 'Erro ao cancelar solicitação');
@@ -682,7 +684,7 @@
 
             } catch (error) {
                 console.error('Error cancelling request:', error);
-                alert('Erro ao cancelar solicitação: ' + error.message);
+                modalSystem.error('Erro ao cancelar solicitação: ' + error.message);
             }
         }
 
@@ -692,17 +694,17 @@
 
         function viewActiveTrip(requestId) {
             // Implementar visualização de viagem ativa
-            alert('Funcionalidade de acompanhamento em desenvolvimento');
+            modalSystem.info('Funcionalidade de acompanhamento em desenvolvimento');
         }
 
         function viewTripDetails(requestId) {
             // Implementar detalhes da viagem
-            alert('Funcionalidade de detalhes em desenvolvimento');
+            modalSystem.info('Funcionalidade de detalhes em desenvolvimento');
         }
 
         function requestAgain(requestId) {
             // Implementar nova solicitação baseada na anterior
-            alert('Funcionalidade de nova solicitação em desenvolvimento');
+            modalSystem.info('Funcionalidade de nova solicitação em desenvolvimento');
         }
 
         function showError(message) {

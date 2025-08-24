@@ -912,6 +912,7 @@
             }
         }
     </style>
+    <script src="js/modal-system.js"></script>
 </head>
 <body>
 
@@ -1147,7 +1148,7 @@
             };
 
             if (!credentials[userType]) {
-                alert('Tipo de usuário inválido');
+                modalSystem.error('Tipo de usuário inválido');
                 return;
             }
 
@@ -1200,14 +1201,14 @@
                             window.location.href = 'services.html';
                     }
                 } else {
-                    alert(data.message || 'Erro no login');
+                    modalSystem.error(data.message || 'Erro no login');
                     resetLoginButton();
                 }
             })
             .catch(error => {
                 hideLoading();
                 console.error('Login error:', error);
-                alert('Erro de conexão. Tente novamente.');
+                modalSystem.error('Erro de conexão. Tente novamente.');
                 resetLoginButton();
             });
         }
@@ -1229,7 +1230,7 @@
             const password = document.getElementById('password').value;
             
             if (!email || !password) {
-                alert('Por favor, preencha todos os campos.');
+                modalSystem.warning('Por favor, preencha todos os campos.');
                 return;
             }
 
@@ -1242,12 +1243,12 @@
 
         // Social Login
         function handleSocialLogin(provider) {
-            alert(`Login com ${provider} - funcionalidade em desenvolvimento`);
+            modalSystem.info(`Login com ${provider} - funcionalidade em desenvolvimento`);
         }
 
         // Forgot Password
         function handleForgotPassword() {
-            alert('Redirecionando para recuperação de senha...');
+            modalSystem.info('Redirecionando para recuperação de senha...');
         }
 
         // Show Registration Modal
@@ -1403,7 +1404,7 @@
         function installApp() {
             if (isAppInstalled) {
                 // App already installed - show message
-                alert('O app já está instalado! Você pode encontrá-lo na sua tela inicial.');
+                modalSystem.info('O app já está instalado! Você pode encontrá-lo na sua tela inicial.');
                 return;
             }
             
@@ -1445,7 +1446,7 @@
                 instructions += '• ou "Instalar aplicativo"';
             }
             
-            alert(instructions);
+            modalSystem.info(instructions, 'Como instalar o app');
         }
 
         // Check install status when app is installed

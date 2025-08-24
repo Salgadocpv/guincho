@@ -336,6 +336,7 @@
             animation-delay: 0.3s;
         }
     </style>
+    <script src="js/modal-system.js"></script>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -443,8 +444,9 @@
         }
 
         // Emergency handler
-        function handleEmergency() {
-            if (confirm('Deseja solicitar atendimento de emergência? Você será conectado imediatamente com o próximo prestador disponível.')) {
+        async function handleEmergency() {
+            const confirmed = await modalSystem.confirm('Deseja solicitar atendimento de emergência? Você será conectado imediatamente com o próximo prestador disponível.', 'Atendimento de Emergência');
+            if (confirmed) {
                 showLoading();
 
                 setTimeout(() => {
@@ -455,8 +457,8 @@
         }
 
         // Location functions
-        function changeLocation() {
-            const newLocation = prompt('Digite sua localização:', userLocation || '');
+        async function changeLocation() {
+            const newLocation = await modalSystem.prompt('Digite sua localização:', userLocation || '', 'Alterar Localização');
             if (newLocation && newLocation.trim()) {
                 userLocation = newLocation.trim();
                 document.getElementById('currentLocation').textContent = userLocation;
