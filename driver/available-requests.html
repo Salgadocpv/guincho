@@ -1031,9 +1031,45 @@
 
         // Trip Details Modal with Map
         function showTripDetailsModal(request) {
+            console.log('showTripDetailsModal called with:', request);
+            console.log('currentLocation:', currentLocation);
+            
             if (!currentLocation) {
-                modalSystem.error('Localização atual não disponível');
-                return;
+                console.log('No current location, trying to get it...');
+                // Try to get location if not available
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            currentLocation = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+                            console.log('Got location, showing modal:', currentLocation);
+                            showTripDetailsModal(request); // Retry with location
+                        },
+                        function(error) {
+                            console.log('Geolocation error, using default location');
+                            currentLocation = { lat: -23.5505, lng: -46.6333 }; // São Paulo default
+                            showTripDetailsModal(request); // Retry with default location
+                        }
+                    );
+                    return;
+                } else {
+                    console.log('Geolocation not supported, using default location');
+                    currentLocation = { lat: -23.5505, lng: -46.6333 }; // São Paulo default
+                }
+            }
+
+            // Ensure request has coordinates, use defaults if missing
+            if (!request.origin_lat || !request.origin_lng) {
+                console.log('Request missing origin coordinates, using defaults');
+                request.origin_lat = -23.5505;
+                request.origin_lng = -46.6333;
+            }
+            if (!request.destination_lat || !request.destination_lng) {
+                console.log('Request missing destination coordinates, using defaults');
+                request.destination_lat = -23.5605;
+                request.destination_lng = -46.6433;
             }
 
             const modalHtml = `
@@ -1562,9 +1598,15 @@
         }
 
         function calculateApproximateDistances(request) {
-            const driverPos = { lat: currentLocation.latitude, lng: currentLocation.longitude };
+            console.log('calculateApproximateDistances called');
+            console.log('currentLocation:', currentLocation);
+            console.log('request:', request);
+            
+            const driverPos = { lat: currentLocation.lat, lng: currentLocation.lng };
             const originPos = { lat: parseFloat(request.origin_lat), lng: parseFloat(request.origin_lng) };
             const destinationPos = { lat: parseFloat(request.destination_lat), lng: parseFloat(request.destination_lng) };
+            
+            console.log('Positions:', { driverPos, originPos, destinationPos });
 
             // Calculate straight-line distances (Haversine formula)
             const driverToOriginKm = calculateDistance(driverPos.lat, driverPos.lng, originPos.lat, originPos.lng);
@@ -1613,7 +1655,7 @@
 
         function initializeTripDetailsMap(request) {
             try {
-                const driverPos = { lat: currentLocation.latitude, lng: currentLocation.longitude };
+                const driverPos = { lat: currentLocation.lat, lng: currentLocation.lng };
                 const originPos = { lat: parseFloat(request.origin_lat), lng: parseFloat(request.origin_lng) };
                 const destinationPos = { lat: parseFloat(request.destination_lat), lng: parseFloat(request.destination_lng) };
 
