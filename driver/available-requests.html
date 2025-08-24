@@ -6,6 +6,7 @@
     <title>Iguincho - Solicitações Disponíveis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="../js/modal-system.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw&libraries=geometry,places"></script>
     <style>
         * {
             margin: 0;
@@ -989,7 +990,7 @@
             const request = requests.find(r => r.id == requestId);
             if (!request) return;
 
-            modalSystem.info(`Detalhes da Solicitação:\n\nServiço: ${getServiceName(request.service_type)}\nCliente: ${request.client_name}\nDistância: ${request.distance ? parseFloat(request.distance).toFixed(1) : '0'} km\nOferta: R$ ${parseFloat(request.client_offer).toFixed(2)}\n\nOrigem: ${request.origin_address}\nDestino: ${request.destination_address}`);
+            showTripDetailsModal(request);
         }
 
         function startPolling() {
@@ -1026,6 +1027,660 @@
 
         function goBack() {
             window.location.href = 'dashboard.html';
+        }
+
+        // Trip Details Modal with Map
+        function showTripDetailsModal(request) {
+            if (!currentLocation) {
+                modalSystem.error('Localização atual não disponível');
+                return;
+            }
+
+            const modalHtml = `
+                <div class="trip-details-modal">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-route"></i> Detalhes da Solicitação</h3>
+                        <button onclick="closeTripDetailsModal()" class="close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-content">
+                        <div class="trip-info">
+                            <div class="service-type">
+                                <i class="fas fa-wrench"></i>
+                                <span>${getServiceName(request.service_type)}</span>
+                            </div>
+                            <div class="client-info">
+                                <i class="fas fa-user"></i>
+                                <span>${request.client_name}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="map-container">
+                            <div id="tripDetailsMap" style="width: 100%; height: 300px; border-radius: 8px;"></div>
+                        </div>
+                        
+                        <div class="route-info">
+                            <div class="route-segment">
+                                <div class="segment-title">
+                                    <i class="fas fa-map-marker-alt" style="color: #007bff;"></i>
+                                    Sua posição → Origem
+                                </div>
+                                <div class="segment-details">
+                                    <span class="distance" id="driverToOriginDistance">Calculando...</span>
+                                    <span class="duration" id="driverToOriginDuration">Calculando...</span>
+                                </div>
+                            </div>
+                            
+                            <div class="route-segment">
+                                <div class="segment-title">
+                                    <i class="fas fa-map-marker-alt" style="color: #28a745;"></i>
+                                    Origem → Destino
+                                </div>
+                                <div class="segment-details">
+                                    <span class="distance" id="originToDestinationDistance">Calculando...</span>
+                                    <span class="duration" id="originToDestinationDuration">Calculando...</span>
+                                </div>
+                            </div>
+                            
+                            <div class="route-segment total">
+                                <div class="segment-title">
+                                    <i class="fas fa-calculator"></i>
+                                    Totais da Viagem
+                                </div>
+                                <div class="segment-details">
+                                    <span class="distance" id="totalDistance">Calculando...</span>
+                                    <span class="duration" id="totalDuration">Calculando...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="price-calculations">
+                            <div class="price-section client-offer">
+                                <div class="price-header">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                    <span>Oferta do Cliente</span>
+                                </div>
+                                <div class="price-details">
+                                    <div class="price-value">R$ ${parseFloat(request.client_offer).toFixed(2)}</div>
+                                    <div class="price-per-km" id="clientPricePerKm">R$ 0,00/km</div>
+                                </div>
+                            </div>
+                            
+                            <div class="price-section driver-bid">
+                                <div class="price-header">
+                                    <i class="fas fa-truck"></i>
+                                    <span>Sua Proposta</span>
+                                </div>
+                                <div class="price-input-container">
+                                    <div class="input-group">
+                                        <span class="input-prefix">R$</span>
+                                        <input type="number" id="driverBidAmount" 
+                                               placeholder="Digite sua proposta" 
+                                               step="0.01" min="0" max="9999.99"
+                                               onchange="updateDriverPricePerKm()">
+                                    </div>
+                                    <div class="price-per-km" id="driverPricePerKm">R$ 0,00/km</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="addresses">
+                            <div class="address-item origin">
+                                <div class="address-label">
+                                    <i class="fas fa-map-marker-alt" style="color: #28a745;"></i>
+                                    Origem
+                                </div>
+                                <div class="address-text">${request.origin_address}</div>
+                            </div>
+                            
+                            <div class="address-item destination">
+                                <div class="address-label">
+                                    <i class="fas fa-flag-checkered" style="color: #dc3545;"></i>
+                                    Destino
+                                </div>
+                                <div class="address-text">${request.destination_address}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button onclick="closeTripDetailsModal()" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Fechar
+                            </button>
+                            <button onclick="submitBidFromModal(${request.id})" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Enviar Proposta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>
+                .trip-details-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 20px;
+                    overflow-y: auto;
+                }
+                
+                .trip-details-modal .modal-content {
+                    background: white;
+                    border-radius: 12px;
+                    max-width: 600px;
+                    width: 100%;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    color: #333;
+                }
+                
+                .modal-header {
+                    padding: 20px;
+                    border-bottom: 1px solid #eee;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    color: white;
+                    border-radius: 12px 12px 0 0;
+                }
+                
+                .modal-header h3 {
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 1.2rem;
+                }
+                
+                .close-btn {
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 1.2rem;
+                    cursor: pointer;
+                    padding: 5px;
+                    border-radius: 4px;
+                    transition: background 0.3s ease;
+                }
+                
+                .close-btn:hover {
+                    background: rgba(255,255,255,0.2);
+                }
+                
+                .trip-info {
+                    padding: 20px;
+                    display: flex;
+                    gap: 20px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .service-type, .client-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 500;
+                }
+                
+                .map-container {
+                    padding: 20px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .route-info {
+                    padding: 20px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .route-segment {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 10px 0;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .route-segment:last-child {
+                    border-bottom: none;
+                }
+                
+                .route-segment.total {
+                    background: #f8f9fa;
+                    margin: 10px -10px 0;
+                    padding: 15px 10px;
+                    border-radius: 8px;
+                    border: none;
+                    font-weight: 600;
+                }
+                
+                .segment-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 500;
+                }
+                
+                .segment-details {
+                    display: flex;
+                    gap: 15px;
+                    font-size: 0.9rem;
+                }
+                
+                .price-calculations {
+                    padding: 20px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .price-section {
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+                
+                .price-section:last-child {
+                    margin-bottom: 0;
+                }
+                
+                .client-offer {
+                    border-left: 4px solid #007bff;
+                }
+                
+                .driver-bid {
+                    border-left: 4px solid #28a745;
+                }
+                
+                .price-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 600;
+                    margin-bottom: 10px;
+                    color: #495057;
+                }
+                
+                .price-details {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                
+                .price-value {
+                    font-size: 1.4rem;
+                    font-weight: 700;
+                    color: #007bff;
+                }
+                
+                .driver-bid .price-value {
+                    color: #28a745;
+                }
+                
+                .price-per-km {
+                    font-size: 0.9rem;
+                    color: #6c757d;
+                    font-weight: 500;
+                }
+                
+                .price-input-container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 15px;
+                }
+                
+                .input-group {
+                    display: flex;
+                    align-items: center;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    overflow: hidden;
+                    min-width: 150px;
+                }
+                
+                .input-prefix {
+                    padding: 8px 12px;
+                    background: #e9ecef;
+                    color: #495057;
+                    font-weight: 600;
+                    border-right: 1px solid #ddd;
+                }
+                
+                .input-group input {
+                    border: none;
+                    padding: 8px 12px;
+                    outline: none;
+                    flex: 1;
+                    font-size: 1rem;
+                }
+                
+                .addresses {
+                    padding: 20px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .address-item {
+                    margin-bottom: 15px;
+                }
+                
+                .address-item:last-child {
+                    margin-bottom: 0;
+                }
+                
+                .address-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 600;
+                    margin-bottom: 5px;
+                    font-size: 0.9rem;
+                }
+                
+                .address-text {
+                    color: #6c757d;
+                    font-size: 0.9rem;
+                    padding-left: 20px;
+                }
+                
+                .modal-actions {
+                    padding: 20px;
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                }
+                
+                .btn {
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.3s ease;
+                }
+                
+                .btn-secondary {
+                    background: #6c757d;
+                    color: white;
+                }
+                
+                .btn-secondary:hover {
+                    background: #5a6268;
+                }
+                
+                .btn-primary {
+                    background: #28a745;
+                    color: white;
+                }
+                
+                .btn-primary:hover {
+                    background: #218838;
+                }
+                
+                @media (max-width: 768px) {
+                    .trip-details-modal {
+                        padding: 10px;
+                    }
+                    
+                    .trip-info {
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    
+                    .segment-details {
+                        flex-direction: column;
+                        gap: 5px;
+                        text-align: right;
+                    }
+                    
+                    .price-input-container {
+                        flex-direction: column;
+                        align-items: stretch;
+                        gap: 10px;
+                    }
+                    
+                    .modal-actions {
+                        flex-direction: column;
+                    }
+                    
+                    .btn {
+                        justify-content: center;
+                    }
+                }
+                </style>
+            `;
+
+            // Add modal to body
+            const modalDiv = document.createElement('div');
+            modalDiv.innerHTML = modalHtml;
+            document.body.appendChild(modalDiv);
+
+            // Initialize map after modal is in DOM
+            setTimeout(() => {
+                initializeTripDetailsMap(request);
+            }, 100);
+        }
+
+        function closeTripDetailsModal() {
+            const modal = document.querySelector('.trip-details-modal');
+            if (modal) {
+                modal.parentNode.removeChild(modal);
+            }
+        }
+
+        function initializeTripDetailsMap(request) {
+            const driverPos = { lat: currentLocation.latitude, lng: currentLocation.longitude };
+            const originPos = { lat: parseFloat(request.origin_lat), lng: parseFloat(request.origin_lng) };
+            const destinationPos = { lat: parseFloat(request.destination_lat), lng: parseFloat(request.destination_lng) };
+
+            const map = new google.maps.Map(document.getElementById('tripDetailsMap'), {
+                zoom: 11,
+                center: originPos,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
+            });
+
+            // Driver marker (blue)
+            const driverMarker = new google.maps.Marker({
+                position: driverPos,
+                map: map,
+                title: 'Sua posição',
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#007bff">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            <circle cx="12" cy="9" r="1.5" fill="white"/>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(32, 32),
+                    anchor: new google.maps.Point(16, 32)
+                }
+            });
+
+            // Origin marker (green)
+            const originMarker = new google.maps.Marker({
+                position: originPos,
+                map: map,
+                title: 'Origem da viagem',
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#28a745">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            <circle cx="12" cy="9" r="1.5" fill="white"/>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(32, 32),
+                    anchor: new google.maps.Point(16, 32)
+                }
+            });
+
+            // Destination marker (red)
+            const destinationMarker = new google.maps.Marker({
+                position: destinationPos,
+                map: map,
+                title: 'Destino da viagem',
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#dc3545">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            <circle cx="12" cy="9" r="1.5" fill="white"/>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(32, 32),
+                    anchor: new google.maps.Point(16, 32)
+                }
+            });
+
+            // Fit map to show all markers
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend(driverPos);
+            bounds.extend(originPos);
+            bounds.extend(destinationPos);
+            map.fitBounds(bounds);
+
+            // Calculate routes
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer1 = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#007bff',
+                    strokeWeight: 4,
+                    strokeOpacity: 0.8
+                }
+            });
+            const directionsRenderer2 = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#28a745',
+                    strokeWeight: 4,
+                    strokeOpacity: 0.8
+                }
+            });
+
+            // Route 1: Driver to Origin
+            directionsService.route({
+                origin: driverPos,
+                destination: originPos,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (result, status) => {
+                if (status === 'OK') {
+                    directionsRenderer1.setDirections(result);
+                    const route = result.routes[0].legs[0];
+                    document.getElementById('driverToOriginDistance').textContent = route.distance.text;
+                    document.getElementById('driverToOriginDuration').textContent = route.duration.text;
+                    
+                    // Update totals
+                    updateTotalCalculations();
+                }
+            });
+
+            // Route 2: Origin to Destination
+            directionsService.route({
+                origin: originPos,
+                destination: destinationPos,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (result, status) => {
+                if (status === 'OK') {
+                    directionsRenderer2.setDirections(result);
+                    const route = result.routes[0].legs[0];
+                    document.getElementById('originToDestinationDistance').textContent = route.distance.text;
+                    document.getElementById('originToDestinationDuration').textContent = route.duration.text;
+                    
+                    // Store service distance for calculations
+                    window.currentTripServiceDistance = route.distance.value / 1000; // Convert to km
+                    
+                    // Update price calculations
+                    updateClientPricePerKm(request.client_offer);
+                    updateDriverPricePerKm();
+                    
+                    // Update totals
+                    updateTotalCalculations();
+                }
+            });
+        }
+
+        function updateTotalCalculations() {
+            const driverDistance = document.getElementById('driverToOriginDistance').textContent;
+            const serviceDistance = document.getElementById('originToDestinationDistance').textContent;
+            const driverDuration = document.getElementById('driverToOriginDuration').textContent;
+            const serviceDuration = document.getElementById('originToDestinationDuration').textContent;
+
+            if (driverDistance !== 'Calculando...' && serviceDistance !== 'Calculando...') {
+                // Parse distances (remove "km" and convert to number)
+                const driverKm = parseFloat(driverDistance.replace(/[^\d.,]/g, '').replace(',', '.'));
+                const serviceKm = parseFloat(serviceDistance.replace(/[^\d.,]/g, '').replace(',', '.'));
+                const totalKm = driverKm + serviceKm;
+
+                document.getElementById('totalDistance').textContent = totalKm.toFixed(1) + ' km';
+            }
+
+            if (driverDuration !== 'Calculando...' && serviceDuration !== 'Calculando...') {
+                // Parse durations (convert to minutes)
+                const driverMin = parseDurationToMinutes(driverDuration);
+                const serviceMin = parseDurationToMinutes(serviceDuration);
+                const totalMin = driverMin + serviceMin;
+
+                const hours = Math.floor(totalMin / 60);
+                const minutes = totalMin % 60;
+                const totalDurationText = hours > 0 ? `${hours}h ${minutes}min` : `${minutes}min`;
+
+                document.getElementById('totalDuration').textContent = totalDurationText;
+            }
+        }
+
+        function parseDurationToMinutes(durationText) {
+            let totalMinutes = 0;
+            const hourMatch = durationText.match(/(\d+)\s*h/);
+            const minMatch = durationText.match(/(\d+)\s*min/);
+            
+            if (hourMatch) totalMinutes += parseInt(hourMatch[1]) * 60;
+            if (minMatch) totalMinutes += parseInt(minMatch[1]);
+            
+            return totalMinutes;
+        }
+
+        function updateClientPricePerKm(clientOffer) {
+            if (window.currentTripServiceDistance) {
+                const pricePerKm = parseFloat(clientOffer) / window.currentTripServiceDistance;
+                document.getElementById('clientPricePerKm').textContent = `R$ ${pricePerKm.toFixed(2)}/km`;
+            }
+        }
+
+        function updateDriverPricePerKm() {
+            const bidAmount = document.getElementById('driverBidAmount').value;
+            if (bidAmount && window.currentTripServiceDistance) {
+                const pricePerKm = parseFloat(bidAmount) / window.currentTripServiceDistance;
+                document.getElementById('driverPricePerKm').textContent = `R$ ${pricePerKm.toFixed(2)}/km`;
+            } else {
+                document.getElementById('driverPricePerKm').textContent = 'R$ 0,00/km';
+            }
+        }
+
+        function submitBidFromModal(requestId) {
+            const bidAmount = document.getElementById('driverBidAmount').value;
+            const estimatedArrival = 30; // Default 30 minutes - could be calculated from route
+
+            if (!bidAmount || parseFloat(bidAmount) <= 0) {
+                modalSystem.error('Por favor, digite um valor válido para sua proposta');
+                return;
+            }
+
+            // Close modal first
+            closeTripDetailsModal();
+
+            // Submit bid using existing function
+            submitBid(requestId, bidAmount, estimatedArrival);
         }
 
         // Cleanup on page unload
