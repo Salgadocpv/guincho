@@ -658,6 +658,9 @@
             displayTripInfo();
             createTripRequest();
             startPolling();
+            
+            // Setup auto-cancellation on page unload
+            setupAutoCancellation();
         });
 
         function validateTripData() {
@@ -1003,11 +1006,123 @@
             return deg * (Math.PI/180);
         }
 
+        // Auto-cancellation setup
+        function setupAutoCancellation() {
+            let isNavigatingAway = false;
+            
+            // Handle beforeunload (user closing tab/browser or navigating away)
+            window.addEventListener('beforeunload', function(e) {
+                if (tripRequestId && !isNavigatingAway) {
+                    // Cancel the request when user leaves
+                    cancelTripRequestOnExit();
+                    
+                    // Show confirmation dialog (may not work in all browsers)
+                    const message = 'Ao sair desta página sua solicitação será cancelada. Tem certeza?';
+                    e.returnValue = message;
+                    return message;
+                }
+            });
+            
+            // Handle page visibility change (tab switching, minimizing)
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && tripRequestId && !isNavigatingAway) {
+                    // Start a timer to cancel if user doesn't return within 2 minutes
+                    setTimeout(() => {
+                        if (document.hidden && tripRequestId && !isNavigatingAway) {
+                            cancelTripRequestOnExit();
+                        }
+                    }, 120000); // 2 minutes
+                }
+            });
+            
+            // Track when we're intentionally navigating (accepting proposal)
+            window.markAsNavigatingAway = function() {
+                isNavigatingAway = true;
+            };
+        }
+        
+        async function cancelTripRequestOnExit() {
+            if (!tripRequestId) return;
+            
+            try {
+                const token = await window.authHelper.getAuthToken();
+                
+                // Use sendBeacon for reliable delivery even when page is unloading
+                if (navigator.sendBeacon) {
+                    const formData = new FormData();
+                    formData.append('trip_request_id', tripRequestId);
+                    formData.append('token', token);
+                    
+                    navigator.sendBeacon('api/trips/cancel_request.php', formData);
+                } else {
+                    // Fallback to synchronous request
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'api/trips/cancel_request.php', false); // synchronous
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    xhr.send(JSON.stringify({ trip_request_id: tripRequestId }));
+                }
+                
+            } catch (error) {
+                console.error('Error cancelling request on exit:', error);
+            }
+        }
+
         function goBack() {
+            // Mark as intentional navigation to prevent auto-cancellation
+            if (window.markAsNavigatingAway) {
+                window.markAsNavigatingAway();
+            }
+            
+            // Cancel the request manually when going back
+            if (tripRequestId) {
+                cancelTripRequest();
+            } else {
+                // If no active request, just navigate
+                navigateToServices();
+            }
+        }
+        
+        async function cancelTripRequest() {
+            try {
+                const token = await window.authHelper.getAuthToken();
+                const response = await fetch('api/trips/cancel_request.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ trip_request_id: tripRequestId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('Trip request cancelled successfully');
+                } else {
+                    console.error('Error cancelling trip request:', data.message);
+                }
+                
+            } catch (error) {
+                console.error('Error cancelling trip request:', error);
+            } finally {
+                navigateToServices();
+            }
+        }
+        
+        function navigateToServices() {
+            if (requestTimer) {
+                clearTimeout(requestTimer);
+            }
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+            Object.values(proposalTimers).forEach(timer => clearTimeout(timer));
+            
             window.location.href = 'service-details.html?service=' + tripData.service;
         }
 
-        // Cleanup on page unload
+        // Cleanup on page unload - Updated to handle cancellation
         window.addEventListener('beforeunload', function() {
             if (pollInterval) clearInterval(pollInterval);
             if (requestTimer) clearInterval(requestTimer);

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Solicitações - Iguincho</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .filters {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-item label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .filter-item select,
+        .filter-item input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .filter-item select option {
+            background: #0056b3;
+            color: white;
+        }
+
+        .requests-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .request-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .request-id {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .request-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-active {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-completed {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .service-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .service-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .service-details p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .route-info {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .route-point {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .route-point:last-child {
+            margin-bottom: 0;
+        }
+
+        .route-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .origin-icon {
+            background: #28a745;
+            color: white;
+        }
+
+        .destination-icon {
+            background: #dc3545;
+            color: white;
+        }
+
+        .route-address {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .request-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-primary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            margin-top: 40px;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            opacity: 0.3;
+            margin-bottom: 20px;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-subtitle {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-item {
+                justify-content: space-between;
+            }
+
+            .request-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .request-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1>Minhas Solicitações</h1>
+        <div class="subtitle">Histórico de serviços solicitados</div>
+    </div>
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-item">
+                <label for="statusFilter">Status:</label>
+                <select id="statusFilter" onchange="filterRequests()">
+                    <option value="">Todos</option>
+                    <option value="pending">Aguardando</option>
+                    <option value="active">Ativo</option>
+                    <option value="completed">Concluído</option>
+                    <option value="cancelled">Cancelado</option>
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <label for="serviceFilter">Serviço:</label>
+                <select id="serviceFilter" onchange="filterRequests()">
+                    <option value="">Todos</option>
+                    <option value="guincho">Guincho</option>
+                    <option value="bateria">Bateria</option>
+                    <option value="pneu">Pneu</option>
+                    <option value="chaveiro">Chaveiro</option>
+                    <option value="mecanico">Mecânico</option>
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <label for="periodFilter">Período:</label>
+                <select id="periodFilter" onchange="filterRequests()">
+                    <option value="">Todos</option>
+                    <option value="today">Hoje</option>
+                    <option value="week">Esta semana</option>
+                    <option value="month">Este mês</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading">
+            <div class="spinner"></div>
+            Carregando suas solicitações...
+        </div>
+
+        <div id="requestsContainer" class="requests-grid" style="display: none;"></div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="empty-title">Nenhuma solicitação encontrada</div>
+            <div class="empty-subtitle">Você ainda não fez nenhuma solicitação de serviço.</div>
+            <a href="../services.html" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Solicitar Serviço
+            </a>
+        </div>
+    </div>
+
+    <script src="../js/auth-helper.js"></script>
+    <script>
+        let allRequests = [];
+        let filteredRequests = [];
+
+        // Service icons mapping
+        const serviceIcons = {
+            guincho: 'fas fa-truck',
+            bateria: 'fas fa-car-battery',
+            pneu: 'fas fa-tire',
+            chaveiro: 'fas fa-key',
+            mecanico: 'fas fa-wrench'
+        };
+
+        // Service names mapping
+        const serviceNames = {
+            guincho: 'Guincho',
+            bateria: 'Bateria',
+            pneu: 'Troca de Pneu',
+            chaveiro: 'Chaveiro',
+            mecanico: 'Mecânico'
+        };
+
+        // Status names mapping
+        const statusNames = {
+            pending: 'Aguardando',
+            active: 'Ativo',
+            completed: 'Concluído',
+            cancelled: 'Cancelado'
+        };
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadRequests();
+        });
+
+        async function loadRequests() {
+            try {
+                const token = await window.authHelper.getAuthToken();
+                const response = await fetch('../api/trips/get_client_requests.php', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    allRequests = data.data || [];
+                    filteredRequests = [...allRequests];
+                    displayRequests();
+                } else {
+                    throw new Error(data.message || 'Erro ao carregar solicitações');
+                }
+
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                showError('Erro ao carregar suas solicitações: ' + error.message);
+            }
+        }
+
+        function displayRequests() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const requestsContainer = document.getElementById('requestsContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            loadingIndicator.style.display = 'none';
+
+            if (filteredRequests.length === 0) {
+                requestsContainer.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            requestsContainer.style.display = 'grid';
+            
+            requestsContainer.innerHTML = filteredRequests.map(request => createRequestCard(request)).join('');
+        }
+
+        function createRequestCard(request) {
+            const createdDate = new Date(request.created_at);
+            const formattedDate = createdDate.toLocaleDateString('pt-BR') + ' às ' + createdDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            return `
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-id"># ${request.id}</div>
+                        <div class="request-status status-${request.status}">
+                            ${statusNames[request.status] || request.status}
+                        </div>
+                    </div>
+
+                    <div class="service-info">
+                        <div class="service-icon">
+                            <i class="${serviceIcons[request.service_type] || 'fas fa-cog'}"></i>
+                        </div>
+                        <div class="service-details">
+                            <h3>${serviceNames[request.service_type] || request.service_type}</h3>
+                            <p>${formattedDate}</p>
+                        </div>
+                    </div>
+
+                    <div class="route-info">
+                        <div class="route-point">
+                            <div class="route-icon origin-icon">A</div>
+                            <div class="route-address">${request.origin_address}</div>
+                        </div>
+                        <div class="route-point">
+                            <div class="route-icon destination-icon">B</div>
+                            <div class="route-address">${request.destination_address}</div>
+                        </div>
+                    </div>
+
+                    <div class="request-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Oferta</div>
+                            <div class="detail-value">R$ ${parseFloat(request.client_offer).toFixed(2)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Distância</div>
+                            <div class="detail-value">${request.distance_km} km</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tempo Est.</div>
+                            <div class="detail-value">${request.estimated_duration_minutes} min</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Propostas</div>
+                            <div class="detail-value">${request.bid_count || 0}</div>
+                        </div>
+                    </div>
+
+                    <div class="request-actions">
+                        ${createRequestActions(request)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function createRequestActions(request) {
+            switch (request.status) {
+                case 'pending':
+                    return `
+                        <button class="btn btn-primary" onclick="viewProposals(${request.id})">
+                            <i class="fas fa-eye"></i> Ver Propostas
+                        </button>
+                        <button class="btn btn-danger" onclick="cancelRequest(${request.id})">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    `;
+                case 'active':
+                    return `
+                        <button class="btn btn-primary" onclick="viewActiveTrip(${request.id})">
+                            <i class="fas fa-map-marker-alt"></i> Acompanhar
+                        </button>
+                    `;
+                case 'completed':
+                    return `
+                        <button class="btn btn-secondary" onclick="viewTripDetails(${request.id})">
+                            <i class="fas fa-receipt"></i> Detalhes
+                        </button>
+                    `;
+                case 'cancelled':
+                    return `
+                        <button class="btn btn-secondary" onclick="requestAgain(${request.id})">
+                            <i class="fas fa-redo"></i> Solicitar Novamente
+                        </button>
+                    `;
+                default:
+                    return '';
+            }
+        }
+
+        function filterRequests() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const serviceFilter = document.getElementById('serviceFilter').value;
+            const periodFilter = document.getElementById('periodFilter').value;
+
+            filteredRequests = allRequests.filter(request => {
+                // Status filter
+                if (statusFilter && request.status !== statusFilter) {
+                    return false;
+                }
+
+                // Service filter
+                if (serviceFilter && request.service_type !== serviceFilter) {
+                    return false;
+                }
+
+                // Period filter
+                if (periodFilter) {
+                    const requestDate = new Date(request.created_at);
+                    const now = new Date();
+                    
+                    switch (periodFilter) {
+                        case 'today':
+                            if (requestDate.toDateString() !== now.toDateString()) {
+                                return false;
+                            }
+                            break;
+                        case 'week':
+                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            if (requestDate < weekAgo) {
+                                return false;
+                            }
+                            break;
+                        case 'month':
+                            const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                            if (requestDate < monthAgo) {
+                                return false;
+                            }
+                            break;
+                    }
+                }
+
+                return true;
+            });
+
+            displayRequests();
+        }
+
+        async function cancelRequest(requestId) {
+            if (!confirm('Tem certeza que deseja cancelar esta solicitação?')) {
+                return;
+            }
+
+            try {
+                const token = await window.authHelper.getAuthToken();
+                const response = await fetch('../api/trips/cancel_request.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ trip_request_id: requestId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Solicitação cancelada com sucesso!');
+                    await loadRequests(); // Reload to update status
+                } else {
+                    throw new Error(data.message || 'Erro ao cancelar solicitação');
+                }
+
+            } catch (error) {
+                console.error('Error cancelling request:', error);
+                alert('Erro ao cancelar solicitação: ' + error.message);
+            }
+        }
+
+        function viewProposals(requestId) {
+            window.location.href = `../trip-proposals.html?trip_request_id=${requestId}`;
+        }
+
+        function viewActiveTrip(requestId) {
+            // Implementar visualização de viagem ativa
+            alert('Funcionalidade de acompanhamento em desenvolvimento');
+        }
+
+        function viewTripDetails(requestId) {
+            // Implementar detalhes da viagem
+            alert('Funcionalidade de detalhes em desenvolvimento');
+        }
+
+        function requestAgain(requestId) {
+            // Implementar nova solicitação baseada na anterior
+            alert('Funcionalidade de nova solicitação em desenvolvimento');
+        }
+
+        function showError(message) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.innerHTML = `
+                <div style="color: #dc3545;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function goBack() {
+            window.location.href = '../services.html';
+        }
+    </script>
+</body>
+</html>
