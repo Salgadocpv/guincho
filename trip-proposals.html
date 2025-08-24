@@ -684,25 +684,37 @@
         async function createTripRequest() {
             try {
                 const token = await window.authHelper.getAuthToken();
+                
+                console.log('Creating trip request with data:', tripData);
+                console.log('Using auth token:', token);
+                
+                const requestBody = {
+                    service_type: tripData.service,
+                    origin_lat: parseFloat(tripData.originLat),
+                    origin_lng: parseFloat(tripData.originLng),
+                    origin_address: tripData.originAddress,
+                    destination_lat: parseFloat(tripData.destLat),
+                    destination_lng: parseFloat(tripData.destLng),
+                    destination_address: tripData.destAddress,
+                    client_offer: parseFloat(tripData.offerValue)
+                };
+                
+                console.log('Request body:', requestBody);
+                
                 const response = await fetch('api/trips/create_request.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({
-                        service_type: tripData.service,
-                        origin_lat: parseFloat(tripData.originLat),
-                        origin_lng: parseFloat(tripData.originLng),
-                        origin_address: tripData.originAddress,
-                        destination_lat: parseFloat(tripData.destLat),
-                        destination_lng: parseFloat(tripData.destLng),
-                        destination_address: tripData.destAddress,
-                        client_offer: parseFloat(tripData.offerValue)
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (data.success) {
                     tripRequestId = data.data.trip_request_id;
@@ -714,6 +726,14 @@
             } catch (error) {
                 console.error('Error creating trip request:', error);
                 alert('Erro ao criar solicitação: ' + error.message);
+                
+                // Log detailed error information for debugging
+                console.error('Detailed error info:', {
+                    message: error.message,
+                    stack: error.stack,
+                    tripData: tripData
+                });
+                
                 goBack();
             }
         }

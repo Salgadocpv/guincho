@@ -49,7 +49,7 @@ try {
     ];
     
     // Validar arquivos obrigatórios (simulação - em produção seria via FormData)
-    $required_files = ['cnhPhoto', 'crlvPhoto', 'vehiclePhoto'];
+    $required_files = ['profilePhoto', 'cnhPhoto', 'crlvPhoto', 'vehiclePhoto'];
     
     foreach ($required_driver_fields as $field) {
         if (!isset($data[$field]) || (is_string($data[$field]) && trim($data[$field]) === '')) {

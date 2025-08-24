@@ -37,16 +37,27 @@ if ($user['user_type'] !== 'client') {
 // Get posted data
 $data = json_decode(file_get_contents("php://input"));
 
-// Validate required fields
-if (empty($data->service_type) || 
-    empty($data->origin_lat) || empty($data->origin_lng) || empty($data->origin_address) ||
-    empty($data->destination_lat) || empty($data->destination_lng) || empty($data->destination_address) ||
-    empty($data->client_offer)) {
-    
+// Log received data for debugging
+error_log('Received trip request data: ' . json_encode($data));
+
+// Validate required fields with more detailed error messages
+$missing_fields = [];
+if (empty($data->service_type)) $missing_fields[] = 'service_type';
+if (empty($data->origin_lat) && $data->origin_lat !== 0) $missing_fields[] = 'origin_lat';
+if (empty($data->origin_lng) && $data->origin_lng !== 0) $missing_fields[] = 'origin_lng';
+if (empty($data->origin_address)) $missing_fields[] = 'origin_address';
+if (empty($data->destination_lat) && $data->destination_lat !== 0) $missing_fields[] = 'destination_lat';
+if (empty($data->destination_lng) && $data->destination_lng !== 0) $missing_fields[] = 'destination_lng';
+if (empty($data->destination_address)) $missing_fields[] = 'destination_address';
+if (empty($data->client_offer) && $data->client_offer !== 0) $missing_fields[] = 'client_offer';
+
+if (!empty($missing_fields)) {
     http_response_code(400);
     echo json_encode([
         'success' => false, 
-        'message' => 'Dados obrigatórios: service_type, origin_lat, origin_lng, origin_address, destination_lat, destination_lng, destination_address, client_offer'
+        'message' => 'Campos obrigatórios ausentes: ' . implode(', ', $missing_fields),
+        'missing_fields' => $missing_fields,
+        'received_data' => $data
     ]);
     exit();
 }
