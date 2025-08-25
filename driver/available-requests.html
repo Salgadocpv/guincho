@@ -1878,7 +1878,7 @@
             }
         }
 
-        function submitBidFromModal(requestId) {
+        async function submitBidFromModal(requestId) {
             const bidAmount = document.getElementById('driverBidAmount').value;
             const estimatedArrival = 30; // Default 30 minutes - could be calculated from route
 
@@ -1887,11 +1887,34 @@
                 return;
             }
 
-            // Close modal first
-            closeTripDetailsModal();
+            try {
+                const response = await fetch('/guincho/api/trips/place_bid.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                    },
+                    body: JSON.stringify({
+                        trip_request_id: requestId,
+                        bid_amount: parseFloat(bidAmount),
+                        estimated_arrival_minutes: estimatedArrival,
+                        message: 'Proposta enviada via modal de detalhes'
+                    })
+                });
 
-            // Submit bid using existing function
-            submitBid(requestId, bidAmount, estimatedArrival);
+                const data = await response.json();
+                
+                if (data.success) {
+                    modalSystem.success('Proposta enviada com sucesso!');
+                    closeTripDetailsModal();
+                    loadRequests(); // Refresh the list
+                } else {
+                    modalSystem.error('Erro ao enviar proposta: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error submitting bid:', error);
+                modalSystem.error('Erro ao enviar proposta');
+            }
         }
 
         // Check if driver has an active trip

@@ -852,13 +852,23 @@
         }
 
         async function acceptSelectedProposal() {
-            if (!selectedProposal) return;
+            console.log('acceptSelectedProposal called, selectedProposal:', selectedProposal);
+            if (!selectedProposal) {
+                console.log('No proposal selected');
+                modalSystem.warning('Selecione uma proposta primeiro');
+                return;
+            }
             
             const confirmed = await modalSystem.confirm('Tem certeza que deseja aceitar esta proposta?', 'Aceitar Proposta');
             if (!confirmed) return;
             
             try {
-                const token = await window.authHelper.getAuthToken();
+                const token = (window.authHelper && window.authHelper.getAuthToken) 
+                    ? await window.authHelper.getAuthToken()
+                    : localStorage.getItem('auth_token') || '';
+                    
+                console.log('Aceiting proposal:', selectedProposal, 'with token:', token ? 'present' : 'missing');
+                
                 const response = await fetch('api/trips/accept_bid.php', {
                     method: 'POST',
                     headers: {
