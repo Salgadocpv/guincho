@@ -942,11 +942,19 @@
         }
 
         async function submitBid() {
-            if (!selectedRequest) return;
+            console.log('submitBid called, selectedRequest:', selectedRequest);
+            
+            if (!selectedRequest) {
+                console.log('No selected request');
+                modalSystem.error('Nenhuma solicitação selecionada');
+                return;
+            }
 
             const bidAmount = parseFloat(document.getElementById('bidAmount').value);
             const arrivalTime = parseInt(document.getElementById('arrivalTime').value);
             const message = document.getElementById('bidMessage').value;
+            
+            console.log('Form values:', { bidAmount, arrivalTime, message });
 
             if (!bidAmount || bidAmount <= 0) {
                 modalSystem.warning('Informe um valor válido para a proposta');
@@ -959,21 +967,31 @@
             }
 
             try {
+                const token = localStorage.getItem('auth_token') || '';
+                console.log('Sending request with token:', token ? 'present' : 'missing');
+                
+                const requestBody = {
+                    trip_request_id: selectedRequest.id,
+                    bid_amount: bidAmount,
+                    estimated_arrival_minutes: arrivalTime,
+                    message: message
+                };
+                
+                console.log('Request body:', requestBody);
+                
                 const response = await fetch('/guincho/api/trips/place_bid.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                        'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({
-                        trip_request_id: selectedRequest.id,
-                        bid_amount: bidAmount,
-                        estimated_arrival_minutes: arrivalTime,
-                        message: message
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
+                console.log('Response status:', response.status);
+                
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (data.success) {
                     modalSystem.success('Proposta enviada com sucesso!');
@@ -984,7 +1002,7 @@
                 }
             } catch (error) {
                 console.error('Error submitting bid:', error);
-                modalSystem.error('Erro ao enviar proposta');
+                modalSystem.error('Erro ao enviar proposta: ' + error.message);
             }
         }
 

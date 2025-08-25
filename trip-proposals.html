@@ -867,20 +867,27 @@
                     ? await window.authHelper.getAuthToken()
                     : localStorage.getItem('auth_token') || '';
                     
-                console.log('Aceiting proposal:', selectedProposal, 'with token:', token ? 'present' : 'missing');
+                console.log('Accepting proposal:', selectedProposal, 'with token:', token ? 'present' : 'missing');
+            
+            const requestBody = {
+                bid_id: selectedProposal
+            };
+            
+            console.log('Request body:', requestBody);
                 
-                const response = await fetch('api/trips/accept_bid.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        bid_id: selectedProposal
-                    })
-                });
+            const response = await fetch('api/trips/accept_bid.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(requestBody)
+            });
 
-                const data = await response.json();
+            console.log('Response status:', response.status);
+            
+            const data = await response.json();
+            console.log('Response data:', data);
                 
                 if (data.success) {
                     // Redirect to trip tracking page
