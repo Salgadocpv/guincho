@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Aceitar Proposta</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card { 
+            background: white; 
+            margin: 15px 0; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button { 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 5px; 
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #218838; }
+        .logs {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste Direto de Aceitar Proposta</h1>
+    
+    <div class="test-card">
+        <h2>1. Preparação</h2>
+        <button onclick="createTestData()">🎯 Criar Dados de Teste</button>
+        <button onclick="setupClientToken()">👤 Configurar Token Cliente</button>
+        <div id="prep-logs" class="logs">Clique nos botões acima para preparar o teste...</div>
+    </div>
+
+    <div class="test-card">
+        <h2>2. Verificar Propostas</h2>
+        <button onclick="checkProposals()">🔍 Ver Propostas Disponíveis</button>
+        <div id="proposals-logs" class="logs">Nenhuma verificação feita ainda...</div>
+    </div>
+
+    <div class="test-card">
+        <h2>3. Testar Aceite</h2>
+        <input type="number" id="bidIdInput" placeholder="ID da proposta" value="1">
+        <button onclick="testAcceptProposal()">✅ Testar Aceitar Proposta</button>
+        <div id="accept-logs" class="logs">Nenhum teste realizado ainda...</div>
+    </div>
+
+    <div class="test-card">
+        <h2>4. Debug Completo</h2>
+        <button onclick="fullDebug()">🔧 Debug Completo</button>
+        <div id="debug-logs" class="logs">Debug não executado ainda...</div>
+    </div>
+
+    <script>
+        function log(message, elementId) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.innerHTML += `[${timestamp}] ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        async function createTestData() {
+            log('🎯 Criando dados de teste...', 'prep-logs');
+            
+            try {
+                const response = await fetch('/guincho/api/debug/create_test_data_sp.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ Dados criados com sucesso!', 'prep-logs');
+                    log(`Trip ID: ${data.test_data.trip_id}`, 'prep-logs');
+                    log(`Bid ID: ${data.test_data.bid_id}`, 'prep-logs');
+                    
+                    // Auto-fill bid ID
+                    document.getElementById('bidIdInput').value = data.test_data.bid_id;
+                    
+                    window.testData = data.test_data;
+                } else {
+                    log('❌ Erro ao criar dados: ' + data.message, 'prep-logs');
+                }
+            } catch (error) {
+                log('❌ Erro de rede: ' + error.message, 'prep-logs');
+            }
+        }
+
+        async function setupClientToken() {
+            log('👤 Configurando token de cliente...', 'prep-logs');
+            
+            try {
+                const response = await fetch('/guincho/api/debug/simple_tokens.php?action=get_tokens');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const clientToken = data.tokens.client.token;
+                    localStorage.setItem('auth_token', clientToken);
+                    log('✅ Token cliente configurado: ' + clientToken.substring(0, 20) + '...', 'prep-logs');
+                } else {
+                    log('❌ Erro ao gerar token: ' + data.message, 'prep-logs');
+                }
+            } catch (error) {
+                log('❌ Erro de rede: ' + error.message, 'prep-logs');
+            }
+        }
+
+        async function checkProposals() {
+            log('🔍 Verificando propostas disponíveis...', 'proposals-logs');
+            
+            try {
+                const response = await fetch('/guincho/api/debug/simple_bid_check.php');
+                const html = await response.text();
+                
+                // Extract table data (simplified)
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const tables = doc.querySelectorAll('table');
+                
+                if (tables.length > 0) {
+                    log('✅ Propostas encontradas na primeira tabela:', 'proposals-logs');
+                    const rows = tables[0].querySelectorAll('tr');
+                    for (let i = 1; i < rows.length; i++) { // Skip header
+                        const cells = rows[i].querySelectorAll('td');
+                        if (cells.length >= 4) {
+                            log(`- ID: ${cells[0].textContent}, Status: ${cells[3].textContent}`, 'proposals-logs');
+                        }
+                    }
+                } else {
+                    log('⚠️ Nenhuma tabela encontrada na resposta', 'proposals-logs');
+                }
+            } catch (error) {
+                log('❌ Erro ao verificar propostas: ' + error.message, 'proposals-logs');
+            }
+        }
+
+        async function testAcceptProposal() {
+            const bidId = document.getElementById('bidIdInput').value;
+            log(`✅ Testando aceite da proposta ID: ${bidId}`, 'accept-logs');
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                log('❌ Token não encontrado! Configure o token primeiro.', 'accept-logs');
+                return;
+            }
+            
+            log('🔑 Token encontrado: ' + token.substring(0, 20) + '...', 'accept-logs');
+            
+            const requestBody = {
+                bid_id: parseInt(bidId)
+            };
+            
+            log('📤 Enviando request:', 'accept-logs');
+            log(JSON.stringify(requestBody, null, 2), 'accept-logs');
+            
+            try {
+                const response = await fetch('/guincho/api/trips/accept_bid.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                log(`📥 Response status: ${response.status} ${response.statusText}`, 'accept-logs');
+                
+                const responseText = await response.text();
+                log('📥 Response body:', 'accept-logs');
+                log(responseText, 'accept-logs');
+                
+                try {
+                    const responseData = JSON.parse(responseText);
+                    if (responseData.success) {
+                        log('🎉 SUCESSO! Proposta aceita!', 'accept-logs');
+                    } else {
+                        log('❌ ERRO: ' + responseData.message, 'accept-logs');
+                    }
+                } catch (e) {
+                    log('⚠️ Resposta não é JSON válido', 'accept-logs');
+                }
+                
+            } catch (error) {
+                log('❌ Erro na requisição: ' + error.message, 'accept-logs');
+            }
+        }
+
+        async function fullDebug() {
+            const bidId = document.getElementById('bidIdInput').value;
+            log(`🔧 Debug completo para bid ID: ${bidId}`, 'debug-logs');
+            
+            try {
+                const response = await fetch(`/guincho/api/debug/debug_accept_bid.php?bid_id=${bidId}`);
+                const data = await response.json();
+                
+                log('🔧 Resultado do debug:', 'debug-logs');
+                log(JSON.stringify(data, null, 2), 'debug-logs');
+                
+            } catch (error) {
+                log('❌ Erro no debug: ' + error.message, 'debug-logs');
+            }
+        }
+
+        // Auto-start
+        window.onload = function() {
+            log('🧪 Teste de aceitar proposta carregado', 'prep-logs');
+            log('Siga os passos na ordem: 1 → 2 → 3 → 4', 'prep-logs');
+        };
+    </script>
+</body>
+</html>
