@@ -127,34 +127,43 @@ try {
     if (class_exists('TripNotification')) {
         $notification = new TripNotification($db);
         
-        // Notify accepted driver
+        // Notify accepted driver with navigation redirect
+        $navigation_url = "/guincho/navigation.html?destLat={$trip_request->origin_lat}&destLng={$trip_request->origin_lng}";
         $notification->create(
             $driver_user['id'],
             'bid_accepted',
-            'Proposta Aceita!',
-            "Sua proposta de R$ " . number_format($trip_bid->bid_amount, 2, ',', '.') . " foi aceita por {$user['full_name']}",
+            'Proposta Aceita! Navegue até o cliente',
+            "Sua proposta de R$ " . number_format($trip_bid->bid_amount, 2, ',', '.') . " foi aceita por {$user['full_name']}. Clique para navegar até o local.",
             $trip_request->id,
             $active_trip->id,
             [
                 'client_name' => $user['full_name'],
                 'client_phone' => $user['phone'],
                 'final_price' => $trip_bid->bid_amount,
-                'service_type' => $trip_request->service_type
+                'service_type' => $trip_request->service_type,
+                'navigation_url' => $navigation_url,
+                'origin_lat' => $trip_request->origin_lat,
+                'origin_lng' => $trip_request->origin_lng,
+                'origin_address' => $trip_request->origin_address,
+                'redirect_to' => $navigation_url
             ]
         );
         
-        // Notify client
+        // Notify client with trip tracking redirect
+        $tracking_url = "/guincho/trip-tracking.html?trip_id={$active_trip->id}";
         $notification->create(
             $user['id'],
             'trip_started',
-            'Viagem Confirmada',
-            "Sua viagem foi confirmada com {$driver_user['full_name']}",
+            'Viagem Confirmada! Acompanhe seu guincheiro',
+            "Sua viagem foi confirmada com {$driver_user['full_name']}. Clique para acompanhar em tempo real.",
             $trip_request->id,
             $active_trip->id,
             [
                 'driver_name' => $driver_user['full_name'],
                 'driver_phone' => $driver_user['phone'],
-                'final_price' => $trip_bid->bid_amount
+                'final_price' => $trip_bid->bid_amount,
+                'tracking_url' => $tracking_url,
+                'redirect_to' => $tracking_url
             ]
         );
         

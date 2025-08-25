@@ -13,6 +13,7 @@ include_once '../config/database.php';
 include_once '../classes/TripBid.php';
 include_once '../classes/TripRequest.php';
 include_once '../classes/TripNotification.php';
+include_once '../classes/ActiveTrip.php';
 include_once '../middleware/auth.php';
 
 // Check authentication
@@ -60,6 +61,21 @@ try {
     if (!$driver) {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'Dados do guincheiro não encontrados']);
+        exit();
+    }
+    
+    // Check if driver already has an active trip
+    $active_trip = new ActiveTrip($db);
+    $stmt = $active_trip->getDriverActiveTrips($driver['id']);
+    $current_active_trip = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($current_active_trip) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Você já possui uma viagem ativa em andamento. Finalize-a antes de fazer uma nova proposta.',
+            'active_trip_id' => $current_active_trip['id']
+        ]);
         exit();
     }
     

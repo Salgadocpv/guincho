@@ -14,6 +14,7 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 include_once '../config/database.php';
 include_once '../classes/TripRequest.php';
+include_once '../classes/ActiveTrip.php';
 include_once '../middleware/auth.php';
 
 // Check authentication
@@ -44,6 +45,47 @@ $driver = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$driver) {
     http_response_code(404);
     echo json_encode(['success' => false, 'message' => 'Dados do guincheiro não encontrados']);
+    exit();
+}
+
+// Check if this is a request to check for active trips only
+$check_active_only = isset($_GET['check_active_only']) && $_GET['check_active_only'] === 'true';
+
+if ($check_active_only) {
+    // Check if driver has an active trip
+    $active_trip = new ActiveTrip($db);
+    $stmt = $active_trip->getDriverActiveTrips($driver['id']);
+    $current_active_trip = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($current_active_trip) {
+        echo json_encode([
+            'success' => true,
+            'active_trip' => $current_active_trip,
+            'message' => 'Driver has an active trip'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => true,
+            'active_trip' => null,
+            'message' => 'Driver is available'
+        ]);
+    }
+    exit();
+}
+
+// Check if driver already has an active trip
+$active_trip = new ActiveTrip($db);
+$stmt = $active_trip->getDriverActiveTrips($driver['id']);
+$current_active_trip = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($current_active_trip) {
+    // Driver has an active trip, don't show new requests
+    echo json_encode([
+        'success' => true,
+        'data' => [],
+        'message' => 'Você possui uma viagem ativa. Finalize-a antes de ver novas solicitações.',
+        'active_trip' => $current_active_trip
+    ]);
     exit();
 }
 

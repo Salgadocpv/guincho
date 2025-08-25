@@ -701,9 +701,11 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
+            checkForActiveTrip();
             initializeLocation();
             setupEventListeners();
             startPolling();
+            startNotificationListener();
         });
 
         function checkAuth() {
@@ -1890,6 +1892,148 @@
 
             // Submit bid using existing function
             submitBid(requestId, bidAmount, estimatedArrival);
+        }
+
+        // Check if driver has an active trip
+        async function checkForActiveTrip() {
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                const response = await fetch('/guincho/api/trips/get_requests.php?lat=-23.5505&lng=-46.6333&check_active_only=true', {
+                    headers: {
+                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success && data.active_trip) {
+                    // Driver has an active trip, redirect to navigation
+                    const trip = data.active_trip;
+                    const navigationUrl = `/guincho/navigation.html?destLat=${trip.origin_lat}&destLng=${trip.origin_lng}`;
+                    
+                    modalSystem.info(`Você possui uma viagem ativa. Redirecionando para navegação...`);
+                    setTimeout(() => {
+                        window.location.href = navigationUrl;
+                    }, 2000);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking active trip:', error);
+            }
+        }
+
+        // Start listening for notifications
+        function startNotificationListener() {
+            // Use Server-Sent Events for real-time notifications
+            if (typeof EventSource !== "undefined") {
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                const eventSource = new EventSource(`/guincho/api/notifications/stream.php?token=${localStorage.getItem('auth_token') || ''}`);
+                
+                eventSource.onmessage = function(event) {
+                    try {
+                        const notification = JSON.parse(event.data);
+                        handleNotification(notification);
+                    } catch (error) {
+                        console.error('Error parsing notification:', error);
+                    }
+                };
+                
+                eventSource.onerror = function(event) {
+                    console.error('EventSource failed:', event);
+                    // Retry connection after 5 seconds
+                    setTimeout(() => {
+                        if (eventSource.readyState === EventSource.CLOSED) {
+                            startNotificationListener();
+                        }
+                    }, 5000);
+                };
+            } else {
+                console.warn('EventSource not supported, falling back to polling');
+                // Fallback to polling notifications
+                setInterval(checkNotifications, 5000);
+            }
+        }
+
+        // Handle incoming notifications
+        function handleNotification(notification) {
+            if (notification.type === 'bid_accepted') {
+                // Bid was accepted, redirect to navigation
+                const redirectUrl = notification.extra_data?.redirect_to || notification.extra_data?.navigation_url;
+                
+                if (redirectUrl) {
+                    modalSystem.success(
+                        'Proposta Aceita!',
+                        `Sua proposta foi aceita por ${notification.extra_data?.client_name || 'um cliente'}. Navegando para o local...`
+                    );
+                    
+                    // Stop current activities
+                    if (pollInterval) clearInterval(pollInterval);
+                    
+                    // Redirect after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 3000);
+                } else {
+                    // Fallback: construct navigation URL manually
+                    if (notification.extra_data?.origin_lat && notification.extra_data?.origin_lng) {
+                        const navigationUrl = `/guincho/navigation.html?destLat=${notification.extra_data.origin_lat}&destLng=${notification.extra_data.origin_lng}`;
+                        
+                        modalSystem.success('Proposta Aceita!', 'Redirecionando para navegação...');
+                        
+                        setTimeout(() => {
+                            window.location.href = navigationUrl;
+                        }, 2000);
+                    } else {
+                        modalSystem.success('Proposta Aceita!', 'Verifique a seção de viagens ativas.');
+                    }
+                }
+                
+                // Also show browser notification if permission granted
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification("Proposta Aceita!", {
+                        body: `${notification.extra_data?.client_name || 'Um cliente'} aceitou sua proposta!`,
+                        icon: "/guincho/favicon.ico"
+                    });
+                }
+            } else if (notification.type === 'bid_rejected') {
+                // Bid was rejected, just show notification
+                modalSystem.info('Proposta não aceita', 'O cliente escolheu outra proposta.');
+            }
+        }
+
+        // Fallback notification check for browsers without EventSource
+        async function checkNotifications() {
+            try {
+                const response = await fetch('/guincho/api/notifications/get.php?limit=1&unread_only=true', {
+                    headers: {
+                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    const notification = data.data[0];
+                    handleNotification(notification);
+                    
+                    // Mark as read
+                    await fetch('/guincho/api/notifications/mark_read.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                        },
+                        body: JSON.stringify({ notification_id: notification.id })
+                    });
+                }
+            } catch (error) {
+                console.error('Error checking notifications:', error);
+            }
+        }
+
+        // Request notification permission on page load
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
         }
 
         // Cleanup on page unload
