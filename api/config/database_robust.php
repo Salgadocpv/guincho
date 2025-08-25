@@ -5,15 +5,15 @@
  */
 
 class DatabaseRobust {
-    // Configurações primárias (Hostinger)
+    // Configurações primárias (Hostinger) - usando localhost em produção
     private $configs = [
         [
-            'host' => 'srv1310.hstgr.io',
+            'host' => 'localhost',
             'db_name' => 'u461266905_guincho',
             'username' => 'u461266905_guincho',
             'password' => '4580951Ga@',
             'port' => 3306,
-            'name' => 'Hostinger Primary'
+            'name' => 'Hostinger Localhost'
         ]
         // Pode adicionar servidores de backup aqui
     ];
