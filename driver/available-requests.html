@@ -698,6 +698,29 @@
         let selectedRequest = null;
         let pollInterval = null;
 
+        // Modal System - Simple Implementation
+        const modalSystem = {
+            success: function(message, subtitle = '') {
+                console.log('✅ SUCCESS:', message, subtitle);
+                alert('✅ ' + message + (subtitle ? '\n' + subtitle : ''));
+            },
+            error: function(message, subtitle = '') {
+                console.error('❌ ERROR:', message, subtitle);
+                alert('❌ ' + message + (subtitle ? '\n' + subtitle : ''));
+            },
+            warning: function(message, subtitle = '') {
+                console.warn('⚠️ WARNING:', message, subtitle);
+                alert('⚠️ ' + message + (subtitle ? '\n' + subtitle : ''));
+            },
+            info: function(message, subtitle = '') {
+                console.info('ℹ️ INFO:', message, subtitle);
+                alert('ℹ️ ' + message + (subtitle ? '\n' + subtitle : ''));
+            },
+            confirm: function(message, title = 'Confirmar') {
+                return confirm(title + '\n\n' + message);
+            }
+        };
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();

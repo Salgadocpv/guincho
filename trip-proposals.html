@@ -634,6 +634,33 @@
         let requestTimer = null;
         let proposalTimers = {};
         let pollInterval = null;
+
+        // Modal System - Simple Implementation
+        const modalSystem = {
+            success: function(message, subtitle = '') {
+                console.log('✅ SUCCESS:', message, subtitle);
+                alert('✅ ' + message + (subtitle ? '\n' + subtitle : ''));
+                return Promise.resolve();
+            },
+            error: function(message, subtitle = '') {
+                console.error('❌ ERROR:', message, subtitle);
+                alert('❌ ' + message + (subtitle ? '\n' + subtitle : ''));
+                return Promise.resolve();
+            },
+            warning: function(message, subtitle = '') {
+                console.warn('⚠️ WARNING:', message, subtitle);
+                alert('⚠️ ' + message + (subtitle ? '\n' + subtitle : ''));
+                return Promise.resolve();
+            },
+            info: function(message, subtitle = '') {
+                console.info('ℹ️ INFO:', message, subtitle);
+                alert('ℹ️ ' + message + (subtitle ? '\n' + subtitle : ''));
+                return Promise.resolve();
+            },
+            confirm: function(message, title = 'Confirmar') {
+                return Promise.resolve(confirm(title + '\n\n' + message));
+            }
+        };
         
         // Trip data from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
