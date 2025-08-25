@@ -78,13 +78,21 @@ $active_trip = new ActiveTrip($db);
 $stmt = $active_trip->getDriverActiveTrips($driver['id']);
 $current_active_trip = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Debug: Add driver info to response
+$debug_info = [
+    'driver_id' => $driver['id'],
+    'user_id' => $user['id'],
+    'has_active_trip' => $current_active_trip ? true : false
+];
+
 if ($current_active_trip) {
     // Driver has an active trip, don't show new requests
     echo json_encode([
         'success' => true,
         'data' => [],
         'message' => 'Você possui uma viagem ativa. Finalize-a antes de ver novas solicitações.',
-        'active_trip' => $current_active_trip
+        'active_trip' => $current_active_trip,
+        'debug' => $debug_info
     ]);
     exit();
 }
@@ -146,7 +154,12 @@ try {
                 'lat' => (float)$driver_lat,
                 'lng' => (float)$driver_lng
             ]
-        ]
+        ],
+        'debug' => array_merge($debug_info, [
+            'total_requests_found' => count($requests),
+            'filtered_requests' => count($filtered_requests),
+            'query_executed' => true
+        ])
     ]);
     
 } catch (Exception $e) {
