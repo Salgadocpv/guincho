@@ -118,14 +118,15 @@ try {
     }
     
     // Accept the bid (this also rejects other bids)
-    if (!$trip_bid->accept()) {
+    // Use false to not start a new transaction since we already have one
+    if (!$trip_bid->accept(false)) {
         $db->rollback();
         throw new Exception('Erro ao aceitar proposta');
     }
     
-    // Create active trip
+    // Create active trip (use false to not start new transaction)
     $active_trip = new ActiveTrip($db);
-    if (!$active_trip->createFromBid($trip_request->id, $trip_bid->id)) {
+    if (!$active_trip->createFromBid($trip_request->id, $trip_bid->id, false)) {
         $db->rollback();
         throw new Exception('Erro ao criar viagem ativa');
     }

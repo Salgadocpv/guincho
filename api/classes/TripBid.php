@@ -84,8 +84,16 @@ class TripBid {
     /**
      * Accept a bid
      */
-    public function accept() {
-        $this->conn->beginTransaction();
+    public function accept($use_transaction = true) {
+        $started_transaction = false;
+        
+        if ($use_transaction) {
+            // Only start transaction if not already in one
+            if (!$this->conn->inTransaction()) {
+                $this->conn->beginTransaction();
+                $started_transaction = true;
+            }
+        }
 
         try {
             // Update this bid to accepted
@@ -107,11 +115,16 @@ class TripBid {
             $stmt->bindParam(":id", $this->id);
             $stmt->execute();
 
-            $this->conn->commit();
+            if ($started_transaction) {
+                $this->conn->commit();
+            }
             return true;
 
         } catch (Exception $e) {
-            $this->conn->rollback();
+            if ($started_transaction) {
+                $this->conn->rollback();
+            }
+            error_log("Error in TripBid->accept(): " . $e->getMessage());
             return false;
         }
     }

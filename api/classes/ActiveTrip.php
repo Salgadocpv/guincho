@@ -39,8 +39,13 @@ class ActiveTrip {
     /**
      * Create a new active trip from accepted bid
      */
-    public function createFromBid($trip_request_id, $bid_id) {
-        $this->conn->beginTransaction();
+    public function createFromBid($trip_request_id, $bid_id, $use_transaction = true) {
+        $started_transaction = false;
+        
+        if ($use_transaction && !$this->conn->inTransaction()) {
+            $this->conn->beginTransaction();
+            $started_transaction = true;
+        }
 
         try {
             // Get trip request and bid data
@@ -97,11 +102,16 @@ class ActiveTrip {
             $stmt->bindParam(":id", $trip_request_id);
             $stmt->execute();
 
-            $this->conn->commit();
+            if ($started_transaction) {
+                $this->conn->commit();
+            }
             return true;
 
         } catch (Exception $e) {
-            $this->conn->rollback();
+            if ($started_transaction) {
+                $this->conn->rollback();
+            }
+            error_log("Error in ActiveTrip->createFromBid(): " . $e->getMessage());
             return false;
         }
     }
