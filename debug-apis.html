@@ -65,8 +65,8 @@
 
     <div class="api-test">
         <h2>2. API de Criar Dados de Teste</h2>
-        <div class="url">/guincho/api/debug/test_bid_flow.php?action=create_full_test</div>
-        <button onclick="testCreateDataAPI()">🎯 Testar Criação de Dados</button>
+        <div class="url">/guincho/api/debug/test_bid_flow_safe.php?action=create_full_test</div>
+        <button onclick="testCreateDataAPI()">🎯 Testar Criação de Dados (Versão Segura)</button>
         <div id="create-result" class="response">Clique para testar...</div>
     </div>
 
@@ -150,9 +150,9 @@
 
         async function testCreateDataAPI() {
             await testAPI(
-                '/guincho/api/debug/test_bid_flow.php?action=create_full_test',
+                '/guincho/api/debug/test_bid_flow_safe.php?action=create_full_test',
                 'create-result',
-                'Criação de Dados de Teste'
+                'Criação de Dados de Teste (Versão Segura)'
             );
         }
 
