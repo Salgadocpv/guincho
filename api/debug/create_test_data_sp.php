@@ -113,7 +113,7 @@ try {
         SELECT 
             tr.id as trip_id, tr.created_at as trip_created, tr.expires_at as trip_expires,
             tb.id as bid_id, tb.created_at as bid_created, tb.expires_at as bid_expires,
-            NOW() as current_time
+            NOW() as current_server_time
         FROM trip_requests tr
         JOIN trip_bids tb ON tr.id = tb.trip_request_id
         WHERE tr.id = ? AND tb.id = ?
