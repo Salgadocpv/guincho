@@ -21,22 +21,8 @@ try {
     $db->exec("ALTER TABLE trip_requests AUTO_INCREMENT = 1");
     $db->exec("ALTER TABLE trip_bids AUTO_INCREMENT = 1");
     
-    // Criar usuários se não existirem
-    $client_check = $db->prepare("SELECT id FROM users WHERE email = 'cliente@teste.com' LIMIT 1");
-    $client_check->execute();
-    $client = $client_check->fetch();
-    
-    if (!$client) {
-        $client_insert = $db->prepare("
-            INSERT INTO users (user_type, full_name, email, phone, password_hash, status, email_verified, terms_accepted, created_at) 
-            VALUES ('client', 'Cliente Teste', 'cliente@teste.com', '(11) 99999-9999', ?, 'active', 1, 1, NOW())
-        ");
-        $client_password = password_hash('123456', PASSWORD_DEFAULT);
-        $client_insert->execute([$client_password]);
-        $client_id = $db->lastInsertId();
-    } else {
-        $client_id = $client['id'];
-    }
+    // Usar o cliente que está logado (ID 1 - cliente@iguincho.com)
+    $client_id = 1; // Cliente que está fazendo login no sistema
     
     $driver_check = $db->prepare("SELECT id FROM users WHERE email = 'guincheiro@teste.com' LIMIT 1");
     $driver_check->execute();
