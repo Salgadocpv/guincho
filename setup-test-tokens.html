@@ -96,7 +96,7 @@
         async function generateTokens() {
             try {
                 log('Gerando tokens de teste...');
-                const response = await fetch('/guincho/api/auth/test_auth.php?action=get_tokens');
+                const response = await fetch('/guincho/api/debug/simple_tokens.php?action=get_tokens');
                 const data = await response.json();
                 
                 if (data.success) {

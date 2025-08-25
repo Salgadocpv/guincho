@@ -12,7 +12,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-include_once '../config/database.php';
+// Testar se arquivo de database existe
+$config_path = __DIR__ . '/../config/database.php';
+if (!file_exists($config_path)) {
+    throw new Exception("Arquivo database.php não encontrado");
+}
+
+include_once $config_path;
+
+if (!class_exists('Database')) {
+    throw new Exception("Classe Database não carregada");
+}
 
 try {
     $database = new Database();
