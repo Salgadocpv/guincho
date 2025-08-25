@@ -34,13 +34,16 @@ class DatabaseRobust {
                 try {
                     error_log("Tentando conexão {$config['name']} - Tentativa $attempt/{$this->maxRetries}");
                     
+                    // Definir timezone para São Paulo
+                    date_default_timezone_set('America/Sao_Paulo');
+                    
                     $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['db_name']};charset={$this->charset}";
                     
                     $options = [
                         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                         PDO::ATTR_EMULATE_PREPARES   => false,
-                        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$this->charset}",
+                        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$this->charset}, time_zone = '-03:00'",
                         PDO::ATTR_TIMEOUT => 30, // 30 segundos timeout
                         PDO::MYSQL_ATTR_COMPRESS => true, // Compressão
                         PDO::ATTR_PERSISTENT => false // Não usar conexões persistentes
