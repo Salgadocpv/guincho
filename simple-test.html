@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Simples</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card { 
+            background: white; 
+            margin: 10px 0; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 5px; 
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #0056b3; }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        .logs { 
+            background: #f8f9fa; 
+            border: 1px solid #e9ecef; 
+            padding: 15px; 
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .big-button {
+            font-size: 20px;
+            padding: 20px 40px;
+            margin: 20px 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Teste Simples dos Botões</h1>
+    
+    <div class="test-card">
+        <h2>Status do Sistema</h2>
+        <div id="systemStatus" class="logs">Carregando...</div>
+    </div>
+
+    <div class="test-card">
+        <h2>Testes Básicos</h2>
+        <button class="big-button" onclick="testBasics()">▶️ Testar Sistema Básico</button>
+        <button class="big-button" onclick="openPagesManually()">🔗 Abrir Páginas Manualmente</button>
+    </div>
+
+    <div class="test-card">
+        <h2>Instruções Manuais</h2>
+        <div style="background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <strong>Se nada funcionar automaticamente, teste manualmente:</strong><br><br>
+            
+            <strong>1. Configure o token:</strong><br>
+            • Abra: <a href="/guincho/api/debug/simple_tokens.php?action=get_tokens" target="_blank">Gerar Tokens</a><br>
+            • Copie um token da resposta<br>
+            • Execute no console: <code>localStorage.setItem('auth_token', 'TOKEN_AQUI')</code><br><br>
+            
+            <strong>2. Crie dados de teste:</strong><br>
+            • Abra: <a href="/guincho/api/debug/test_bid_flow.php?action=create_full_test" target="_blank">Criar Dados</a><br><br>
+            
+            <strong>3. Teste o guincheiro:</strong><br>
+            • Abra: <a href="/guincho/driver/available-requests.html" target="_blank">Página Guincheiro</a><br>
+            • Abra console (F12)<br>
+            • Execute: <code>console.log(typeof submitBid)</code><br>
+            • Se retornar "function", execute: <code>submitBid()</code><br><br>
+            
+            <strong>4. Teste o cliente:</strong><br>
+            • Abra: <a href="/guincho/trip-proposals.html" target="_blank">Página Cliente</a><br>
+            • Abra console (F12)<br>
+            • Execute: <code>console.log(typeof acceptSelectedProposal)</code><br>
+            • Se retornar "function", execute: <code>acceptSelectedProposal()</code>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            testResults.push({timestamp, message, type});
+            
+            const statusDiv = document.getElementById('systemStatus');
+            const color = type === 'error' ? 'color: red' : type === 'success' ? 'color: green' : 'color: black';
+            statusDiv.innerHTML += `<span style="${color}">${logEntry}</span>\n`;
+            statusDiv.scrollTop = statusDiv.scrollHeight;
+        }
+
+        async function testBasics() {
+            log('🚀 Iniciando teste básico...');
+            
+            try {
+                // Teste 1: Gerar tokens
+                log('1️⃣ Testando geração de tokens...');
+                const tokenResponse = await fetch('/guincho/api/debug/simple_tokens.php?action=get_tokens');
+                const tokenData = await tokenResponse.json();
+                
+                if (tokenData.success) {
+                    log('✅ Tokens gerados com sucesso', 'success');
+                    
+                    // Teste 2: Criar dados
+                    log('2️⃣ Criando dados de teste...');
+                    const testResponse = await fetch('/guincho/api/debug/test_bid_flow.php?action=create_full_test');
+                    const testData = await testResponse.json();
+                    
+                    if (testData.success) {
+                        log('✅ Dados de teste criados - Trip: ' + testData.test_data.trip_request_id, 'success');
+                        
+                        // Teste 3: Verificar API de requests
+                        log('3️⃣ Testando API de solicitações...');
+                        const requestsResponse = await fetch('/guincho/api/trips/get_requests.php?lat=-23.5505&lng=-46.6333');
+                        const requestsData = await requestsResponse.json();
+                        
+                        if (requestsData.success) {
+                            log('✅ API de requests OK - ' + (requestsData.data?.length || 0) + ' solicitações', 'success');
+                        } else {
+                            log('❌ Erro na API de requests: ' + requestsData.message, 'error');
+                        }
+                        
+                        // Resultado final
+                        log('🎉 Sistema básico funcionando!', 'success');
+                        log('📝 Agora teste manualmente clicando nos botões das páginas', 'success');
+                        
+                    } else {
+                        throw new Error('Falha ao criar dados de teste');
+                    }
+                } else {
+                    throw new Error('Falha ao gerar tokens');
+                }
+                
+            } catch (error) {
+                log('❌ Erro no teste básico: ' + error.message, 'error');
+            }
+        }
+
+        function openPagesManually() {
+            log('🔗 Abrindo páginas para teste manual...');
+            
+            // Abrir páginas em novas abas
+            window.open('/guincho/driver/available-requests.html', 'driver_page');
+            window.open('/guincho/trip-proposals.html', 'client_page');
+            window.open('/guincho/api/debug/simple_tokens.php?action=get_tokens', 'tokens_page');
+            
+            log('✅ Páginas abertas em novas abas', 'success');
+            log('📋 Siga as instruções manuais abaixo', 'success');
+        }
+
+        // Auto-start
+        window.onload = function() {
+            log('🔧 Teste simples carregado');
+            log('▶️ Clique em "Testar Sistema Básico" para começar');
+        };
+    </script>
+</body>
+</html>
