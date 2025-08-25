@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Accept Proposal - Iguincho</title>
+    <script src="js/modal-system.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+        .step { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #dee2e6; }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border-color: #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; font-size: 12px; }
+        button { 
+            padding: 12px 20px; margin: 5px; background: #007bff; color: white; 
+            border: none; border-radius: 4px; cursor: pointer; font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .flow-step { 
+            display: flex; align-items: center; gap: 10px; margin: 10px 0;
+        }
+        .step-number {
+            background: #007bff; color: white; width: 30px; height: 30px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; flex-shrink: 0;
+        }
+        .step-number.completed { background: #28a745; }
+        .step-number.error { background: #dc3545; }
+        .results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Aceitar Proposta - Fluxo Completo</h1>
+    <p>Este teste simula o fluxo completo desde o login até aceitar uma proposta</p>
+
+    <div class="step">
+        <h3>Estado Atual</h3>
+        <div id="currentState">
+            <div class="flow-step">
+                <div class="step-number" id="step1">1</div>
+                <span>Login do Cliente</span>
+                <button onclick="doClientLogin()" id="loginBtn">Fazer Login</button>
+            </div>
+            <div class="flow-step">
+                <div class="step-number" id="step2">2</div>
+                <span>Criar Solicitação</span>
+                <button onclick="createTripRequest()" id="createBtn" disabled>Criar Request</button>
+            </div>
+            <div class="flow-step">
+                <div class="step-number" id="step3">3</div>
+                <span>Proposta de Guincheiro</span>
+                <button onclick="createBid()" id="bidBtn" disabled>Fazer Proposta</button>
+            </div>
+            <div class="flow-step">
+                <div class="step-number" id="step4">4</div>
+                <span>Aceitar Proposta</span>
+                <button onclick="acceptBid()" id="acceptBtn" disabled>Aceitar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>🔄 Executar Fluxo Completo</h3>
+        <button onclick="runFullFlow()">▶️ Executar Tudo</button>
+        <button onclick="resetTest()" style="background: #6c757d;">🔄 Reset</button>
+    </div>
+
+    <div class="results" id="results"></div>
+
+    <script>
+        let testState = {
+            clientToken: null,
+            driverToken: null,
+            clientUserId: null,
+            driverUserId: null,
+            tripRequestId: null,
+            bidId: null,
+            step: 0
+        };
+
+        function log(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `step ${type}`;
+            entry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            resultsDiv.appendChild(entry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function updateStepStatus(stepNumber, status) {
+            const stepEl = document.getElementById(`step${stepNumber}`);
+            stepEl.className = `step-number ${status}`;
+            testState.step = Math.max(testState.step, stepNumber);
+            
+            // Enable next button
+            if (status === 'completed') {
+                const buttons = ['loginBtn', 'createBtn', 'bidBtn', 'acceptBtn'];
+                if (buttons[stepNumber]) {
+                    document.getElementById(buttons[stepNumber]).disabled = false;
+                }
+            }
+        }
+
+        async function doClientLogin() {
+            log('🔐 Iniciando login do cliente...', 'info');
+            
+            try {
+                const response = await fetch('api/auth/login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'cliente@iguincho.com',
+                        password: 'teste123'
+                    })
+                });
+                
+                const data = await response.json();
+                log(`Login response: ${JSON.stringify(data, null, 2)}`, 'info');
+                
+                if (data.success) {
+                    testState.clientToken = data.data.session_token || 'test_client_token';
+                    testState.clientUserId = data.data.user.id;
+                    log(`✅ Cliente logado com sucesso! User ID: ${testState.clientUserId}`, 'success');
+                    updateStepStatus(1, 'completed');
+                    document.getElementById('createBtn').disabled = false;
+                } else {
+                    log(`❌ Erro no login: ${data.message}`, 'error');
+                    updateStepStatus(1, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro de conexão no login: ${error.message}`, 'error');
+                updateStepStatus(1, 'error');
+            }
+        }
+
+        async function createTripRequest() {
+            if (!testState.clientToken) {
+                log('❌ Faça login primeiro!', 'error');
+                return;
+            }
+
+            log('📝 Criando solicitação de viagem...', 'info');
+            
+            const requestData = {
+                service_type: 'guincho',
+                origin_lat: -23.5505,
+                origin_lng: -46.6333,
+                origin_address: 'Av. Paulista, 1000 - São Paulo, SP',
+                destination_lat: -23.5629,
+                destination_lng: -46.6544,
+                destination_address: 'Rua Augusta, 500 - São Paulo, SP',
+                client_offer: 75.00
+            };
+            
+            try {
+                log(`Usando token: ${testState.clientToken}`, 'info');
+                
+                const response = await fetch('api/trips/create_request.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + testState.clientToken
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const responseText = await response.text();
+                log(`Create response text: ${responseText}`, 'info');
+                
+                const data = JSON.parse(responseText);
+                
+                if (data.success) {
+                    testState.tripRequestId = data.data.trip_request_id;
+                    log(`✅ Solicitação criada! ID: ${testState.tripRequestId}`, 'success');
+                    updateStepStatus(2, 'completed');
+                    document.getElementById('bidBtn').disabled = false;
+                } else {
+                    log(`❌ Erro ao criar solicitação: ${data.message}`, 'error');
+                    if (data.debug_info) {
+                        log(`Debug info: ${JSON.stringify(data.debug_info, null, 2)}`, 'info');
+                    }
+                    updateStepStatus(2, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro de conexão: ${error.message}`, 'error');
+                updateStepStatus(2, 'error');
+            }
+        }
+
+        async function createBid() {
+            if (!testState.tripRequestId) {
+                log('❌ Crie uma solicitação primeiro!', 'error');
+                return;
+            }
+
+            log('💰 Criando proposta do guincheiro...', 'info');
+            
+            const bidData = {
+                trip_request_id: testState.tripRequestId,
+                bid_amount: 70.00,
+                estimated_arrival_minutes: 15,
+                message: 'Guincho especializado em carros de passeio'
+            };
+            
+            try {
+                const response = await fetch('api/trips/place_bid.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer driver_test_token'
+                    },
+                    body: JSON.stringify(bidData)
+                });
+                
+                const data = await response.json();
+                log(`Bid response: ${JSON.stringify(data, null, 2)}`, 'info');
+                
+                if (data.success) {
+                    testState.bidId = data.data.bid_id;
+                    log(`✅ Proposta criada! ID: ${testState.bidId}`, 'success');
+                    updateStepStatus(3, 'completed');
+                    document.getElementById('acceptBtn').disabled = false;
+                } else {
+                    log(`❌ Erro ao criar proposta: ${data.message}`, 'error');
+                    updateStepStatus(3, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro de conexão: ${error.message}`, 'error');
+                updateStepStatus(3, 'error');
+            }
+        }
+
+        async function acceptBid() {
+            if (!testState.bidId || !testState.clientToken) {
+                log('❌ Crie uma proposta e faça login primeiro!', 'error');
+                return;
+            }
+
+            log('✅ Tentando aceitar proposta...', 'info');
+            log(`Usando client token: ${testState.clientToken}`, 'info');
+            log(`Bid ID: ${testState.bidId}`, 'info');
+            
+            try {
+                const response = await fetch('api/trips/accept_bid.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + testState.clientToken
+                    },
+                    body: JSON.stringify({
+                        bid_id: testState.bidId
+                    })
+                });
+                
+                const responseText = await response.text();
+                log(`Accept response (raw): ${responseText}`, 'info');
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error('Invalid JSON response: ' + responseText);
+                }
+                
+                if (data.success) {
+                    log(`🎉 SUCESSO! Proposta aceita!`, 'success');
+                    log(`Dados: ${JSON.stringify(data.data, null, 2)}`, 'success');
+                    updateStepStatus(4, 'completed');
+                } else {
+                    log(`❌ ERRO ao aceitar proposta: ${data.message}`, 'error');
+                    if (data.debug_info) {
+                        log(`🔍 DEBUG INFO:`, 'warning');
+                        log(`   Trip Client ID: ${data.debug_info.trip_client_id}`, 'warning');
+                        log(`   Auth User ID: ${data.debug_info.auth_user_id}`, 'warning');
+                        log(`   Auth User Type: ${data.debug_info.auth_user_type}`, 'warning');
+                        log(`   Auth User Email: ${data.debug_info.auth_user_email}`, 'warning');
+                        
+                        if (data.debug_info.trip_client_id != data.debug_info.auth_user_id) {
+                            log(`🚨 PROBLEMA IDENTIFICADO: IDs diferentes!`, 'error');
+                            log(`   A solicitação pertence ao usuário ID ${data.debug_info.trip_client_id}`, 'error');
+                            log(`   Mas você está autenticado como usuário ID ${data.debug_info.auth_user_id}`, 'error');
+                        }
+                    }
+                    updateStepStatus(4, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro de conexão: ${error.message}`, 'error');
+                updateStepStatus(4, 'error');
+            }
+        }
+
+        async function runFullFlow() {
+            log('🚀 Iniciando fluxo completo...', 'info');
+            resetTest();
+            
+            await doClientLogin();
+            if (testState.step >= 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await createTripRequest();
+            }
+            if (testState.step >= 2) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await createBid();
+            }
+            if (testState.step >= 3) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await acceptBid();
+            }
+            
+            log('🏁 Fluxo completo finalizado!', 'info');
+        }
+
+        function resetTest() {
+            testState = {
+                clientToken: null,
+                driverToken: null,
+                clientUserId: null,
+                driverUserId: null,
+                tripRequestId: null,
+                bidId: null,
+                step: 0
+            };
+            
+            // Reset UI
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step${i}`).className = 'step-number';
+            }
+            
+            // Reset buttons
+            document.getElementById('loginBtn').disabled = false;
+            document.getElementById('createBtn').disabled = true;
+            document.getElementById('bidBtn').disabled = true;
+            document.getElementById('acceptBtn').disabled = true;
+            
+            // Clear results
+            document.getElementById('results').innerHTML = '';
+            
+            log('🔄 Teste resetado!', 'info');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('📋 Teste de Accept Proposal carregado. Clique em "Fazer Login" para começar.', 'info');
+        });
+    </script>
+</body>
+</html>

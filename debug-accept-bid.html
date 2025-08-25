@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Accept Bid - Iguincho</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .step { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Accept Bid</h1>
+    
+    <div class="step">
+        <h3>1. Verificar Autenticação</h3>
+        <button onclick="testAuth()">Testar Auth</button>
+        <div id="authResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>2. Criar Solicitação de Teste</h3>
+        <button onclick="createTestRequest()">Criar Request</button>
+        <div id="requestResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>3. Criar Proposta de Teste</h3>
+        <button onclick="createTestBid()">Criar Bid</button>
+        <div id="bidResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>4. Aceitar Proposta</h3>
+        <button onclick="acceptBid()">Aceitar Bid</button>
+        <div id="acceptResult"></div>
+    </div>
+
+    <script>
+        let testData = {
+            token: 'test_client_1_' + Math.floor(Date.now() / 1000),
+            tripRequestId: null,
+            bidId: null,
+            clientId: 1
+        };
+
+        async function testAuth() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<p>Testando autenticação...</p>';
+            
+            try {
+                const response = await fetch('api/auth/login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'cliente@iguincho.com',
+                        password: 'teste123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    testData.token = data.data.session_token;
+                    testData.clientId = data.data.user.id;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Autenticação OK</h4>
+                            <pre>Token: ${testData.token}</pre>
+                            <pre>Client ID: ${testData.clientId}</pre>
+                            <pre>User: ${JSON.stringify(data.data.user, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Erro na autenticação</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Erro de conexão</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function createTestRequest() {
+            const resultDiv = document.getElementById('requestResult');
+            resultDiv.innerHTML = '<p>Criando solicitação...</p>';
+            
+            const requestData = {
+                service_type: 'guincho',
+                origin_lat: -23.5505,
+                origin_lng: -46.6333,
+                origin_address: 'Av. Paulista, 1000 - São Paulo, SP',
+                destination_lat: -23.5629,
+                destination_lng: -46.6544,
+                destination_address: 'Rua Augusta, 500 - São Paulo, SP',
+                client_offer: 75.00
+            };
+            
+            try {
+                const response = await fetch('api/trips/create_request.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + testData.token
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    testData.tripRequestId = data.data.trip_request_id;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Solicitação criada</h4>
+                            <pre>Trip Request ID: ${testData.tripRequestId}</pre>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Erro ao criar solicitação</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Erro de conexão</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function createTestBid() {
+            if (!testData.tripRequestId) {
+                document.getElementById('bidResult').innerHTML = '<div class="warning">⚠️ Crie uma solicitação primeiro</div>';
+                return;
+            }
+            
+            const resultDiv = document.getElementById('bidResult');
+            resultDiv.innerHTML = '<p>Criando proposta...</p>';
+            
+            const bidData = {
+                trip_request_id: testData.tripRequestId,
+                bid_amount: 70.00,
+                estimated_arrival_minutes: 15,
+                message: 'Guincho especializado em carros de passeio'
+            };
+            
+            try {
+                const response = await fetch('api/trips/place_bid.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer driver_test_token'
+                    },
+                    body: JSON.stringify(bidData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    testData.bidId = data.data.bid_id;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Proposta criada</h4>
+                            <pre>Bid ID: ${testData.bidId}</pre>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Erro ao criar proposta</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Erro de conexão</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function acceptBid() {
+            if (!testData.bidId) {
+                document.getElementById('acceptResult').innerHTML = '<div class="warning">⚠️ Crie uma proposta primeiro</div>';
+                return;
+            }
+            
+            const resultDiv = document.getElementById('acceptResult');
+            resultDiv.innerHTML = '<p>Aceitando proposta...</p>';
+            
+            console.log('Test data before accept:', testData);
+            
+            try {
+                const response = await fetch('api/trips/accept_bid.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + testData.token
+                    },
+                    body: JSON.stringify({
+                        bid_id: testData.bidId
+                    })
+                });
+                
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error('Invalid JSON response: ' + responseText);
+                }
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Proposta aceita com sucesso!</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Erro ao aceitar proposta</h4>
+                            <pre>Status: ${response.status}</pre>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Erro de conexão</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Debug additional info
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test data initialized:', testData);
+            
+            // Auto test auth on load
+            setTimeout(testAuth, 500);
+        });
+    </script>
+</body>
+</html>

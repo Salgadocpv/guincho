@@ -74,10 +74,22 @@ try {
         exit();
     }
     
+    // Debug log para verificar IDs
+    error_log("DEBUG accept_bid: client_id={$trip_request->client_id}, user_id={$user['id']}, user_type={$user['user_type']}");
+    
     if ($trip_request->client_id != $user['id']) {
         $db->rollback();
         http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Esta solicitação não pertence a você']);
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Esta solicitação não pertence a você',
+            'debug_info' => [
+                'trip_client_id' => $trip_request->client_id,
+                'auth_user_id' => $user['id'],
+                'auth_user_type' => $user['user_type'],
+                'auth_user_email' => $user['email'] ?? 'N/A'
+            ]
+        ]);
         exit();
     }
     

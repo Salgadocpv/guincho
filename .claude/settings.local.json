@@ -25,6 +25,9 @@
       "WebFetch(domain:www.coppermane.com.br)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\c\\xampp\\htdocs"
+    ]
   }
 }

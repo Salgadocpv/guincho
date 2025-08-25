@@ -53,7 +53,9 @@ function authenticate() {
             $user = $user_stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($user) {
-                return ['success' => true, 'user' => $user];
+                error_log("DEBUG auth token: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
+                error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
+    return ['success' => true, 'user' => $user];
             }
         }
         
@@ -77,7 +79,9 @@ function authenticate() {
             return ['success' => false, 'message' => 'Usuário inativo'];
         }
         
-        return ['success' => true, 'user' => $user];
+        error_log("DEBUG auth session: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
+        error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
+    return ['success' => true, 'user' => $user];
         
     } catch (Exception $e) {
         error_log('Auth error: ' . $e->getMessage());
@@ -144,6 +148,7 @@ function authenticateTestClient($db) {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
+    error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
     return ['success' => true, 'user' => $user];
 }
 
@@ -185,6 +190,7 @@ function authenticateTestDriver($db) {
         $stmt->execute([$user['id']]);
     }
     
+    error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
     return ['success' => true, 'user' => $user];
 }
 
@@ -211,6 +217,7 @@ function authenticateTestAdmin($db) {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
+    error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
     return ['success' => true, 'user' => $user];
 }
 
