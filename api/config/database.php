@@ -5,8 +5,8 @@
  */
 
 class Database {
-    // SEMPRE usar banco do servidor Hostinger
-    private $host = 'srv1310.hstgr.io';
+    // Usar localhost em produção para evitar limite de conexões
+    private $host = 'localhost';
     private $db_name = 'u461266905_guincho';
     private $username = 'u461266905_guincho';
     private $password = '4580951Ga@';

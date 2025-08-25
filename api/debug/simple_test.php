@@ -24,8 +24,8 @@ try {
         include_once $config_path;
         echo "Config carregado: ✅ OK<br>";
         
-        // Teste direto de conexão
-        $host = 'srv1310.hstgr.io';
+        // Teste direto de conexão (usando localhost em produção)
+        $host = 'localhost';
         $db_name = 'u461266905_guincho';
         $username = 'u461266905_guincho';
         $password = '4580951Ga@';
