@@ -35,6 +35,28 @@ function authenticate() {
         $database = new Database();
         $db = $database->getConnection();
         
+        // Check for new test token format first
+        if (preg_match('/^test_(driver|client)_(\d+)_(\d+)$/', $token, $matches)) {
+            $user_type = $matches[1];
+            $user_id = (int)$matches[2];
+            $timestamp = (int)$matches[3];
+            
+            // Check if token is not too old (24 hours)
+            if (time() - $timestamp > 86400) {
+                return ['success' => false, 'message' => 'Token expirado'];
+            }
+            
+            // Get user info
+            $user_query = "SELECT * FROM users WHERE id = ? AND user_type = ? AND status = 'active'";
+            $user_stmt = $db->prepare($user_query);
+            $user_stmt->execute([$user_id, $user_type]);
+            $user = $user_stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($user) {
+                return ['success' => true, 'user' => $user];
+            }
+        }
+        
         // Check if token exists in user_sessions table
         $stmt = $db->prepare("
             SELECT u.*, s.expires_at 
