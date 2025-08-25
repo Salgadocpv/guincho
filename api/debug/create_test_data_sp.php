@@ -57,8 +57,25 @@ try {
             VALUES (?, '12345678901', 'C', '3-5', 'guincho', 'São Paulo', '24h', 'approved', NOW())
         ");
         $driver_profile->execute([$driver_id]);
+        $driver_profile_id = $db->lastInsertId();
     } else {
-        $driver_id = $driver['id'];
+        $driver_user_id = $driver['id'];
+        // Get the driver profile ID
+        $driver_profile_query = $db->prepare("SELECT id FROM drivers WHERE user_id = ? LIMIT 1");
+        $driver_profile_query->execute([$driver_user_id]);
+        $driver_profile = $driver_profile_query->fetch();
+        
+        if (!$driver_profile) {
+            // Create driver profile if doesn't exist
+            $create_profile = $db->prepare("
+                INSERT INTO drivers (user_id, cnh, cnh_category, experience, specialty, work_region, availability, approval_status, created_at) 
+                VALUES (?, '12345678901', 'C', '3-5', 'guincho', 'São Paulo', '24h', 'approved', NOW())
+            ");
+            $create_profile->execute([$driver_user_id]);
+            $driver_profile_id = $db->lastInsertId();
+        } else {
+            $driver_profile_id = $driver_profile['id'];
+        }
     }
     
     // Criar solicitação de viagem (expira em 2 horas - horário SP)
@@ -88,7 +105,7 @@ try {
         (?, ?, 100.00, 25, 'Proposta teste - horário São Paulo', 'pending', ?, NOW())
     ");
     
-    $bid_insert->execute([$trip_id, $driver_id, $bid_expires]);
+    $bid_insert->execute([$trip_id, $driver_profile_id, $bid_expires]);
     $bid_id = $db->lastInsertId();
     
     // Verificar horários
@@ -113,7 +130,8 @@ try {
         'current_php_time' => date('Y-m-d H:i:s'),
         'test_data' => [
             'client_id' => $client_id,
-            'driver_id' => $driver_id,
+            'driver_user_id' => isset($driver_id) ? $driver_id : $driver_user_id,
+            'driver_profile_id' => $driver_profile_id,
             'trip_id' => $trip_id,
             'bid_id' => $bid_id
         ],
