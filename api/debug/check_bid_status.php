@@ -30,7 +30,7 @@ try {
                 u.email as client_email,
                 d.id as driver_id,
                 du.email as driver_email,
-                NOW() as current_time
+                NOW() as current_server_time
             FROM trip_bids tb
             JOIN trip_requests tr ON tb.trip_request_id = tr.id
             JOIN users u ON tr.client_id = u.id
@@ -62,7 +62,7 @@ try {
                 tr.expires_at as trip_expires,
                 u.email as client_email,
                 du.email as driver_email,
-                NOW() as current_time,
+                NOW() as current_server_time,
                 (tb.expires_at <= NOW()) as bid_expired,
                 (tr.expires_at <= NOW()) as trip_expired
             FROM trip_bids tb
