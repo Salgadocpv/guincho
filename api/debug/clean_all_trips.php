@@ -33,8 +33,6 @@ try {
     }
     
     if ($action === 'clean_all') {
-        $db->beginTransaction();
-        
         try {
             // Clean all trip-related tables in order (respecting foreign keys)
             $cleanup_queries = [
@@ -69,8 +67,6 @@ try {
                 $stmt->execute();
             }
             
-            $db->commit();
-            
             // Get counts after cleaning
             $counts_after = [];
             foreach ($tables as $table => $query) {
@@ -90,7 +86,6 @@ try {
             ]);
             
         } catch (Exception $e) {
-            $db->rollback();
             throw $e;
         }
         
