@@ -37,16 +37,8 @@ try {
         $stmt->execute();
         $users_affected = $stmt->rowCount();
         
-        // Clear any driver location tracking if exists
-        $clear_location_query = "UPDATE drivers SET 
-                                current_lat = NULL, 
-                                current_lng = NULL, 
-                                last_location_update = NULL
-                                WHERE approval_status = 'approved'";
-        
-        $stmt = $db->prepare($clear_location_query);
-        $stmt->execute();
-        $locations_cleared = $stmt->rowCount();
+        // No location clearing needed - drivers table doesn't have location fields
+        $locations_cleared = 0;
         
         // Get drivers status after reset
         $stmt = $db->prepare($current_query);
@@ -66,8 +58,7 @@ try {
     } else {
         // Just show current drivers status
         $query = "SELECT d.id, d.user_id, u.full_name, u.status as user_status, 
-                        d.approval_status, d.specialty, d.work_region,
-                        d.current_lat, d.current_lng, d.last_location_update
+                        d.approval_status, d.specialty, d.work_region
                  FROM drivers d 
                  JOIN users u ON d.user_id = u.id 
                  ORDER BY d.id";
@@ -81,17 +72,14 @@ try {
             'approved' => 0,
             'pending' => 0,
             'rejected' => 0,
-            'active_users' => 0,
-            'with_location' => 0
+            'suspended' => 0,
+            'active_users' => 0
         ];
         
         foreach ($drivers as $driver) {
             $status_counts[$driver['approval_status']]++;
             if ($driver['user_status'] === 'active') {
                 $status_counts['active_users']++;
-            }
-            if ($driver['current_lat'] && $driver['current_lng']) {
-                $status_counts['with_location']++;
             }
         }
         
