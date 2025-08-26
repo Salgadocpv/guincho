@@ -81,12 +81,13 @@ class AuthHelper {
      * Use test token for development
      */
     useTestToken() {
-        const testToken = 'test_token_' + Date.now();
+        // Use the specific test client token that works with our API
+        const testToken = 'test_client_2_1756211315';
         
         // Create mock user data
         const testUserData = {
             user: {
-                id: 1,
+                id: 2,
                 user_type: 'client',
                 full_name: 'Cliente Teste',
                 email: 'cliente@iguincho.com',

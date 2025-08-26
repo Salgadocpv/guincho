@@ -692,16 +692,35 @@
         }
 
         async function cancelActiveTrip(requestId) {
-            const confirmed = await modalSystem.confirm(
-                'Tem certeza que deseja cancelar esta viagem? O guincheiro será liberado automaticamente.',
-                'Cancelar Viagem Ativa'
-            );
+            console.log('cancelActiveTrip called with ID:', requestId);
+            
+            let confirmed;
+            try {
+                if (window.modalSystem && window.modalSystem.confirm) {
+                    confirmed = await window.modalSystem.confirm(
+                        'Tem certeza que deseja cancelar esta viagem? O guincheiro será liberado automaticamente.',
+                        'Cancelar Viagem Ativa'
+                    );
+                } else {
+                    // Fallback para confirm nativo
+                    confirmed = confirm('Tem certeza que deseja cancelar esta viagem? O guincheiro será liberado automaticamente.');
+                }
+            } catch (error) {
+                console.error('Error with modal confirm:', error);
+                confirmed = confirm('Tem certeza que deseja cancelar esta viagem? O guincheiro será liberado automaticamente.');
+            }
+            
+            console.log('User confirmed:', confirmed);
             if (!confirmed) {
                 return;
             }
 
             try {
+                console.log('Getting auth token...');
                 const token = await window.authHelper.getAuthToken();
+                console.log('Token obtained:', token ? 'Yes' : 'No');
+                
+                console.log('Making API request...');
                 const response = await fetch('../api/trips/cancel_active_trip.php', {
                     method: 'POST',
                     headers: {
@@ -711,10 +730,18 @@
                     body: JSON.stringify({ trip_request_id: requestId })
                 });
 
+                console.log('API response status:', response.status);
                 const data = await response.json();
+                console.log('API response data:', data);
 
                 if (data.success) {
-                    modalSystem.success('Viagem cancelada com sucesso! O guincheiro foi liberado.');
+                    console.log('Success! Showing success message...');
+                    if (window.modalSystem && window.modalSystem.success) {
+                        await window.modalSystem.success('Viagem cancelada com sucesso! O guincheiro foi liberado.');
+                    } else {
+                        alert('Viagem cancelada com sucesso! O guincheiro foi liberado.');
+                    }
+                    console.log('Reloading requests...');
                     await loadRequests(); // Reload to update status
                 } else {
                     throw new Error(data.message || 'Erro ao cancelar viagem');
@@ -722,7 +749,11 @@
 
             } catch (error) {
                 console.error('Error cancelling active trip:', error);
-                modalSystem.error('Erro ao cancelar viagem: ' + error.message);
+                if (window.modalSystem && window.modalSystem.error) {
+                    window.modalSystem.error('Erro ao cancelar viagem: ' + error.message);
+                } else {
+                    alert('Erro ao cancelar viagem: ' + error.message);
+                }
             }
         }
 
