@@ -24,7 +24,7 @@
             output.innerHTML = 'Criando viagem de teste...';
             
             try {
-                const response = await fetch('api/debug/create_and_verify_trip.php');
+                const response = await fetch('api/debug/force_new_trip.php');
                 const data = await response.json();
                 
                 if (data.success) {
