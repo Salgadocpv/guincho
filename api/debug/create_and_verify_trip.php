@@ -26,6 +26,10 @@ try {
             $cleanup_requests = "DELETE FROM trip_requests WHERE client_id = 2";
             $db->prepare($cleanup_requests)->execute();
             
+            // Also cleanup notifications for clean slate
+            $cleanup_notifications = "DELETE FROM trip_notifications WHERE user_id = 2";
+            $db->prepare($cleanup_notifications)->execute();
+            
             // 2. Create a fresh trip request for test client (ID 2)
             $request_query = "INSERT INTO trip_requests 
                             (client_id, service_type, origin_lat, origin_lng, origin_address, 
@@ -34,7 +38,7 @@ try {
                             VALUES 
                             (2, 'guincho', -23.5505, -46.6333, 'Av. Paulista, 1000 - São Paulo, SP',
                              -23.5629, -46.6544, 'Rua Augusta, 500 - São Paulo, SP', 85.00,
-                             'active', 2.5, 15, DATE_ADD(NOW(), INTERVAL 2 HOUR))";
+                             'pending', 2.5, 15, DATE_ADD(NOW(), INTERVAL 2 HOUR))";
             
             $request_stmt = $db->prepare($request_query);
             $request_stmt->execute();
@@ -54,6 +58,12 @@ try {
             $active_trip_stmt->bindParam(':trip_request_id', $trip_request_id, PDO::PARAM_INT);
             $active_trip_stmt->execute();
             $active_trip_id = $db->lastInsertId();
+            
+            // Update trip request status to active now that we have an active trip
+            $update_status = "UPDATE trip_requests SET status = 'active' WHERE id = :trip_request_id";
+            $update_stmt = $db->prepare($update_status);
+            $update_stmt->bindParam(':trip_request_id', $trip_request_id, PDO::PARAM_INT);
+            $update_stmt->execute();
             
             // Commit transaction
             $db->commit();
