@@ -590,6 +590,9 @@
                         <button class="btn btn-primary" onclick="viewActiveTrip(${request.id})">
                             <i class="fas fa-map-marker-alt"></i> Acompanhar
                         </button>
+                        <button class="btn btn-danger" onclick="cancelActiveTrip(${request.id})">
+                            <i class="fas fa-times"></i> Cancelar Viagem
+                        </button>
                     `;
                 case 'completed':
                     return `
@@ -685,6 +688,41 @@
             } catch (error) {
                 console.error('Error cancelling request:', error);
                 modalSystem.error('Erro ao cancelar solicitação: ' + error.message);
+            }
+        }
+
+        async function cancelActiveTrip(requestId) {
+            const confirmed = await modalSystem.confirm(
+                'Tem certeza que deseja cancelar esta viagem? O guincheiro será liberado automaticamente.',
+                'Cancelar Viagem Ativa'
+            );
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const token = await window.authHelper.getAuthToken();
+                const response = await fetch('../api/trips/cancel_active_trip.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ trip_request_id: requestId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    modalSystem.success('Viagem cancelada com sucesso! O guincheiro foi liberado.');
+                    await loadRequests(); // Reload to update status
+                } else {
+                    throw new Error(data.message || 'Erro ao cancelar viagem');
+                }
+
+            } catch (error) {
+                console.error('Error cancelling active trip:', error);
+                modalSystem.error('Erro ao cancelar viagem: ' + error.message);
             }
         }
 
