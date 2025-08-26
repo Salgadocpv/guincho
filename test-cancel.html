@@ -9,20 +9,50 @@
 </head>
 <body>
     <h1>Teste de Cancelamento de Viagem</h1>
-    <button id="testButton" onclick="testCancel()">Testar Cancelamento (ID 4)</button>
+    <button id="testButton" onclick="testCancel()">Testar Cancelamento (ID Dinâmico)</button>
+    <button id="createTripButton" onclick="createTestTrip()">Criar Nova Viagem de Teste</button>
     <div id="output" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;"></div>
 
     <script>
         // Initialize auth helper
         window.authHelper = new AuthHelper();
         
+        let currentTripId = null;
+        
+        async function createTestTrip() {
+            const output = document.getElementById('output');
+            output.innerHTML = 'Criando viagem de teste...';
+            
+            try {
+                const response = await fetch('api/debug/create_and_verify_trip.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentTripId = data.created_data.trip_request_id;
+                    output.innerHTML = `✅ <strong>Viagem criada com sucesso!</strong><br>
+                                      ID: ${currentTripId}<br>
+                                      Status: ${data.created_data.status}<br>
+                                      <em>Agora você pode testar o cancelamento.</em>`;
+                } else {
+                    output.innerHTML = '❌ <strong>Erro:</strong> ' + data.message;
+                }
+            } catch (error) {
+                output.innerHTML = '❌ <strong>Erro:</strong> ' + error.message;
+            }
+        }
+
         async function testCancel() {
             const output = document.getElementById('output');
+            
+            if (!currentTripId) {
+                output.innerHTML = '⚠️ <strong>Aviso:</strong> Crie uma viagem de teste primeiro!';
+                return;
+            }
+            
             output.innerHTML = 'Testando cancelamento...';
             
             try {
-                // Test the exact same function as in my-requests.html
-                console.log('cancelActiveTrip called with ID: 4');
+                console.log('cancelActiveTrip called with ID:', currentTripId);
                 
                 let confirmed;
                 try {
@@ -56,7 +86,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({ trip_request_id: 4 })
+                    body: JSON.stringify({ trip_request_id: currentTripId })
                 });
 
                 console.log('API response status:', response.status);
@@ -86,10 +116,10 @@
             }
         }
         
-        // Show current auth token on page load
+        // Show current auth token on page load and create a test trip
         window.addEventListener('DOMContentLoaded', async () => {
             const token = await window.authHelper.getAuthToken();
-            document.getElementById('output').innerHTML = 'Token carregado: ' + (token ? token.substring(0, 20) + '...' : 'Nenhum');
+            document.getElementById('output').innerHTML = 'Token carregado: ' + (token ? token.substring(0, 20) + '...' : 'Nenhum') + '<br><br>🚀 <em>Clique em "Criar Nova Viagem de Teste" para começar!</em>';
         });
     </script>
 </body>
