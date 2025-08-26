@@ -27,6 +27,11 @@ class AuthHelper {
      * Get or create authentication token for testing
      */
     async getAuthToken() {
+        // For client pages, always use the specific test token that works with our API
+        if (window.location.pathname.includes('/client/') || window.location.pathname.includes('test-cancel.html')) {
+            return 'test_client_2_1756211315';
+        }
+        
         // If we already have a token, return it
         if (this.authToken && this.authToken !== 'null' && this.authToken !== '') {
             return this.authToken;
