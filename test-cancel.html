@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Cancelar Viagem</title>
+    <script src="js/modal-system.js"></script>
+    <script src="js/auth-helper.js"></script>
+</head>
+<body>
+    <h1>Teste de Cancelamento de Viagem</h1>
+    <button id="testButton" onclick="testCancel()">Testar Cancelamento (ID 4)</button>
+    <div id="output" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;"></div>
+
+    <script>
+        // Initialize auth helper
+        window.authHelper = new AuthHelper();
+        
+        async function testCancel() {
+            const output = document.getElementById('output');
+            output.innerHTML = 'Testando cancelamento...';
+            
+            try {
+                // Test the exact same function as in my-requests.html
+                console.log('cancelActiveTrip called with ID: 4');
+                
+                let confirmed;
+                try {
+                    if (window.modalSystem && window.modalSystem.confirm) {
+                        confirmed = await window.modalSystem.confirm(
+                            'Tem certeza que deseja cancelar esta viagem? O guincheiro será liberado automaticamente.',
+                            'Cancelar Viagem Ativa'
+                        );
+                    } else {
+                        confirmed = confirm('Tem certeza que deseja cancelar esta viagem? O guincheiro será liberado automaticamente.');
+                    }
+                } catch (error) {
+                    console.error('Error with modal confirm:', error);
+                    confirmed = confirm('Tem certeza que deseja cancelar esta viagem? O guincheiro será liberado automaticamente.');
+                }
+                
+                console.log('User confirmed:', confirmed);
+                if (!confirmed) {
+                    output.innerHTML = 'Cancelamento cancelado pelo usuário.';
+                    return;
+                }
+
+                console.log('Getting auth token...');
+                const token = await window.authHelper.getAuthToken();
+                console.log('Token obtained:', token ? 'Yes' : 'No');
+                
+                console.log('Making API request...');
+                const response = await fetch('api/trips/cancel_active_trip.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ trip_request_id: 4 })
+                });
+
+                console.log('API response status:', response.status);
+                const data = await response.json();
+                console.log('API response data:', data);
+
+                if (data.success) {
+                    console.log('Success! Showing success message...');
+                    if (window.modalSystem && window.modalSystem.success) {
+                        await window.modalSystem.success('Viagem cancelada com sucesso! O guincheiro foi liberado.');
+                    } else {
+                        alert('Viagem cancelada com sucesso! O guincheiro foi liberado.');
+                    }
+                    output.innerHTML = '<strong>SUCESSO:</strong> ' + data.message;
+                } else {
+                    throw new Error(data.message || 'Erro ao cancelar viagem');
+                }
+
+            } catch (error) {
+                console.error('Error cancelling active trip:', error);
+                output.innerHTML = '<strong>ERRO:</strong> ' + error.message;
+                if (window.modalSystem && window.modalSystem.error) {
+                    window.modalSystem.error('Erro ao cancelar viagem: ' + error.message);
+                } else {
+                    alert('Erro ao cancelar viagem: ' + error.message);
+                }
+            }
+        }
+        
+        // Show current auth token on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const token = await window.authHelper.getAuthToken();
+            document.getElementById('output').innerHTML = 'Token carregado: ' + (token ? token.substring(0, 20) + '...' : 'Nenhum');
+        });
+    </script>
+</body>
+</html>
