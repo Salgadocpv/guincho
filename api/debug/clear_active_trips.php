@@ -27,9 +27,8 @@ try {
     $action = $_GET['action'] ?? 'view';
     
     if ($action === 'clear') {
-        // Clear all active trips (set to completed)
-        $clear_query = "UPDATE active_trips 
-                       SET status = 'completed', completed_at = CURRENT_TIMESTAMP 
+        // Delete all active trips completely
+        $clear_query = "DELETE FROM active_trips 
                        WHERE status IN ('confirmed', 'driver_en_route', 'driver_arrived', 'in_progress')";
         
         $clear_stmt = $db->prepare($clear_query);
@@ -38,7 +37,7 @@ try {
         
         echo json_encode([
             'success' => true,
-            'message' => "Limpeza concluída. $affected_rows viagens marcadas como concluídas.",
+            'message' => "Limpeza concluída. $affected_rows viagens ativas removidas completamente.",
             'before_clearing' => $active_trips,
             'affected_rows' => $affected_rows
         ]);
