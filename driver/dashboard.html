@@ -289,6 +289,9 @@
     </div>
 
     <script>
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+        
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
         });
@@ -317,7 +320,7 @@
         function logout() {
             console.log('Logout function called');
             try {
-                const confirmed = confirm('Deseja sair do sistema?');
+                const confirmed = await modalSystem.confirm('Deseja sair do sistema?');
                 console.log('User confirmed logout:', confirmed);
                 if (confirmed) {
                     console.log('Removing userData from localStorage');

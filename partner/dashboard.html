@@ -112,6 +112,9 @@
     </div>
 
     <script>
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+        
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
         });
@@ -138,7 +141,7 @@
         }
 
         async function logout() {
-            const confirmed = confirm('Deseja sair do sistema?');
+            const confirmed = await modalSystem.confirm('Deseja sair do sistema?');
             if (confirmed) {
                 localStorage.removeItem('userData');
                 window.location.href = '../index.html';

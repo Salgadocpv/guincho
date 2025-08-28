@@ -114,6 +114,17 @@ try {
     $stmt->execute();
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Get questionnaire answers for each request
+    foreach ($requests as &$request) {
+        $answers_query = "SELECT question_id, question_text, option_id, option_text 
+                          FROM questionnaire_answers 
+                          WHERE trip_request_id = ? 
+                          ORDER BY question_id";
+        $answers_stmt = $db->prepare($answers_query);
+        $answers_stmt->execute([$request['id']]);
+        $request['questionnaire_answers'] = $answers_stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
     // Calculate distance from driver to each trip origin
     foreach ($requests as &$request) {
         $distance = TripRequest::calculateDistance(

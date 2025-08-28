@@ -464,6 +464,9 @@
     </main>
 
     <script>
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+        
         // Global variables
         let itemType = '';
         let itemId = '';
@@ -486,7 +489,7 @@
             const user = JSON.parse(userData);
             
             if (user.user.user_type !== 'admin') {
-                alert('Acesso negado. Apenas administradores podem acessar esta área.');
+                await modalSystem.error('Acesso negado. Apenas administradores podem acessar esta área.');
                 setTimeout(() => {
                     window.location.href = '../index.html';
                 }, 2000);
@@ -901,7 +904,7 @@
         }
 
         function logout() {
-            const confirmed = confirm('Deseja sair do sistema?');
+            const confirmed = await modalSystem.confirm('Deseja sair do sistema?');
             if (confirmed) {
                 localStorage.removeItem('userData');
                 window.location.href = '../index.html';
@@ -910,16 +913,16 @@
 
         // Action functions
         function approveUser() {
-            if (confirm(`Deseja aprovar este ${getTypeName(itemType).toLowerCase()}?`)) {
-                alert('Funcionalidade em desenvolvimento.');
+            if (await modalSystem.confirm(`Deseja aprovar este ${getTypeName(itemType).toLowerCase()}?`)) {
+                await modalSystem.info('Funcionalidade em desenvolvimento.');
                 // TODO: Implement approval API
             }
         }
 
         function rejectUser() {
-            const reason = prompt('Motivo da rejeição (opcional):');
+            const reason = await modalSystem.prompt('Motivo da rejeição (opcional):');
             if (reason !== null) {
-                alert('Funcionalidade em desenvolvimento.');
+                await modalSystem.info('Funcionalidade em desenvolvimento.');
                 // TODO: Implement rejection API
             }
         }

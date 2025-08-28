@@ -423,6 +423,9 @@
     </main>
 
     <script>
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+        
         // Global variables
         let listType = '';
         let allData = [];
@@ -445,7 +448,7 @@
             const user = JSON.parse(userData);
             
             if (user.user.user_type !== 'admin') {
-                alert('Acesso negado. Apenas administradores podem acessar esta área.');
+                await modalSystem.error('Acesso negado. Apenas administradores podem acessar esta área.');
                 setTimeout(() => {
                     window.location.href = '../index.html';
                 }, 2000);
@@ -556,7 +559,7 @@
                     console.error('Debug info:', data.debug);
                 }
                 
-                alert(errorMessage);
+                await modalSystem.error(errorMessage);
             }
         }
 
@@ -657,7 +660,7 @@
         }
 
         function exportData() {
-            alert('Funcionalidade de exportação em desenvolvimento.');
+            await modalSystem.info('Funcionalidade de exportação em desenvolvimento.');
         }
 
         function viewItem(id) {
@@ -670,8 +673,8 @@
         }
 
         function approveItem(id) {
-            if (confirm('Deseja aprovar este usuário?')) {
-                alert(`Aprovar usuário ${id} - funcionalidade em desenvolvimento.`);
+            if (await modalSystem.confirm('Deseja aprovar este usuário?')) {
+                await modalSystem.info(`Aprovar usuário ${id} - funcionalidade em desenvolvimento.`);
             }
         }
 
@@ -733,7 +736,7 @@
         }
 
         function logout() {
-            const confirmed = confirm('Deseja sair do sistema?');
+            const confirmed = await modalSystem.confirm('Deseja sair do sistema?');
             if (confirmed) {
                 localStorage.removeItem('userData');
                 window.location.href = '../index.html';

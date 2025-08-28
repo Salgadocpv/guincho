@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurar Tokens de Teste</title>
+    <script src="js/modal-system.js"></script>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -84,6 +85,9 @@
     </div>
 
     <script>
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+        
         let currentTokens = null;
 
         function log(message) {
@@ -124,24 +128,24 @@
 
         function setDriverToken() {
             if (!currentTokens) {
-                alert('Gere os tokens primeiro!');
+                await modalSystem.warning('Gere os tokens primeiro!');
                 return;
             }
             
             localStorage.setItem('auth_token', currentTokens.driver.token);
             log(`🚛 Token do guincheiro configurado: ${currentTokens.driver.token}`);
-            alert('Token do guincheiro configurado! Agora você pode testar o botão "Enviar Proposta"');
+            await modalSystem.success('Token do guincheiro configurado! Agora você pode testar o botão "Enviar Proposta"');
         }
 
         function setClientToken() {
             if (!currentTokens) {
-                alert('Gere os tokens primeiro!');
+                await modalSystem.warning('Gere os tokens primeiro!');
                 return;
             }
             
             localStorage.setItem('auth_token', currentTokens.client.token);
             log(`👤 Token do cliente configurado: ${currentTokens.client.token}`);
-            alert('Token do cliente configurado! Agora você pode testar o botão "Aceitar Proposta"');
+            await modalSystem.success('Token do cliente configurado! Agora você pode testar o botão "Aceitar Proposta"');
         }
 
         function openDriverPage() {
@@ -164,7 +168,7 @@
                     log('✅ Cenário de teste criado!');
                     log(`Trip ID: ${data.test_data.trip_request_id}`);
                     log(`Bid ID: ${data.test_data.bid_id}`);
-                    alert('Cenário de teste criado! Agora você pode testar os botões.');
+                    await modalSystem.success('Cenário de teste criado! Agora você pode testar os botões.');
                 } else {
                     throw new Error(data.message);
                 }

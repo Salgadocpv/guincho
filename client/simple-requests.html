@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minhas Solicitações - Simples</title>
+    <script src="../js/modal-system.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .loading { color: blue; font-size: 18px; }
@@ -25,6 +26,9 @@
     <div id="requests"></div>
     
     <script>
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+        
         console.log('Página carregada, iniciando teste...');
         
         async function loadRequestsSimple() {
@@ -85,7 +89,8 @@
         }
         
         async function cancelTrip(tripId) {
-            if (!confirm('Tem certeza que deseja cancelar esta viagem?')) {
+            const confirmed = await modalSystem.confirm('Tem certeza que deseja cancelar esta viagem?');
+            if (!confirmed) {
                 return;
             }
             
@@ -102,13 +107,13 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('Viagem cancelada com sucesso!');
+                    await modalSystem.alert('Viagem cancelada com sucesso!');
                     loadRequestsSimple(); // Reload
                 } else {
-                    alert('Erro ao cancelar: ' + data.message);
+                    await modalSystem.error('Erro ao cancelar: ' + data.message);
                 }
             } catch (error) {
-                alert('Erro de conexão: ' + error.message);
+                await modalSystem.error('Erro de conexão: ' + error.message);
             }
         }
         

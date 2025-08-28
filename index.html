@@ -1106,6 +1106,9 @@
     </div>
 
     <script>
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+        
         // State Management
         let isPasswordVisible = false;
         let isRememberChecked = false;
@@ -1154,7 +1157,7 @@
                 if (typeof modalSystem !== 'undefined') {
                     modalSystem.error('Tipo de usuário inválido');
                 } else {
-                    alert('Tipo de usuário inválido');
+                    modalSystem.error('Tipo de usuário inválido');
                 }
                 return;
             }
@@ -1167,7 +1170,7 @@
             
             if (!emailField || !passwordField) {
                 console.error('Email or password field not found');
-                alert('Campos de login não encontrados');
+                modalSystem.error('Campos de login não encontrados');
                 return;
             }
 
@@ -1241,7 +1244,7 @@
                     if (typeof modalSystem !== 'undefined') {
                         modalSystem.error(data.message || 'Erro no login');
                     } else {
-                        alert(data.message || 'Erro no login');
+                        modalSystem.error(data.message || 'Erro no login');
                     }
                     resetLoginButton();
                 }
@@ -1252,7 +1255,7 @@
                 if (typeof modalSystem !== 'undefined') {
                     modalSystem.error('Erro de conexão. Tente novamente.');
                 } else {
-                    alert('Erro de conexão. Tente novamente.');
+                    modalSystem.error('Erro de conexão. Tente novamente.');
                 }
                 resetLoginButton();
             });

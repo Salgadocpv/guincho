@@ -116,6 +116,36 @@ try {
     }
     
     if ($trip_request->create()) {
+        // Save questionnaire answers if provided
+        if (isset($data->questionnaire_answers) && is_array($data->questionnaire_answers)) {
+            try {
+                foreach ($data->questionnaire_answers as $answer) {
+                    if (isset($answer->question_id, $answer->question_text, $answer->option_id, $answer->option_text)) {
+                        $answer_stmt = $db->prepare("
+                            INSERT INTO questionnaire_answers 
+                            (trip_request_id, question_id, question_text, option_id, option_text) 
+                            VALUES (?, ?, ?, ?, ?)
+                            ON DUPLICATE KEY UPDATE 
+                                option_id = VALUES(option_id),
+                                option_text = VALUES(option_text),
+                                updated_at = CURRENT_TIMESTAMP
+                        ");
+                        
+                        $answer_stmt->execute([
+                            $trip_request->id,
+                            $answer->question_id,
+                            $answer->question_text,
+                            $answer->option_id,
+                            $answer->option_text
+                        ]);
+                    }
+                }
+            } catch (Exception $answer_error) {
+                error_log('Error saving questionnaire answers: ' . $answer_error->getMessage());
+                // Don't fail the trip creation if answers fail to save
+            }
+        }
+        
         // Get nearby drivers to notify
         $stmt = $db->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'driver_search_radius_km'");
         $stmt->execute();
