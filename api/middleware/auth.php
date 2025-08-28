@@ -41,11 +41,11 @@ function authenticate() {
             $user_id = (int)$matches[2];
             $timestamp = (int)$matches[3];
             
-            // Check if token is not too old (24 hours)
+            // Check if token is not too old (24 hours) with 1 hour tolerance for timezone differences
             $token_age = time() - $timestamp;
             error_log("DEBUG: current_time=" . time() . ", token_timestamp=" . $timestamp . ", age=" . $token_age);
-            if ($token_age > 86400 || $token_age < 0) {
-                error_log("DEBUG: Token rejected - age=" . $token_age . " (max 86400, min 0)");
+            if ($token_age > 86400 || $token_age < -3600) { // Allow 1 hour in the future
+                error_log("DEBUG: Token rejected - age=" . $token_age . " (max 86400, min -3600)");
                 return ['success' => false, 'message' => 'Token expirado (idade: ' . $token_age . 's)'];
             }
             
