@@ -43,8 +43,10 @@ function authenticate() {
             
             // Check if token is not too old (24 hours)
             $token_age = time() - $timestamp;
+            error_log("DEBUG: current_time=" . time() . ", token_timestamp=" . $timestamp . ", age=" . $token_age);
             if ($token_age > 86400 || $token_age < 0) {
-                return ['success' => false, 'message' => 'Token expirado'];
+                error_log("DEBUG: Token rejected - age=" . $token_age . " (max 86400, min 0)");
+                return ['success' => false, 'message' => 'Token expirado (idade: ' . $token_age . 's)'];
             }
             
             // Get user info

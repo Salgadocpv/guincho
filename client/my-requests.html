@@ -466,6 +466,15 @@
         };
 
         document.addEventListener('DOMContentLoaded', async function() {
+            // Clear any invalid tokens on page load
+            const token = localStorage.getItem('auth_token');
+            if (token && (token.includes('1756211315') || token === 'null' || token === '')) {
+                console.log('Clearing invalid token:', token);
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('userData');
+                localStorage.removeItem('token_timestamp');
+            }
+            
             await loadRequests();
         });
 
