@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Solicitações - Simples</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .loading { color: blue; font-size: 18px; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; }
+        .request { border: 1px solid #ccc; margin: 10px 0; padding: 15px; }
+        .status { padding: 5px 10px; border-radius: 3px; color: white; }
+        .status-pending { background: orange; }
+        .status-active { background: green; }
+        .status-completed { background: gray; }
+        .status-cancelled { background: red; }
+        button { padding: 8px 15px; margin: 5px; cursor: pointer; }
+        .btn-danger { background: red; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h1>Minhas Solicitações - Teste Simples</h1>
+    <div id="status" class="loading">Carregando suas solicitações...</div>
+    <div id="requests"></div>
+    
+    <script>
+        console.log('Página carregada, iniciando teste...');
+        
+        async function loadRequestsSimple() {
+            const statusDiv = document.getElementById('status');
+            const requestsDiv = document.getElementById('requests');
+            
+            try {
+                console.log('1. Fazendo fetch direto...');
+                statusDiv.textContent = 'Fazendo request para API...';
+                
+                const response = await fetch('../api/trips/get_client_requests.php', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer test_simple_token'
+                    }
+                });
+                
+                console.log('2. Response status:', response.status);
+                statusDiv.textContent = 'Processando resposta...';
+                
+                const data = await response.json();
+                console.log('3. Data recebida:', data);
+                
+                if (data.success) {
+                    statusDiv.textContent = 'Sucesso! Carregadas ' + data.count + ' solicitações';
+                    statusDiv.className = 'success';
+                    
+                    if (data.data && data.data.length > 0) {
+                        requestsDiv.innerHTML = data.data.map(request => `
+                            <div class="request">
+                                <h3>Solicitação #${request.id}</h3>
+                                <p><strong>Serviço:</strong> ${request.service_type}</p>
+                                <p><strong>Status:</strong> <span class="status status-${request.status}">${request.status}</span></p>
+                                <p><strong>Origem:</strong> ${request.origin_address}</p>
+                                <p><strong>Destino:</strong> ${request.destination_address}</p>
+                                <p><strong>Valor:</strong> R$ ${request.client_offer}</p>
+                                <p><strong>Criado em:</strong> ${request.created_at}</p>
+                                <p><strong>Propostas:</strong> ${request.bid_count}</p>
+                                ${request.status === 'active' ? `
+                                    <button class="btn-danger" onclick="cancelTrip(${request.id})">
+                                        Cancelar Viagem
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `).join('');
+                    } else {
+                        requestsDiv.innerHTML = '<p>Nenhuma solicitação encontrada.</p>';
+                    }
+                } else {
+                    throw new Error(data.message || 'Erro na resposta da API');
+                }
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                statusDiv.textContent = 'ERRO: ' + error.message;
+                statusDiv.className = 'error';
+            }
+        }
+        
+        async function cancelTrip(tripId) {
+            if (!confirm('Tem certeza que deseja cancelar esta viagem?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('../api/trips/cancel_active_trip.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer test_simple_token'
+                    },
+                    body: JSON.stringify({ trip_request_id: tripId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Viagem cancelada com sucesso!');
+                    loadRequestsSimple(); // Reload
+                } else {
+                    alert('Erro ao cancelar: ' + data.message);
+                }
+            } catch (error) {
+                alert('Erro de conexão: ' + error.message);
+            }
+        }
+        
+        // Carregar quando a página estiver pronta
+        document.addEventListener('DOMContentLoaded', loadRequestsSimple);
+    </script>
+</body>
+</html>
