@@ -28,36 +28,14 @@ class AuthHelper {
      * Get or create authentication token for testing
      */
     async getAuthToken() {
-        // For client pages, check if we need a new token
+        // For client pages, always generate a simple test token
         if (window.location.pathname.includes('/client/') || window.location.pathname.includes('test-cancel.html')) {
-            // Check if current token is still valid (not older than 23 hours)
-            const tokenTimestamp = this.tokenTimestamp ? parseInt(this.tokenTimestamp) : 0;
             const currentTimestamp = Math.floor(Date.now() / 1000);
-            const tokenAge = currentTimestamp - tokenTimestamp;
-            
-            if (!this.authToken || tokenAge > 82800) { // 23 hours
-                // Generate new token
-                const newToken = `test_client_2_${currentTimestamp}`;
-                localStorage.setItem('auth_token', newToken);
-                localStorage.setItem('token_timestamp', currentTimestamp.toString());
-                this.authToken = newToken;
-                this.tokenTimestamp = currentTimestamp.toString();
-            }
-            
-            return this.authToken;
+            return `test_client_2_${currentTimestamp}`;
         }
         
-        // If we already have a token, check if it's valid
+        // For other pages, use the original logic
         if (this.authToken && this.authToken !== 'null' && this.authToken !== '') {
-            // Check if token needs renewal
-            const tokenTimestamp = this.tokenTimestamp ? parseInt(this.tokenTimestamp) : 0;
-            const currentTimestamp = Math.floor(Date.now() / 1000);
-            const tokenAge = currentTimestamp - tokenTimestamp;
-            
-            if (tokenAge > 82800) { // 23 hours
-                return this.createTestSession();
-            }
-            
             return this.authToken;
         }
 

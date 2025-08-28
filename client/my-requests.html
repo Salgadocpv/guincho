@@ -487,7 +487,13 @@
             console.log('loadRequests: Iniciando carregamento...');
             try {
                 console.log('loadRequests: Obtendo token...');
-                const token = await window.authHelper.getAuthToken();
+                
+                // Add timeout to token request
+                const tokenPromise = window.authHelper.getAuthToken();
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Timeout ao obter token')), 10000);
+                });
+                const token = await Promise.race([tokenPromise, timeoutPromise]);
                 console.log('loadRequests: Token obtido:', token);
                 
                 console.log('loadRequests: Fazendo request para API...');
