@@ -28,10 +28,42 @@ class AuthHelper {
      * Get or create authentication token for testing
      */
     async getAuthToken() {
-        // For client pages, always generate a simple test token
+        // For client pages, try to login first to get the correct user ID, then use a simple token
         if (window.location.pathname.includes('/client/') || window.location.pathname.includes('test-cancel.html')) {
-            const currentTimestamp = Math.floor(Date.now() / 1000);
-            return `test_client_2_${currentTimestamp}`;
+            // Check if we have valid stored data
+            const storedToken = localStorage.getItem('auth_token');
+            const storedUserData = localStorage.getItem('userData');
+            
+            if (storedToken && storedUserData && !storedToken.includes('test_client_2_')) {
+                // We have a real session token from login, use it
+                return storedToken;
+            }
+            
+            // No valid session, try to login to get user ID
+            try {
+                const loginResponse = await fetch('../api/auth/login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'cliente@iguincho.com',
+                        password: 'teste123'
+                    })
+                });
+                
+                const loginData = await loginResponse.json();
+                
+                if (loginData.success && loginData.data) {
+                    // Store the session data
+                    localStorage.setItem('auth_token', loginData.data.session_token);
+                    localStorage.setItem('userData', JSON.stringify(loginData.data));
+                    return loginData.data.session_token;
+                }
+            } catch (error) {
+                console.log('Login failed, using fallback token');
+            }
+            
+            // Fallback: use any test token that will trigger authenticateTestUser
+            return 'test_client_fallback';
         }
         
         // For other pages, use the original logic
