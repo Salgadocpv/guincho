@@ -136,7 +136,7 @@ function authenticateTestClient($db) {
         // Create test user if doesn't exist
         $stmt = $db->prepare("
             INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-            VALUES ('client', 'Maria Silva Santos', '123.456.789-01', '1990-05-15', '(11) 98765-4321', 'maria.silva@teste.com', ?, TRUE, 'active', TRUE)
+            VALUES ('client', 'Maria Silva Santos', '123.456.789-09', '1990-05-15', '(11) 98765-4321', 'maria.silva@teste.com', ?, TRUE, 'active', TRUE)
         ");
         $passwordHash = password_hash('senha123', PASSWORD_ARGON2I);
         $stmt->execute([$passwordHash]);
