@@ -76,7 +76,7 @@
                 }
 
                 console.log('Getting auth token...');
-                const token = await window.authHelper.getAuthToken();
+                const token = 'test_simple_token';
                 console.log('Token obtained:', token ? 'Yes' : 'No');
                 
                 console.log('Making API request...');
@@ -118,7 +118,7 @@
         
         // Show current auth token on page load and create a test trip
         window.addEventListener('DOMContentLoaded', async () => {
-            const token = await window.authHelper.getAuthToken();
+            const token = 'test_simple_token';
             document.getElementById('output').innerHTML = 'Token carregado: ' + (token ? token.substring(0, 20) + '...' : 'Nenhum') + '<br><br>🚀 <em>Clique em "Criar Nova Viagem de Teste" para começar!</em>';
         });
     </script>
