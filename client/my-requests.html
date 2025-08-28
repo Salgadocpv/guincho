@@ -466,52 +466,32 @@
         };
 
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('DOMContentLoaded: Página carregada');
-            console.log('DOMContentLoaded: window.authHelper exists:', !!window.authHelper);
-            console.log('DOMContentLoaded: modalSystem exists:', !!window.modalSystem);
-            
             // Clear any invalid tokens on page load
             const token = localStorage.getItem('auth_token');
             if (token && (token.includes('1756211315') || token === 'null' || token === '')) {
-                console.log('Clearing invalid token:', token);
                 localStorage.removeItem('auth_token');
                 localStorage.removeItem('userData');
                 localStorage.removeItem('token_timestamp');
             }
             
-            console.log('DOMContentLoaded: Chamando loadRequests...');
             await loadRequests();
         });
 
         async function loadRequests() {
-            console.log('loadRequests: Iniciando carregamento...');
             try {
-                console.log('loadRequests: Obtendo token...');
-                
-                // Add timeout to token request
-                const tokenPromise = window.authHelper.getAuthToken();
-                const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error('Timeout ao obter token')), 10000);
-                });
-                const token = await Promise.race([tokenPromise, timeoutPromise]);
-                console.log('loadRequests: Token obtido:', token);
-                
-                console.log('loadRequests: Fazendo request para API...');
+                const token = await window.authHelper.getAuthToken();
                 const response = await fetch('../api/trips/get_client_requests.php', {
                     method: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
                 });
-                console.log('loadRequests: Response status:', response.status);
 
                 const data = await response.json();
-                console.log('loadRequests: Data recebida:', data);
 
                 if (data.success) {
                     allRequests = data.data || [];
                     filteredRequests = [...allRequests];
-                    console.log('loadRequests: Dados processados, chamando displayRequests...');
                     displayRequests();
                 } else {
                     throw new Error(data.message || 'Erro ao carregar solicitações');
@@ -524,34 +504,22 @@
         }
 
         function displayRequests() {
-            console.log('displayRequests: Iniciando display...');
-            console.log('displayRequests: filteredRequests:', filteredRequests);
-            
             const loadingIndicator = document.getElementById('loadingIndicator');
             const requestsContainer = document.getElementById('requestsContainer');
             const emptyState = document.getElementById('emptyState');
 
-            console.log('displayRequests: Elementos encontrados:', {
-                loadingIndicator: !!loadingIndicator,
-                requestsContainer: !!requestsContainer,
-                emptyState: !!emptyState
-            });
-
             loadingIndicator.style.display = 'none';
 
             if (filteredRequests.length === 0) {
-                console.log('displayRequests: Nenhuma solicitação, mostrando empty state');
                 requestsContainer.style.display = 'none';
                 emptyState.style.display = 'block';
                 return;
             }
 
-            console.log('displayRequests: Mostrando', filteredRequests.length, 'solicitações');
             emptyState.style.display = 'none';
             requestsContainer.style.display = 'grid';
             
             requestsContainer.innerHTML = filteredRequests.map(request => createRequestCard(request)).join('');
-            console.log('displayRequests: Cards criados e inseridos');
         }
 
         function createRequestCard(request) {
