@@ -15,6 +15,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 include_once '../config/database.php';
 include_once '../classes/User.php';
+include_once '../middleware/auth.php';
+
+// Check authentication
+$auth_result = authenticate();
+if (!$auth_result['success']) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => $auth_result['message']]);
+    exit();
+}
+
+$user = $auth_result['user'];
 
 $database = new Database();
 $db = $database->getConnection();
