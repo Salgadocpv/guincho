@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teste - Cancelar Viagem</title>
     <script src="js/modal-system.js"></script>
-    <script src="js/auth-helper.js"></script>
 </head>
 <body>
     <h1>Teste de Cancelamento de Viagem</h1>
@@ -14,8 +13,6 @@
     <div id="output" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;"></div>
 
     <script>
-        // Initialize auth helper
-        window.authHelper = new AuthHelper();
         
         let currentTripId = null;
         
@@ -76,7 +73,7 @@
                 }
 
                 console.log('Getting auth token...');
-                const token = 'test_simple_token';
+                const token = null;
                 console.log('Token obtained:', token ? 'Yes' : 'No');
                 
                 console.log('Making API request...');
@@ -118,7 +115,7 @@
         
         // Show current auth token on page load and create a test trip
         window.addEventListener('DOMContentLoaded', async () => {
-            const token = 'test_simple_token';
+            const token = null;
             document.getElementById('output').innerHTML = 'Token carregado: ' + (token ? token.substring(0, 20) + '...' : 'Nenhum') + '<br><br>🚀 <em>Clique em "Criar Nova Viagem de Teste" para começar!</em>';
         });
     </script>

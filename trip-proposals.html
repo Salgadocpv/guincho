@@ -623,8 +623,6 @@
         </div>
     </div>
 
-    <!-- Auth Helper -->
-    <script src="js/auth-helper.js"></script>
 
     <script>
         // Global variables
@@ -715,11 +713,9 @@
 
         async function createTripRequest() {
             try {
-                const token = 'test_simple_token';
                 
                 console.log('Creating trip request with data:', tripData);
-                console.log('Using auth token:', token);
-                
+                                
                 const requestBody = {
                     service_type: tripData.service,
                     origin_lat: parseFloat(tripData.originLat),
@@ -737,7 +733,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify(requestBody)
                 });
@@ -774,10 +769,8 @@
             if (!tripRequestId) return;
 
             try {
-                const token = 'test_simple_token';
                 const response = await fetch(`api/trips/get_bids.php?trip_request_id=${tripRequestId}`, {
                     headers: {
-                        'Authorization': 'Bearer ' + token
                     }
                 });
 
@@ -890,7 +883,6 @@
             if (!confirmed) return;
             
             try {
-                const token = 'test_simple_token';
                     
                 console.log('Accepting proposal:', selectedProposal, 'with token:', token ? 'present' : 'missing');
             
@@ -1090,7 +1082,6 @@
             if (!tripRequestId) return;
             
             try {
-                const token = 'test_simple_token';
                 
                 // Use sendBeacon for reliable delivery even when page is unloading
                 if (navigator.sendBeacon) {
@@ -1130,12 +1121,10 @@
         
         async function cancelTripRequest() {
             try {
-                const token = 'test_simple_token';
                 const response = await fetch('api/trips/cancel_request.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({ trip_request_id: tripRequestId })
                 });

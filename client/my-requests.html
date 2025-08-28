@@ -431,10 +431,7 @@
         </div>
     </div>
 
-    <script src="../js/auth-helper.js"></script>
     <script>
-        // Initialize auth helper
-        window.authHelper = new AuthHelper();
         
         let allRequests = [];
         let filteredRequests = [];
@@ -479,12 +476,9 @@
 
         async function loadRequests() {
             try {
-                // Usar exatamente a mesma lógica da página simples que funciona
+                // Sistema simplificado - sem tokens, apenas sessões PHP
                 const response = await fetch('../api/trips/get_client_requests.php', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': 'Bearer test_simple_token'
-                    }
+                    method: 'GET'
                 });
 
                 const data = await response.json();
@@ -677,8 +671,7 @@
                 const response = await fetch('../api/trips/cancel_request.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer test_simple_token'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ trip_request_id: requestId })
                 });
@@ -717,8 +710,7 @@
                 const response = await fetch('../api/trips/cancel_active_trip.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer test_simple_token'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ trip_request_id: parseInt(requestId) })
                 });

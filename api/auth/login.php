@@ -38,6 +38,11 @@ try {
     $user = new User();
     $result = $user->login($data['email'], $data['password']);
     
+    // Iniciar sessão PHP
+    session_start();
+    $_SESSION['user_id'] = $result['user']['id'];
+    $_SESSION['user_type'] = $result['user']['user_type'];
+    
     // Resposta de sucesso
     http_response_code(200);
     echo json_encode([
@@ -45,8 +50,8 @@ try {
         'message' => 'Login realizado com sucesso!',
         'data' => [
             'user' => $result['user'],
-            'session_token' => $result['session_token'],
-            'expires_at' => $result['expires_at']
+            'session_token' => 'session_' . $result['user']['id'], // Compatibilidade
+            'expires_at' => date('Y-m-d H:i:s', time() + 86400)
         ]
     ]);
     

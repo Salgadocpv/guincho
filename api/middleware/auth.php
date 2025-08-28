@@ -1,246 +1,75 @@
 <?php
 /**
- * Authentication Middleware
- * Validates JWT tokens and user sessions
+ * Simple Session-Based Authentication Middleware
+ * No tokens, no JWT, just PHP sessions
  */
 
 function authenticate() {
-    // Handle CLI mode where getallheaders() is not available
-    if (php_sapi_name() === 'cli') {
-        return authenticateTestUser();
-    }
+    session_start();
     
-    $headers = getallheaders();
-    $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    
-    // Modo de teste - permite acesso sem token válido
-    if (empty($authHeader) || $authHeader === 'Bearer test' || $authHeader === 'Bearer ') {
-        return authenticateTestUser();
-    }
-    
-    // Extract token from "Bearer TOKEN" format
-    if (strpos($authHeader, 'Bearer ') === 0) {
-        $token = substr($authHeader, 7);
-    } else {
-        $token = $authHeader;
-    }
-    
-    if (empty($token)) {
-        return authenticateTestUser();
-    }
-    
-    try {
+    // Check if user is logged in
+    if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
         include_once __DIR__ . '/../config/database.php';
         
+        try {
+            $database = new Database();
+            $db = $database->getConnection();
+            
+            // Get user info from database
+            $stmt = $db->prepare("SELECT * FROM users WHERE id = ? AND user_type = ? AND status = 'active'");
+            $stmt->execute([$_SESSION['user_id'], $_SESSION['user_type']]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($user) {
+                return ['success' => true, 'user' => $user];
+            }
+        } catch (Exception $e) {
+            error_log("Auth error: " . $e->getMessage());
+        }
+    }
+    
+    // No session or invalid user - use test client
+    return authenticateTestClient();
+}
+
+function authenticateTestClient() {
+    include_once __DIR__ . '/../config/database.php';
+    
+    try {
         $database = new Database();
         $db = $database->getConnection();
         
-        // Check for new test token format first
-        if (preg_match('/^test_(driver|client)_(\d+)_(\d+)$/', $token, $matches)) {
-            $user_type = $matches[1];
-            $user_id = (int)$matches[2];
-            $timestamp = (int)$matches[3];
-            
-            // Check if token is not too old (24 hours) with 1 hour tolerance for timezone differences
-            $token_age = time() - $timestamp;
-            if ($token_age > 86400 || $token_age < -3600) { // Allow 1 hour in the future
-                return ['success' => false, 'message' => 'Token expirado'];
-            }
-            
-            // Get user info
-            $user_query = "SELECT * FROM users WHERE id = ? AND user_type = ? AND status = 'active'";
-            $user_stmt = $db->prepare($user_query);
-            $user_stmt->execute([$user_id, $user_type]);
-            $user = $user_stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($user) {
-                error_log("DEBUG auth token: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
-                error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
-    return ['success' => true, 'user' => $user];
-            }
-        }
-        
-        // Check if token exists in user_sessions table
-        $stmt = $db->prepare("
-            SELECT u.*, s.expires_at 
-            FROM users u 
-            JOIN user_sessions s ON u.id = s.user_id 
-            WHERE s.session_token = ? AND s.expires_at > NOW()
-        ");
-        
-        $stmt->execute([$token]);
+        // Get or create test client
+        $stmt = $db->prepare("SELECT * FROM users WHERE email = 'maria.silva@teste.com' LIMIT 1");
+        $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$user) {
-            // Se token inválido, usar usuário de teste
-            return authenticateTestUser();
+            // Create test user if doesn't exist
+            $stmt = $db->prepare("
+                INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
+                VALUES ('client', 'Maria Silva Santos', '123.456.789-09', '1990-05-15', '(11) 98765-4321', 'maria.silva@teste.com', ?, TRUE, 'active', TRUE)
+            ");
+            $passwordHash = password_hash('senha123', PASSWORD_ARGON2I);
+            $stmt->execute([$passwordHash]);
+            
+            $userId = $db->lastInsertId();
+            
+            // Get the created user
+            $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
         }
         
-        if ($user['status'] !== 'active') {
-            return ['success' => false, 'message' => 'Usuário inativo'];
-        }
+        // Set session for test user
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_type'] = $user['user_type'];
         
-        error_log("DEBUG auth session: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
-        error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
-    return ['success' => true, 'user' => $user];
+        return ['success' => true, 'user' => $user];
         
     } catch (Exception $e) {
-        error_log('Auth error: ' . $e->getMessage());
-        return authenticateTestUser();
+        error_log("Test auth error: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Erro na autenticação'];
     }
-}
-
-/**
- * Authenticate with test user for development/testing
- */
-function authenticateTestUser() {
-    try {
-        include_once __DIR__ . '/../config/database.php';
-        
-        $database = new Database();
-        $db = $database->getConnection();
-        
-        // Check if request needs specific user mode (based on auth header or request path)
-        $headers = function_exists('getallheaders') ? getallheaders() : [];
-        $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-        
-        $needsAdminMode = (strpos($authHeader, 'admin_test_token') !== false) || 
-                         (strpos($requestUri, '/admin/') !== false);
-        
-        $needsDriverMode = (strpos($authHeader, 'driver_test_token') !== false) || 
-                          (strpos($requestUri, 'get_requests') !== false) ||
-                          (strpos($requestUri, 'place_bid') !== false);
-        
-        if ($needsAdminMode) {
-            return authenticateTestAdmin($db);
-        } else if ($needsDriverMode) {
-            return authenticateTestDriver($db);
-        } else {
-            return authenticateTestClient($db);
-        }
-        
-    } catch (Exception $e) {
-        error_log('Test auth error: ' . $e->getMessage());
-        return ['success' => false, 'message' => 'Erro na autenticação de teste'];
-    }
-}
-
-function authenticateTestClient($db) {
-    // Get or create a test client user
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'maria.silva@teste.com' LIMIT 1");
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$user) {
-        // Create test user if doesn't exist
-        $stmt = $db->prepare("
-            INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-            VALUES ('client', 'Maria Silva Santos', '123.456.789-09', '1990-05-15', '(11) 98765-4321', 'maria.silva@teste.com', ?, TRUE, 'active', TRUE)
-        ");
-        $passwordHash = password_hash('senha123', PASSWORD_ARGON2I);
-        $stmt->execute([$passwordHash]);
-        
-        $userId = $db->lastInsertId();
-        
-        // Get the created user
-        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-    
-    error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
-    return ['success' => true, 'user' => $user];
-}
-
-function authenticateTestDriver($db) {
-    // Get or create a test driver user
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'guincheiro@iguincho.com' LIMIT 1");
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$user) {
-        // Create test driver user
-        $stmt = $db->prepare("
-            INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-            VALUES ('driver', 'Guincheiro Teste', '987.654.321-00', '1985-05-15', '(11) 88888-8888', 'guincheiro@iguincho.com', ?, TRUE, 'active', TRUE)
-        ");
-        $passwordHash = password_hash('teste123', PASSWORD_ARGON2I);
-        $stmt->execute([$passwordHash]);
-        
-        $userId = $db->lastInsertId();
-        
-        // Get the created user
-        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-    
-    // Ensure driver record exists
-    $stmt = $db->prepare("SELECT id FROM drivers WHERE user_id = ?");
-    $stmt->execute([$user['id']]);
-    if (!$stmt->fetch()) {
-        $stmt = $db->prepare("
-            INSERT INTO drivers (user_id, cnh, cnh_category, experience, specialty, work_region, availability, 
-                               truck_plate, truck_brand, truck_model, truck_year, truck_capacity, 
-                               professional_terms_accepted, background_check_authorized, approval_status) 
-            VALUES (?, '12345678900', 'C', '3-5', 'guincho', 'São Paulo', '24h', 
-                   'ABC-1234', 'Ford', 'F-4000', 2018, 'media', 
-                   TRUE, TRUE, 'approved')
-        ");
-        $stmt->execute([$user['id']]);
-    }
-    
-    error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
-    return ['success' => true, 'user' => $user];
-}
-
-function authenticateTestAdmin($db) {
-    // Get or create a test admin user
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'admin@iguincho.com' LIMIT 1");
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$user) {
-        // Create test admin user
-        $stmt = $db->prepare("
-            INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-            VALUES ('admin', 'Admin Teste', '111.222.333-44', '1980-01-01', '(11) 77777-7777', 'admin@iguincho.com', ?, TRUE, 'active', TRUE)
-        ");
-        $passwordHash = password_hash('admin123', PASSWORD_ARGON2I);
-        $stmt->execute([$passwordHash]);
-        
-        $userId = $db->lastInsertId();
-        
-        // Get the created user
-        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-    
-    error_log("DEBUG auth test client: user_id={$user['id']}, user_type={$user['user_type']}, email={$user['email']}");
-    return ['success' => true, 'user' => $user];
-}
-
-function requireAuth() {
-    $auth_result = authenticate();
-    if (!$auth_result['success']) {
-        http_response_code(401);
-        echo json_encode(['success' => false, 'message' => $auth_result['message']]);
-        exit();
-    }
-    return $auth_result['user'];
-}
-
-function requireRole($required_role) {
-    $user = requireAuth();
-    
-    if ($user['user_type'] !== $required_role) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Acesso negado']);
-        exit();
-    }
-    
-    return $user;
 }
 ?>
