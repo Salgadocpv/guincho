@@ -128,7 +128,7 @@ function authenticateTestUser() {
 
 function authenticateTestClient($db) {
     // Get or create a test client user
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'cliente@iguincho.com' LIMIT 1");
+    $stmt = $db->prepare("SELECT * FROM users WHERE email = 'maria.silva@teste.com' LIMIT 1");
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -136,9 +136,9 @@ function authenticateTestClient($db) {
         // Create test user if doesn't exist
         $stmt = $db->prepare("
             INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
-            VALUES ('client', 'Cliente Teste', '123.456.789-00', '1990-01-01', '(11) 99999-9999', 'cliente@iguincho.com', ?, TRUE, 'active', TRUE)
+            VALUES ('client', 'Maria Silva Santos', '123.456.789-01', '1990-05-15', '(11) 98765-4321', 'maria.silva@teste.com', ?, TRUE, 'active', TRUE)
         ");
-        $passwordHash = password_hash('teste123', PASSWORD_ARGON2I);
+        $passwordHash = password_hash('senha123', PASSWORD_ARGON2I);
         $stmt->execute([$passwordHash]);
         
         $userId = $db->lastInsertId();
