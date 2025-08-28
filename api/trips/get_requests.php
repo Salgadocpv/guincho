@@ -114,15 +114,21 @@ try {
     $stmt->execute();
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get questionnaire answers for each request
+    // Get questionnaire answers for each request (with error handling)
     foreach ($requests as &$request) {
-        $answers_query = "SELECT question_id, question_text, option_id, option_text 
-                          FROM questionnaire_answers 
-                          WHERE trip_request_id = ? 
-                          ORDER BY question_id";
-        $answers_stmt = $db->prepare($answers_query);
-        $answers_stmt->execute([$request['id']]);
-        $request['questionnaire_answers'] = $answers_stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $answers_query = "SELECT question_id, question_text, option_id, option_text 
+                              FROM questionnaire_answers 
+                              WHERE trip_request_id = ? 
+                              ORDER BY question_id";
+            $answers_stmt = $db->prepare($answers_query);
+            $answers_stmt->execute([$request['id']]);
+            $request['questionnaire_answers'] = $answers_stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            // If questionnaire_answers table doesn't exist, just set empty array
+            error_log("Questionnaire answers error: " . $e->getMessage());
+            $request['questionnaire_answers'] = [];
+        }
     }
     
     // Calculate distance from driver to each trip origin

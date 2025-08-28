@@ -140,8 +140,9 @@ try {
                         ]);
                     }
                 }
+                error_log('Questionnaire answers saved successfully for trip_request_id: ' . $trip_request->id);
             } catch (Exception $answer_error) {
-                error_log('Error saving questionnaire answers: ' . $answer_error->getMessage());
+                error_log('Error saving questionnaire answers (table may not exist): ' . $answer_error->getMessage());
                 // Don't fail the trip creation if answers fail to save
             }
         }
