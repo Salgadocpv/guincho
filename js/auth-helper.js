@@ -7,6 +7,7 @@ class AuthHelper {
     constructor() {
         this.authToken = localStorage.getItem('auth_token');
         this.userData = localStorage.getItem('userData');
+        this.tokenTimestamp = localStorage.getItem('token_timestamp');
     }
 
     /**
@@ -27,13 +28,36 @@ class AuthHelper {
      * Get or create authentication token for testing
      */
     async getAuthToken() {
-        // For client pages, always use the specific test token that works with our API
+        // For client pages, check if we need a new token
         if (window.location.pathname.includes('/client/') || window.location.pathname.includes('test-cancel.html')) {
-            return 'test_client_2_1756211315';
+            // Check if current token is still valid (not older than 23 hours)
+            const tokenTimestamp = this.tokenTimestamp ? parseInt(this.tokenTimestamp) : 0;
+            const currentTimestamp = Math.floor(Date.now() / 1000);
+            const tokenAge = currentTimestamp - tokenTimestamp;
+            
+            if (!this.authToken || tokenAge > 82800) { // 23 hours
+                // Generate new token
+                const newToken = `test_client_2_${currentTimestamp}`;
+                localStorage.setItem('auth_token', newToken);
+                localStorage.setItem('token_timestamp', currentTimestamp.toString());
+                this.authToken = newToken;
+                this.tokenTimestamp = currentTimestamp.toString();
+            }
+            
+            return this.authToken;
         }
         
-        // If we already have a token, return it
+        // If we already have a token, check if it's valid
         if (this.authToken && this.authToken !== 'null' && this.authToken !== '') {
+            // Check if token needs renewal
+            const tokenTimestamp = this.tokenTimestamp ? parseInt(this.tokenTimestamp) : 0;
+            const currentTimestamp = Math.floor(Date.now() / 1000);
+            const tokenAge = currentTimestamp - tokenTimestamp;
+            
+            if (tokenAge > 82800) { // 23 hours
+                return this.createTestSession();
+            }
+            
             return this.authToken;
         }
 
@@ -65,11 +89,14 @@ class AuthHelper {
             
             if (data.success) {
                 // Store token and user data
+                const currentTimestamp = Math.floor(Date.now() / 1000);
                 localStorage.setItem('auth_token', data.data.session_token);
                 localStorage.setItem('userData', JSON.stringify(data.data));
+                localStorage.setItem('token_timestamp', currentTimestamp.toString());
                 
                 this.authToken = data.data.session_token;
                 this.userData = JSON.stringify(data.data);
+                this.tokenTimestamp = currentTimestamp.toString();
                 
                 return data.data.session_token;
             } else {
@@ -86,8 +113,9 @@ class AuthHelper {
      * Use test token for development
      */
     useTestToken() {
-        // Use the specific test client token that works with our API
-        const testToken = 'test_client_2_1756211315';
+        // Generate a valid test client token with current timestamp
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const testToken = `test_client_2_${currentTimestamp}`;
         
         // Create mock user data
         const testUserData = {
@@ -102,11 +130,14 @@ class AuthHelper {
             expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
         };
         
+        const currentTimestamp = Math.floor(Date.now() / 1000);
         localStorage.setItem('auth_token', testToken);
         localStorage.setItem('userData', JSON.stringify(testUserData));
+        localStorage.setItem('token_timestamp', currentTimestamp.toString());
         
         this.authToken = testToken;
         this.userData = JSON.stringify(testUserData);
+        this.tokenTimestamp = currentTimestamp.toString();
         
         return testToken;
     }
@@ -135,8 +166,10 @@ class AuthHelper {
     logout() {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('userData');
+        localStorage.removeItem('token_timestamp');
         this.authToken = null;
         this.userData = null;
+        this.tokenTimestamp = null;
     }
 
     /**
