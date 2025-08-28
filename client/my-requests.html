@@ -478,48 +478,74 @@
         });
 
         async function loadRequests() {
+            console.log('=== INICIANDO loadRequests ===');
             try {
+                console.log('1. Obtendo token...');
                 const token = await window.authHelper.getAuthToken();
+                console.log('2. Token obtido:', token);
+                
+                console.log('3. Fazendo fetch...');
                 const response = await fetch('../api/trips/get_client_requests.php', {
                     method: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
                 });
+                console.log('4. Response recebida, status:', response.status);
 
+                console.log('5. Parseando JSON...');
                 const data = await response.json();
+                console.log('6. Data recebida:', data);
 
                 if (data.success) {
+                    console.log('7. Sucesso! Processando dados...');
                     allRequests = data.data || [];
                     filteredRequests = [...allRequests];
+                    console.log('8. Chamando displayRequests...');
                     displayRequests();
+                    console.log('9. displayRequests concluído!');
                 } else {
+                    console.log('7. Erro na resposta:', data.message);
                     throw new Error(data.message || 'Erro ao carregar solicitações');
                 }
 
             } catch (error) {
-                console.error('Error loading requests:', error);
+                console.error('ERRO em loadRequests:', error);
                 showError('Erro ao carregar suas solicitações: ' + error.message);
             }
         }
 
         function displayRequests() {
+            console.log('=== INICIANDO displayRequests ===');
+            console.log('filteredRequests:', filteredRequests);
+            
             const loadingIndicator = document.getElementById('loadingIndicator');
             const requestsContainer = document.getElementById('requestsContainer');
             const emptyState = document.getElementById('emptyState');
 
+            console.log('Elementos DOM:', {
+                loadingIndicator: !!loadingIndicator,
+                requestsContainer: !!requestsContainer,
+                emptyState: !!emptyState
+            });
+
             loadingIndicator.style.display = 'none';
+            console.log('Loading indicator escondido');
 
             if (filteredRequests.length === 0) {
+                console.log('Nenhuma solicitação, mostrando empty state');
                 requestsContainer.style.display = 'none';
                 emptyState.style.display = 'block';
                 return;
             }
 
+            console.log('Mostrando', filteredRequests.length, 'solicitações');
             emptyState.style.display = 'none';
             requestsContainer.style.display = 'grid';
             
+            console.log('Gerando HTML das solicitações...');
             requestsContainer.innerHTML = filteredRequests.map(request => createRequestCard(request)).join('');
+            console.log('HTML gerado e inserido!');
         }
 
         function createRequestCard(request) {
