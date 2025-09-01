@@ -7,6 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Iguincho">
@@ -1426,6 +1427,11 @@
 
         // Update install button text and icon based on status
         function updateInstallButton() {
+            if (!installButton) {
+                // Element doesn't exist, skip update
+                return;
+            }
+            
             if (isAppInstalled) {
                 installButton.innerHTML = '<i class="fas fa-mobile-alt"></i> App Instalado';
                 installButton.style.background = 'rgba(40,167,69,0.2)';
