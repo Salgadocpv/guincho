@@ -10,6 +10,12 @@ class ModalSystem {
     }
 
     createModalContainer() {
+        // Aguardar DOM estar pronto
+        if (!document.body) {
+            setTimeout(() => this.createModalContainer(), 10);
+            return;
+        }
+
         // Remove modal container existente se houver
         const existing = document.getElementById('modal-system-container');
         if (existing) {
