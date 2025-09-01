@@ -46,6 +46,40 @@
             box-sizing: border-box;
         }
 
+        /* Profile Button */
+        .profile-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .profile-button:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .profile-button:active {
+            transform: translateY(0);
+        }
+
         /* Header Section */
         .services-header {
             text-align: center;
@@ -201,25 +235,6 @@
             border-bottom-color: white;
         }
 
-        /* Profile Link */
-        .profile-link {
-            text-align: center;
-            margin-top: 24px;
-        }
-
-        .profile-link a {
-            color: rgba(255,255,255,0.6);
-            text-decoration: none;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .profile-link a:hover {
-            color: white;
-        }
 
         /* Loading States */
         .loading-overlay {
@@ -275,6 +290,13 @@
             .service-item {
                 padding: 18px 12px;
             }
+
+            .profile-button {
+                top: 16px;
+                right: 16px;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
         }
 
         /* Melhoria para toque em dispositivos móveis */
@@ -326,6 +348,12 @@
         <div class="loading-spinner"></div>
     </div>
 
+    <!-- Profile Button -->
+    <a href="#" onclick="goToProfile()" class="profile-button">
+        <i class="fas fa-user"></i>
+        Meu Perfil
+    </a>
+
     <div class="services-container">
         <!-- Header -->
         <div class="services-header">
@@ -334,15 +362,7 @@
             <p class="services-subtitle">Escolha o tipo de socorro necessário</p>
         </div>
 
-        <!-- Location Info -->
-        <div class="location-info">
-            <div class="location-text">Sua localização atual</div>
-            <div class="location-value">
-                <i class="fas fa-map-marker-alt"></i>
-                <span id="currentLocation">Detectando localização...</span>
-                <a href="#" class="location-change" onclick="changeLocation()">alterar</a>
-            </div>
-        </div>
+        
 
         <!-- Emergency Button -->
         <div class="emergency-section">
@@ -354,10 +374,7 @@
 
         <!-- Services Grid -->
         <div class="services-grid">
-            <div class="service-item" onclick="goToMyRequests()" data-service="historico">
-                <i class="fas fa-history service-icon"></i>
-                <div class="service-name">Histórico</div>
-            </div>
+           
 
             <div class="service-item" onclick="goToService('guincho')" data-service="guincho">
                 <i class="fas fa-truck service-icon"></i>
@@ -388,16 +405,14 @@
                 <i class="fas fa-bolt service-icon"></i>
                 <div class="service-name">Eletricista</div>
             </div>
+
+             <div class="service-item" onclick="goToMyRequests()" data-service="historico">
+                <i class="fas fa-history service-icon"></i>
+                <div class="service-name">Histórico</div>
+            </div>
         </div>
 
 
-        <!-- Profile Link -->
-        <div class="profile-link">
-            <a href="#" onclick="goToProfile()">
-                <i class="fas fa-user"></i>
-                Meu Perfil
-            </a>
-        </div>
     </div>
 
     <script>
