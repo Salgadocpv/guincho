@@ -240,12 +240,7 @@ class DatabaseAuto {
  * Função helper para obter conexão automática
  */
 function getDBConnectionAuto() {
-    static $database = null;
-    
-    if ($database === null) {
-        $database = new DatabaseAuto();
-    }
-    
-    return $database->getConnection();
+    $db = new DatabaseAuto();
+    return $db->getConnection();
 }
 ?>

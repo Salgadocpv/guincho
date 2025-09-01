@@ -6,7 +6,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
-include_once 'config/database.php';
+include_once 'config/database_auto.php';
 include_once 'classes/TripRequest.php';
 include_once 'middleware/auth.php';
 
@@ -31,8 +31,7 @@ try {
     
     $user = $auth_result['user'];
     
-    $database = new Database();
-    $db = $database->getConnection();
+    $db = getDBConnectionAuto();
     
     // Create trip request with manual SQL first
     $query = "INSERT INTO trip_requests 
