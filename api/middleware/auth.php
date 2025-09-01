@@ -6,14 +6,22 @@
 
 function authenticate() {
     // Try Bearer token authentication first
-    $headers = getallheaders();
-    if (isset($headers['Authorization']) || isset($headers['authorization'])) {
-        $authHeader = $headers['Authorization'] ?? $headers['authorization'];
-        
-        if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
-            $token = $matches[1];
-            return authenticateWithToken($token);
-        }
+    $authHeader = null;
+    
+    // Try multiple ways to get the Authorization header
+    if (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
+    }
+    
+    // Fallback to $_SERVER
+    if (!$authHeader) {
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+    }
+    
+    if ($authHeader && preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+        $token = $matches[1];
+        return authenticateWithToken($token);
     }
     
     // Fallback to session authentication
@@ -22,9 +30,10 @@ function authenticate() {
     // Check if user is logged in via session
     if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
         include_once __DIR__ . '/../config/database.php';
+        include_once __DIR__ . '/../config/database_auto.php';
         
         try {
-            $database = new Database();
+            $database = new DatabaseAuto();
             $db = $database->getConnection();
             
             // Get user info from database
@@ -46,17 +55,20 @@ function authenticate() {
 
 function authenticateWithToken($token) {
     include_once __DIR__ . '/../config/database.php';
+    include_once __DIR__ . '/../config/database_auto.php';
     
     try {
-        $database = new Database();
+        $database = new DatabaseAuto();
         $db = $database->getConnection();
         
         // For now, we'll decode the token as a simple JSON (like the frontend creates)
         // In production, you'd use proper JWT validation
         $tokenData = json_decode(base64_decode($token), true);
         
+        error_log("Token auth attempt - decoded data: " . json_encode($tokenData));
+        
         if (!$tokenData || !isset($tokenData['user_id'])) {
-            // Fallback: try to find test driver
+            error_log("Token auth - invalid token data, using fallback");
             return authenticateTestUser();
         }
         
@@ -66,12 +78,16 @@ function authenticateWithToken($token) {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($user) {
+            error_log("Token auth success - User ID: {$user['id']}, Type: {$user['user_type']}");
+            
             // Set session for consistency
             session_start();
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_type'] = $user['user_type'];
             
             return ['success' => true, 'user' => $user];
+        } else {
+            error_log("Token auth - user not found for ID: " . $tokenData['user_id']);
         }
         
         return authenticateTestUser();
@@ -84,9 +100,10 @@ function authenticateWithToken($token) {
 
 function authenticateTestUser() {
     include_once __DIR__ . '/../config/database.php';
+    include_once __DIR__ . '/../config/database_auto.php';
     
     try {
-        $database = new Database();
+        $database = new DatabaseAuto();
         $db = $database->getConnection();
         
         // Try to get test driver first (for driver requests)
