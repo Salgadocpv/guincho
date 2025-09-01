@@ -106,27 +106,56 @@ function authenticateTestUser() {
         $database = new DatabaseAuto();
         $db = $database->getConnection();
         
-        // Try to get test driver first (for driver requests)
-        $stmt = $db->prepare("
-            SELECT u.* FROM users u
-            JOIN drivers d ON u.id = d.user_id  
-            WHERE u.email = 'guincheiro@iguincho.com' 
-               OR u.email = 'guincheiro@teste.com'
-            ORDER BY u.id DESC
-            LIMIT 1
-        ");
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Check the request to determine what type of user is needed
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        $needsClient = strpos($requestUri, 'get_client_requests') !== false || 
+                       strpos($requestUri, 'create_request') !== false;
         
-        // If no driver found, use test client
-        if (!$user) {
-            $stmt = $db->prepare("SELECT * FROM users WHERE email = 'maria.silva@teste.com' LIMIT 1");
+        $user = null;
+        
+        if ($needsClient) {
+            // For client-specific requests, prioritize test client
+            $stmt = $db->prepare("SELECT * FROM users WHERE email = 'maria.silva@teste.com' AND user_type = 'client' LIMIT 1");
             $stmt->execute();
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // If test client doesn't exist, create it
+            if (!$user) {
+                $stmt = $db->prepare("
+                    INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
+                    VALUES ('client', 'Maria Silva Santos', '123.456.789-09', '1990-05-15', '(11) 98765-4321', 'maria.silva@teste.com', ?, TRUE, 'active', TRUE)
+                ");
+                $passwordHash = password_hash('senha123', PASSWORD_ARGON2I);
+                $stmt->execute([$passwordHash]);
+                
+                $userId = $db->lastInsertId();
+                $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+        } else {
+            // For driver requests, try to get test driver first
+            $stmt = $db->prepare("
+                SELECT u.* FROM users u
+                JOIN drivers d ON u.id = d.user_id  
+                WHERE u.email = 'guincheiro@iguincho.com' 
+                   OR u.email = 'guincheiro@teste.com'
+                ORDER BY u.id DESC
+                LIMIT 1
+            ");
+            $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // If no driver found, use test client as fallback
+            if (!$user) {
+                $stmt = $db->prepare("SELECT * FROM users WHERE email = 'maria.silva@teste.com' LIMIT 1");
+                $stmt->execute();
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
         }
         
         if (!$user) {
-            // Create test client if doesn't exist
+            // Last resort: create test client
             $stmt = $db->prepare("
                 INSERT INTO users (user_type, full_name, cpf, birth_date, phone, email, password_hash, terms_accepted, status, email_verified) 
                 VALUES ('client', 'Maria Silva Santos', '123.456.789-09', '1990-05-15', '(11) 98765-4321', 'maria.silva@teste.com', ?, TRUE, 'active', TRUE)
@@ -135,8 +164,6 @@ function authenticateTestUser() {
             $stmt->execute([$passwordHash]);
             
             $userId = $db->lastInsertId();
-            
-            // Get the created user
             $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
