@@ -569,6 +569,452 @@
                 flex-direction: column;
             }
         }
+        
+        /* Trip Details Modal */
+        .trip-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .trip-details-modal .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            color: #333;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .trip-details-modal .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            flex-shrink: 0;
+        }
+
+        .trip-details-modal .modal-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+        }
+
+        .trip-details-modal .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .trip-details-modal .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .trip-details-modal .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+        }
+
+        .trip-info {
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .service-type, .client-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .map-container {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .route-info {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .route-segment {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .route-segment:last-child {
+            border-bottom: none;
+        }
+
+        .route-segment.total {
+            background: #f8f9fa;
+            margin: 10px -10px 0;
+            padding: 15px 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+        }
+
+        .segment-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .segment-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .price-calculations {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .price-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .price-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .client-offer {
+            border-left: 4px solid #007bff;
+        }
+
+        .driver-bid {
+            border-left: 4px solid #28a745;
+        }
+
+        .price-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .price-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .driver-bid .price-value {
+            color: #28a745;
+        }
+
+        .price-per-km {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .price-input-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+            min-width: 150px;
+        }
+
+        .input-prefix {
+            padding: 8px 12px;
+            background: #e9ecef;
+            color: #495057;
+            font-weight: 600;
+            border-right: 1px solid #ddd;
+        }
+
+        .input-group input {
+            border: none;
+            padding: 8px 12px;
+            outline: none;
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .addresses {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .address-item {
+            margin-bottom: 15px;
+        }
+
+        .address-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .address-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .address-text {
+            color: #6c757d;
+            font-size: 0.9rem;
+            padding-left: 20px;
+        }
+
+        .questionnaire-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .questionnaire-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            color: #495057;
+        }
+
+        .questionnaire-content {
+            display: grid;
+            gap: 12px;
+        }
+
+        .questionnaire-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+        }
+
+        .questionnaire-question {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .questionnaire-answer {
+            color: #28a745;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .questionnaire-empty {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .modal-actions {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-shrink: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            position: sticky;
+            bottom: 0;
+            margin-top: auto;
+        }
+
+        .trip-details-modal .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .trip-details-modal .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .trip-details-modal .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .trip-details-modal .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .trip-details-modal .btn-primary:hover {
+            background: #218838;
+        }
+
+        /* Responsive for Trip Details Modal */
+        @media (max-width: 768px) {
+            .trip-details-modal {
+                padding: 10px;
+            }
+
+            .trip-details-modal .modal-content {
+                max-height: 95vh;
+            }
+
+            .trip-details-modal .modal-header h3 {
+                font-size: 1.15rem;
+            }
+
+            .trip-info {
+                flex-direction: column;
+                gap: 12px;
+                padding: 18px;
+            }
+
+            .map-container {
+                padding: 18px;
+            }
+
+            #tripDetailsMap {
+                height: 280px !important;
+            }
+
+            .price-input-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .trip-details-modal {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .trip-details-modal .modal-content {
+                border-radius: 0;
+                margin: 0;
+                width: 100vw;
+                height: 100vh;
+                max-height: 100vh;
+            }
+
+            .trip-details-modal .modal-header {
+                border-radius: 0;
+                position: sticky;
+                top: 0;
+                z-index: 1;
+            }
+
+            .trip-info, .map-container, .route-info, .price-calculations, .addresses, .questionnaire-section, .modal-actions {
+                padding: 15px;
+            }
+
+            #tripDetailsMap {
+                height: 250px !important;
+            }
+
+            .route-segment {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                padding: 12px 0;
+            }
+
+            .segment-details {
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 10px;
+                font-size: 0.85rem;
+            }
+
+            .price-value {
+                font-size: 1.2rem;
+            }
+
+            .price-input-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .input-group {
+                min-width: auto;
+            }
+
+            .address-text {
+                font-size: 0.85rem;
+                line-height: 1.4;
+                padding-left: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1097,13 +1543,13 @@
 
             const modalHtml = `
                 <div class="trip-details-modal">
-                    <div class="modal-header">
-                        <h3><i class="fas fa-route"></i> Detalhes da Solicitação</h3>
-                        <button onclick="closeTripDetailsModal()" class="close-btn">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
                     <div class="modal-content">
+                        <div class="modal-header">
+                            <h3><i class="fas fa-route"></i> Detalhes da Solicitação</h3>
+                            <button onclick="closeTripDetailsModal()" class="close-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                         <div class="modal-body">
                             <div class="trip-info">
                             <div class="service-type">
@@ -1224,529 +1670,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <style>
-                .trip-details-modal {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0,0,0,0.8);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 10000;
-                    padding: 20px;
-                    overflow-y: auto;
-                }
-                
-                .trip-details-modal .modal-content {
-                    background: white;
-                    border-radius: 12px;
-                    width: 100%;
-                    max-width: 800px;
-                    max-height: 90vh;
-                    overflow-y: auto;
-                    -webkit-overflow-scrolling: touch;
-                    color: #333;
-                    margin: auto;
-                    display: flex;
-                    flex-direction: column;
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-                }
-                
-                .modal-header {
-                    padding: 20px;
-                    border-bottom: 1px solid #eee;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-                    color: white;
-                    border-radius: 12px 12px 0 0;
-                    flex-shrink: 0;
-                }
-                
-                .modal-header h3 {
-                    margin: 0;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 1.2rem;
-                }
-                
-                .close-btn {
-                    background: none;
-                    border: none;
-                    color: white;
-                    font-size: 1.2rem;
-                    cursor: pointer;
-                    padding: 5px;
-                    border-radius: 4px;
-                    transition: background 0.3s ease;
-                }
-                
-                .close-btn:hover {
-                    background: rgba(255,255,255,0.2);
-                }
-                
-                .trip-info {
-                    padding: 20px;
-                    display: flex;
-                    gap: 20px;
-                    border-bottom: 1px solid #eee;
-                }
-                
-                .service-type, .client-info {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-weight: 500;
-                }
-                
-                .map-container {
-                    padding: 20px;
-                    border-bottom: 1px solid #eee;
-                }
-                
-                .route-info {
-                    padding: 20px;
-                    border-bottom: 1px solid #eee;
-                }
-                
-                .route-segment {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 10px 0;
-                    border-bottom: 1px solid #f0f0f0;
-                }
-                
-                .route-segment:last-child {
-                    border-bottom: none;
-                }
-                
-                .route-segment.total {
-                    background: #f8f9fa;
-                    margin: 10px -10px 0;
-                    padding: 15px 10px;
-                    border-radius: 8px;
-                    border: none;
-                    font-weight: 600;
-                }
-                
-                .segment-title {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-weight: 500;
-                }
-                
-                .segment-details {
-                    display: flex;
-                    gap: 15px;
-                    font-size: 0.9rem;
-                }
-                
-                .price-calculations {
-                    padding: 20px;
-                    border-bottom: 1px solid #eee;
-                }
-                
-                .price-section {
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    padding: 15px;
-                    margin-bottom: 15px;
-                }
-                
-                .price-section:last-child {
-                    margin-bottom: 0;
-                }
-                
-                .client-offer {
-                    border-left: 4px solid #007bff;
-                }
-                
-                .driver-bid {
-                    border-left: 4px solid #28a745;
-                }
-                
-                .price-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-weight: 600;
-                    margin-bottom: 10px;
-                    color: #495057;
-                }
-                
-                .price-details {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                
-                .price-value {
-                    font-size: 1.4rem;
-                    font-weight: 700;
-                    color: #007bff;
-                }
-                
-                .driver-bid .price-value {
-                    color: #28a745;
-                }
-                
-                .price-per-km {
-                    font-size: 0.9rem;
-                    color: #6c757d;
-                    font-weight: 500;
-                }
-                
-                .price-input-container {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 15px;
-                }
-                
-                .input-group {
-                    display: flex;
-                    align-items: center;
-                    background: white;
-                    border: 1px solid #ddd;
-                    border-radius: 6px;
-                    overflow: hidden;
-                    min-width: 150px;
-                }
-                
-                .input-prefix {
-                    padding: 8px 12px;
-                    background: #e9ecef;
-                    color: #495057;
-                    font-weight: 600;
-                    border-right: 1px solid #ddd;
-                }
-                
-                .input-group input {
-                    border: none;
-                    padding: 8px 12px;
-                    outline: none;
-                    flex: 1;
-                    font-size: 1rem;
-                }
-                
-                .addresses {
-                    padding: 20px;
-                    border-bottom: 1px solid #eee;
-                }
-                
-                .address-item {
-                    margin-bottom: 15px;
-                }
-                
-                .address-item:last-child {
-                    margin-bottom: 0;
-                }
-                
-                .address-label {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-weight: 600;
-                    margin-bottom: 5px;
-                    font-size: 0.9rem;
-                }
-                
-                .address-text {
-                    color: #6c757d;
-                    font-size: 0.9rem;
-                    padding-left: 20px;
-                }
-                
-                .questionnaire-section {
-                    padding: 20px;
-                    border-bottom: 1px solid #eee;
-                    background: #f8f9fa;
-                }
-                
-                .questionnaire-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-weight: 600;
-                    margin-bottom: 15px;
-                    font-size: 1rem;
-                    color: #495057;
-                }
-                
-                .questionnaire-content {
-                    display: grid;
-                    gap: 12px;
-                }
-                
-                .questionnaire-item {
-                    background: white;
-                    padding: 12px;
-                    border-radius: 6px;
-                    border-left: 3px solid #007bff;
-                }
-                
-                .questionnaire-question {
-                    font-weight: 600;
-                    margin-bottom: 4px;
-                    font-size: 0.9rem;
-                    color: #495057;
-                }
-                
-                .questionnaire-answer {
-                    color: #28a745;
-                    font-weight: 500;
-                    font-size: 0.9rem;
-                }
-                
-                .questionnaire-empty {
-                    text-align: center;
-                    color: #6c757d;
-                    font-style: italic;
-                    padding: 20px;
-                }
-                
-                .modal-actions {
-                    padding: 20px;
-                    display: flex;
-                    gap: 10px;
-                    justify-content: flex-end;
-                    flex-shrink: 0;
-                    background: white;
-                    border-top: 1px solid #eee;
-                    position: sticky;
-                    bottom: 0;
-                    margin-top: auto;
-                }
-                
-                .btn {
-                    padding: 10px 20px;
-                    border: none;
-                    border-radius: 6px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    transition: all 0.3s ease;
-                }
-                
-                .btn-secondary {
-                    background: #6c757d;
-                    color: white;
-                }
-                
-                .btn-secondary:hover {
-                    background: #5a6268;
-                }
-                
-                .btn-primary {
-                    background: #28a745;
-                    color: white;
-                }
-                
-                .btn-primary:hover {
-                    background: #218838;
-                }
-                
-                .modal-body {
-                    flex: 1;
-                    overflow-y: auto;
-                    -webkit-overflow-scrolling: touch;
-                }
-
-                /* Desktop - Large screens */
-                @media (min-width: 1200px) {
-                    .trip-details-modal .modal-content {
-                        max-width: 900px;
-                    }
-                }
-                
-                /* Desktop - Medium screens */
-                @media (min-width: 992px) and (max-width: 1199px) {
-                    .trip-details-modal .modal-content {
-                        max-width: 850px;
-                    }
-                }
-                
-                /* Tablet - Large */
-                @media (min-width: 769px) and (max-width: 991px) {
-                    .trip-details-modal .modal-content {
-                        max-width: 750px;
-                        margin: 20px;
-                    }
-                    
-                    .trip-info {
-                        flex-wrap: wrap;
-                        gap: 15px;
-                    }
-                    
-                    .price-input-container {
-                        flex-wrap: wrap;
-                        gap: 12px;
-                    }
-                    
-                    #tripDetailsMap {
-                        height: 350px !important;
-                    }
-                }
-                
-                /* Mobile - Large (Landscape tablets, small laptops) */
-                @media (min-width: 577px) and (max-width: 768px) {
-                    .trip-details-modal {
-                        padding: 10px;
-                    }
-                    
-                    .trip-details-modal .modal-content {
-                        max-width: 100%;
-                        max-height: 95vh;
-                        border-radius: 8px;
-                    }
-                    
-                    .modal-header h3 {
-                        font-size: 1.15rem;
-                    }
-                    
-                    .trip-info {
-                        flex-direction: column;
-                        gap: 12px;
-                        padding: 18px;
-                    }
-                    
-                    .map-container {
-                        padding: 18px;
-                    }
-                    
-                    #tripDetailsMap {
-                        height: 280px !important;
-                    }
-                    
-                    .price-input-container {
-                        flex-direction: column;
-                        gap: 12px;
-                    }
-                    
-                    .modal-actions {
-                        flex-direction: column;
-                        gap: 10px;
-                    }
-                }
-                
-                /* Mobile - Small */
-                @media (max-width: 576px) {
-                    .trip-details-modal {
-                        padding: 0;
-                        align-items: stretch;
-                    }
-                    
-                    .trip-details-modal .modal-content {
-                        max-width: none;
-                        border-radius: 0;
-                        margin: 0;
-                        width: 100vw;
-                        height: 100vh;
-                    }
-                    
-                    .modal-header {
-                        padding: 15px 20px;
-                        border-radius: 0;
-                        position: sticky;
-                        top: 0;
-                        z-index: 1;
-                    }
-                    
-                    .modal-header h3 {
-                        font-size: 1.1rem;
-                    }
-                    
-                    .trip-info {
-                        padding: 15px;
-                        flex-direction: column;
-                        gap: 10px;
-                    }
-                    
-                    .map-container {
-                        padding: 15px;
-                    }
-                    
-                    #tripDetailsMap {
-                        height: 250px !important;
-                    }
-                    
-                    .route-info {
-                        padding: 15px;
-                    }
-                    
-                    .route-segment {
-                        flex-direction: column;
-                        align-items: stretch;
-                        gap: 8px;
-                        padding: 12px 0;
-                    }
-                    
-                    .segment-details {
-                        flex-direction: row;
-                        justify-content: space-between;
-                        gap: 10px;
-                        font-size: 0.85rem;
-                    }
-                    
-                    .price-calculations {
-                        padding: 15px;
-                    }
-                    
-                    .price-section {
-                        padding: 12px;
-                        margin-bottom: 12px;
-                    }
-                    
-                    .price-value {
-                        font-size: 1.2rem;
-                    }
-                    
-                    .price-input-container {
-                        flex-direction: column;
-                        align-items: stretch;
-                        gap: 10px;
-                    }
-                    
-                    .input-group {
-                        min-width: auto;
-                    }
-                    
-                    .addresses {
-                        padding: 15px;
-                    }
-                    
-                    .address-text {
-                        font-size: 0.85rem;
-                        line-height: 1.4;
-                        padding-left: 16px;
-                    }
-                    
-                    .modal-actions {
-                        padding: 15px 20px;
-                        flex-direction: column;
-                        gap: 8px;
-                        position: sticky;
-                        bottom: 0;
-                        background: white;
-                        border-top: 1px solid #eee;
-                    }
-                    
-                    .btn {
-                        justify-content: center;
-                        padding: 12px 20px;
-                    }
-                }
-                </style>
             `;
 
             // Add modal to body
