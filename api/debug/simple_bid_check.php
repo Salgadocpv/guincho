@@ -11,7 +11,7 @@ echo "<h1>🔍 Debug Simples de Propostas</h1>";
 try {
     include_once '../config/database.php';
     
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     echo "<h2>1. Propostas no banco:</h2>";

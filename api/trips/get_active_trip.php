@@ -35,7 +35,7 @@ if (!$trip_id) {
     exit();
 }
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 try {

@@ -6,9 +6,9 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-include_once '../config/database.php';
+include_once 'bootstrap.php';
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 try {

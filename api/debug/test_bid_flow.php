@@ -8,7 +8,7 @@ header("Content-Type: application/json; charset=UTF-8");
 
 include_once '../config/database.php';
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 try {

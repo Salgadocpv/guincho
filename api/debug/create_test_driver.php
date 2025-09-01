@@ -7,7 +7,7 @@ header("Content-Type: application/json; charset=UTF-8");
 include_once '../config/database.php';
 
 try {
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     // Start transaction
@@ -74,20 +74,23 @@ try {
         $update_stmt->execute([$driver_id]);
         $results['driver_updated'] = true;
     } else {
+        // First, let's check what columns exist in drivers table
+        $columns_query = "SHOW COLUMNS FROM drivers";
+        $columns_stmt = $db->prepare($columns_query);
+        $columns_stmt->execute();
+        $columns = $columns_stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        $results['available_columns'] = $columns;
+        
+        // Insert with only basic required columns
         $driver_stmt = $db->prepare("
-            INSERT INTO drivers (user_id, specialty, vehicle_type, vehicle_brand, vehicle_model, vehicle_year, vehicle_plate, cnh_number, approval_status, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            INSERT INTO drivers (user_id, specialty, approval_status, created_at) 
+            VALUES (?, ?, ?, NOW())
         ");
         
         $driver_stmt->execute([
             $user_id,
             'todos',          // Can handle all service types
-            'Guincho',
-            'Volkswagen',
-            'Constellation',
-            2020,
-            'TST1234',
-            '12345678901',
             'approved'        // Pre-approved for testing
         ]);
         

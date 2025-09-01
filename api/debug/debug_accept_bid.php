@@ -17,7 +17,7 @@ try {
     $data = json_decode(file_get_contents("php://input"));
     $bid_id = $data->bid_id ?? $_GET['bid_id'] ?? null;
     
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     $debug_info = [

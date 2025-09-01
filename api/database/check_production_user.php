@@ -10,7 +10,7 @@ header('Access-Control-Allow-Origin: *');
 try {
     include_once '../config/database.php';
     
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     $response = [

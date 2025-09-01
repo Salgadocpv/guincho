@@ -46,7 +46,7 @@ if (empty($data->bid_id)) {
     exit();
 }
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 try {

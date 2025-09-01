@@ -27,7 +27,7 @@ $user = $auth_result['user'];
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
 $unread_only = isset($_GET['unread_only']) && $_GET['unread_only'] === 'true';
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 try {

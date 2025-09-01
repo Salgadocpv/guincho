@@ -9,7 +9,7 @@ header("Content-Type: application/json; charset=UTF-8");
 include_once '../config/database.php';
 
 try {
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     $bid_id = $_GET['bid_id'] ?? null;

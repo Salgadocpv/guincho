@@ -43,7 +43,7 @@ $user = $auth_result['user'];
 
 // Initialize database
 try {
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     $notification = new TripNotification($db);
 } catch (Exception $e) {

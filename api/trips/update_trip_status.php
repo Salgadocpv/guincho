@@ -56,7 +56,7 @@ if (!in_array($data->status, $valid_statuses)) {
     exit();
 }
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 try {

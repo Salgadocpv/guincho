@@ -9,7 +9,7 @@ include_once '../classes/TripRequest.php';
 include_once '../classes/ActiveTrip.php';
 
 try {
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     $debug_info = [

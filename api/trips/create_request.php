@@ -63,7 +63,7 @@ if (!empty($missing_fields)) {
 }
 
 // Validate minimum offer
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 $stmt = $db->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'minimum_trip_value'");

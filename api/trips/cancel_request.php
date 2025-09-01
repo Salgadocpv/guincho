@@ -42,7 +42,7 @@ if (empty($data->trip_request_id)) {
 }
 
 try {
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     // Start transaction

@@ -1234,25 +1234,26 @@
                     bottom: 0;
                     background: rgba(0,0,0,0.8);
                     display: flex;
-                    align-items: stretch;
+                    align-items: center;
                     justify-content: center;
                     z-index: 10000;
-                    padding: 0;
-                    overflow: hidden;
+                    padding: 20px;
+                    overflow-y: auto;
                 }
                 
                 .trip-details-modal .modal-content {
                     background: white;
-                    border-radius: 0;
+                    border-radius: 12px;
                     width: 100%;
-                    max-width: 600px;
-                    height: 100vh;
+                    max-width: 800px;
+                    max-height: 90vh;
                     overflow-y: auto;
                     -webkit-overflow-scrolling: touch;
                     color: #333;
-                    margin: 0;
+                    margin: auto;
                     display: flex;
                     flex-direction: column;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
                 }
                 
                 .modal-header {
@@ -1263,11 +1264,8 @@
                     align-items: center;
                     background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
                     color: white;
-                    border-radius: 0;
+                    border-radius: 12px 12px 0 0;
                     flex-shrink: 0;
-                    position: sticky;
-                    top: 0;
-                    z-index: 1;
                 }
                 
                 .modal-header h3 {
@@ -1564,7 +1562,85 @@
                     -webkit-overflow-scrolling: touch;
                 }
 
-                @media (max-width: 768px) {
+                /* Desktop - Large screens */
+                @media (min-width: 1200px) {
+                    .trip-details-modal .modal-content {
+                        max-width: 900px;
+                    }
+                }
+                
+                /* Desktop - Medium screens */
+                @media (min-width: 992px) and (max-width: 1199px) {
+                    .trip-details-modal .modal-content {
+                        max-width: 850px;
+                    }
+                }
+                
+                /* Tablet - Large */
+                @media (min-width: 769px) and (max-width: 991px) {
+                    .trip-details-modal .modal-content {
+                        max-width: 750px;
+                        margin: 20px;
+                    }
+                    
+                    .trip-info {
+                        flex-wrap: wrap;
+                        gap: 15px;
+                    }
+                    
+                    .price-input-container {
+                        flex-wrap: wrap;
+                        gap: 12px;
+                    }
+                    
+                    #tripDetailsMap {
+                        height: 350px !important;
+                    }
+                }
+                
+                /* Mobile - Large (Landscape tablets, small laptops) */
+                @media (min-width: 577px) and (max-width: 768px) {
+                    .trip-details-modal {
+                        padding: 10px;
+                    }
+                    
+                    .trip-details-modal .modal-content {
+                        max-width: 100%;
+                        max-height: 95vh;
+                        border-radius: 8px;
+                    }
+                    
+                    .modal-header h3 {
+                        font-size: 1.15rem;
+                    }
+                    
+                    .trip-info {
+                        flex-direction: column;
+                        gap: 12px;
+                        padding: 18px;
+                    }
+                    
+                    .map-container {
+                        padding: 18px;
+                    }
+                    
+                    #tripDetailsMap {
+                        height: 280px !important;
+                    }
+                    
+                    .price-input-container {
+                        flex-direction: column;
+                        gap: 12px;
+                    }
+                    
+                    .modal-actions {
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                }
+                
+                /* Mobile - Small */
+                @media (max-width: 576px) {
                     .trip-details-modal {
                         padding: 0;
                         align-items: stretch;
@@ -1583,6 +1659,7 @@
                         border-radius: 0;
                         position: sticky;
                         top: 0;
+                        z-index: 1;
                     }
                     
                     .modal-header h3 {
@@ -1660,6 +1737,8 @@
                         gap: 8px;
                         position: sticky;
                         bottom: 0;
+                        background: white;
+                        border-top: 1px solid #eee;
                     }
                     
                     .btn {

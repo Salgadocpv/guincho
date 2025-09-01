@@ -30,7 +30,7 @@ if ($user['user_type'] !== 'client') {
 }
 
 try {
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     // Get all trip requests for this client with bid count

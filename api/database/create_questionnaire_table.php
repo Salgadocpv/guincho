@@ -6,7 +6,7 @@
 include_once '../config/database.php';
 
 try {
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
 
     // Create questionnaire_answers table

@@ -67,22 +67,22 @@ class DatabaseAuto {
      */
     private function setDatabaseConfig() {
         if ($this->environment === 'local') {
-            // Configuração XAMPP Local
-            $this->host = 'localhost';
-            $this->db_name = 'guincho_local';
-            $this->username = 'root';
-            $this->password = '';
-            
-            error_log("Usando configuração LOCAL: localhost/guincho_local");
-            
-        } else {
-            // Configuração Hostinger Produção
+            // Conectar ao BD da Hostinger a partir do XAMPP local
             $this->host = 'srv1310.hstgr.io';
             $this->db_name = 'u461266905_guincho';
             $this->username = 'u461266905_guincho';
             $this->password = '4580951Ga@';
             
-            error_log("Usando configuração PRODUÇÃO: Hostinger");
+            error_log("Usando configuração LOCAL, apontando para PRODUÇÃO: srv1310.hstgr.io");
+            
+        } else {
+            // Conectar ao BD localhost a partir do servidor de produção
+            $this->host = 'localhost';
+            $this->db_name = 'u461266905_guincho';
+            $this->username = 'u461266905_guincho';
+            $this->password = '4580951Ga@';
+            
+            error_log("Usando configuração PRODUÇÃO, apontando para LOCALHOST do servidor");
         }
     }
 

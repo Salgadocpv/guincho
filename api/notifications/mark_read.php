@@ -26,7 +26,7 @@ $user = $auth_result['user'];
 // Get posted data
 $data = json_decode(file_get_contents("php://input"));
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 try {

@@ -35,7 +35,7 @@ if ($user['user_type'] !== 'driver') {
 }
 
 // Get driver info
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 $stmt = $db->prepare("SELECT * FROM drivers WHERE user_id = ?");

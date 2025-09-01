@@ -56,7 +56,7 @@ if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
     exit();
 }
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 try {

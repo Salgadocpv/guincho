@@ -12,7 +12,7 @@ date_default_timezone_set('America/Sao_Paulo');
 try {
     include_once '../config/database.php';
     
-    $database = new Database();
+    $database = new DatabaseAuto();
     $db = $database->getConnection();
     
     // Limpar dados antigos

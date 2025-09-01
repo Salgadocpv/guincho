@@ -27,7 +27,7 @@ if (!$auth_result['success']) {
 
 $user = $auth_result['user'];
 
-$database = new Database();
+$database = new DatabaseAuto();
 $db = $database->getConnection();
 
 // Get raw input
