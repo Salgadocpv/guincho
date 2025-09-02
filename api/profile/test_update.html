@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Update Profile</title>
+</head>
+<body>
+    <h2>Teste API Update Profile</h2>
+    
+    <div id="client-test">
+        <h3>Teste Cliente</h3>
+        <button onclick="testClientUpdate()">Testar Update Cliente</button>
+        <div id="client-result"></div>
+    </div>
+    
+    <hr>
+    
+    <div id="driver-test">
+        <h3>Teste Guincheiro</h3>
+        <button onclick="testDriverUpdate()">Testar Update Guincheiro</button>
+        <div id="driver-result"></div>
+    </div>
+    
+    <script>
+        async function testClientUpdate() {
+            const testData = {
+                phone: '(11) 98765-4321',
+                whatsapp: '(11) 98765-4321',
+                email: 'joao.atualizado@email.com',
+                licensePlate: 'TEST-123',
+                vehicleBrand: 'toyota',
+                vehicleModel: 'corolla',
+                vehicleYear: '2022',
+                vehicleColor: 'preto'
+            };
+            
+            try {
+                const response = await fetch('/guincho/api/profile/update_client_simple.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                document.getElementById('client-result').innerHTML = `
+                    <p><strong>Status:</strong> ${result.success ? 'Sucesso' : 'Erro'}</p>
+                    <p><strong>Mensagem:</strong> ${result.message}</p>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('client-result').innerHTML = `
+                    <p style="color: red;"><strong>Erro:</strong> ${error.message}</p>
+                `;
+            }
+        }
+        
+        async function testDriverUpdate() {
+            const testData = {
+                phone: '(11) 99887-6543',
+                whatsapp: '(11) 99887-6543', 
+                email: 'carlos.atualizado@email.com',
+                experience: '10+',
+                specialty: 'todos',
+                workRegion: 'São Paulo - Toda a cidade',
+                availability: '24h',
+                truckBrand: 'Mercedes',
+                truckModel: 'Atego 1719',
+                truckYear: '2020',
+                truckCapacity: 'pesada'
+            };
+            
+            try {
+                const response = await fetch('/guincho/api/profile/update_driver_simple.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                document.getElementById('driver-result').innerHTML = `
+                    <p><strong>Status:</strong> ${result.success ? 'Sucesso' : 'Erro'}</p>
+                    <p><strong>Mensagem:</strong> ${result.message}</p>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('driver-result').innerHTML = `
+                    <p style="color: red;"><strong>Erro:</strong> ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
