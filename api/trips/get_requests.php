@@ -38,6 +38,14 @@ if ($user['user_type'] !== 'driver') {
 $database = new DatabaseAuto();
 $db = $database->getConnection();
 
+// ===== START DEBUGGING =====
+$debug_output = [];
+$debug_output['auth_user'] = $user;
+$debug_output['driver_info_from_db'] = $driver;
+$debug_output['has_active_trip_check'] = $current_active_trip;
+// ===== END DEBUGGING =====
+
+
 $stmt = $db->prepare("SELECT * FROM drivers WHERE user_id = ?");
 $stmt->execute([$user['id']]);
 $driver = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -113,6 +121,12 @@ try {
     $stmt = $db->prepare($query);
     $stmt->execute();
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // ===== START DEBUGGING =====
+    $debug_output['query'] = $query;
+    $debug_output['requests_found_count'] = count($requests);
+    $debug_output['raw_requests_from_db'] = $requests;
+    // ===== END DEBUGGING =====
     
     // Get questionnaire answers for each request (with error handling)
     foreach ($requests as &$request) {
@@ -172,11 +186,7 @@ try {
                 'lng' => (float)$driver_lng
             ]
         ],
-        'debug' => array_merge($debug_info, [
-            'total_requests_found' => count($requests),
-            'filtered_requests' => count($filtered_requests),
-            'query_executed' => true
-        ])
+        'debug' => $debug_output
     ]);
     
 } catch (Exception $e) {

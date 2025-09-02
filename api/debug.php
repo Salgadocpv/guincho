@@ -15,7 +15,7 @@ echo "PHP Version: " . PHP_VERSION . "\n";
 $files = [
     'config/database.php',
     'classes/TripRequest.php',
-    'classes/TripNotification.php', 
+    'classes/TripNotification.php',
     'middleware/auth.php'
 ];
 

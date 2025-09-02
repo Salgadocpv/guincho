@@ -1,35 +1,30 @@
 <?php
-/**
- * Simple Driver Request Test
- */
-
 header("Content-Type: application/json; charset=UTF-8");
-include_once '../config/database.php';
+include_once "../config/database_auto.php";
 
 try {
     $database = new DatabaseAuto();
     $db = $database->getConnection();
     
-    // Just test the basic query that should return requests
-    $query = "SELECT COUNT(*) as total_pending 
-              FROM trip_requests tr
-              WHERE tr.status = 'pending' 
-                AND tr.expires_at > NOW()";
-    
-    $stmt = $db->prepare($query);
+    $stmt = $db->prepare("SELECT COUNT(*) as total FROM trip_requests");
     $stmt->execute();
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $stmt = $db->prepare("SELECT COUNT(*) as active FROM trip_requests WHERE status = \"active\"");
+    $stmt->execute();
+    $active = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $stmt = $db->prepare("SELECT * FROM trip_requests WHERE status = \"active\" ORDER BY created_at DESC LIMIT 3");
+    $stmt->execute();
+    $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([
-        'success' => true,
-        'pending_requests' => $result['total_pending'],
-        'current_time' => date('Y-m-d H:i:s')
+        "total_requests" => $total["total"],
+        "active_requests" => $active["active"], 
+        "sample_requests" => $requests
     ], JSON_PRETTY_PRINT);
     
 } catch (Exception $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Error: ' . $e->getMessage()
-    ], JSON_PRETTY_PRINT);
+    echo json_encode(["error" => $e->getMessage()], JSON_PRETTY_PRINT);
 }
 ?>
