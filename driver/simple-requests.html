@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Viagens Simples</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="../js/modal-system.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .header {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .status-card {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(20px);
+            text-align: center;
+        }
+
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.8;
+        }
+
+        .status-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-message {
+            opacity: 0.8;
+            margin-bottom: 16px;
+        }
+
+        .refresh-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .refresh-btn.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .refresh-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .request-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(20px);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .request-item:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .request-item.has-bid {
+            border-color: #ffc107;
+            background: rgba(255,193,7,0.15);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .service-details h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .service-meta {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            display: flex;
+            gap: 16px;
+        }
+
+        .offer-info {
+            text-align: right;
+        }
+
+        .offer-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 4px;
+        }
+
+        .offer-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .route-display {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+            padding: 16px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+
+        .route-point {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .route-marker {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .origin-marker { background: #28a745; }
+        .destination-marker { background: #dc3545; }
+
+        .route-arrow {
+            color: rgba(255,255,255,0.6);
+            font-size: 1.2rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .detail-item {
+            text-align: center;
+            background: rgba(0,0,0,0.1);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .questionnaire-info {
+            margin: 16px 0;
+            padding: 16px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .questionnaire-info h4 {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .questionnaire-item {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .questionnaire-question {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .questionnaire-answer {
+            opacity: 0.8;
+        }
+
+        /* Bid Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            color: #333;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        .modal-content {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(0,123,255,0.3);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .form-input.currency {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .form-helper {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 6px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            padding: 24px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background: rgba(0,0,0,0.1);
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .request-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+
+            .offer-info {
+                text-align: left;
+            }
+
+            .route-display {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .details-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-truck"></i> Viagens Disponíveis</h1>
+    </div>
+
+    <div class="container">
+        <div id="statusArea">
+            <div class="status-card">
+                <div class="status-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="status-title">Carregando...</div>
+                <div class="status-message">Buscando solicitações disponíveis</div>
+                <button class="refresh-btn" onclick="loadRequests()">
+                    <i class="fas fa-sync-alt"></i>
+                    Atualizar
+                </button>
+            </div>
+        </div>
+
+        <div id="requestsArea"></div>
+    </div>
+
+    <!-- Bid Modal -->
+    <div class="modal-overlay" id="bidModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Enviar Proposta</div>
+                <div class="modal-subtitle">Defina sua proposta para este serviço</div>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label class="form-label">Valor da Proposta (R$)</label>
+                    <input type="number" class="form-input currency" id="bidAmount" placeholder="0,00" step="0.01" min="0">
+                    <div class="form-helper">Oferta do cliente: <span id="clientOfferValue">R$ 0,00</span></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tempo Estimado de Chegada (minutos)</label>
+                    <input type="number" class="form-input" id="arrivalTime" placeholder="15" min="1" max="120">
+                    <div class="form-helper">Tempo realista para chegar ao local</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mensagem (opcional)</label>
+                    <textarea class="form-input" id="bidMessage" rows="3" placeholder="Detalhes sobre seu serviço, experiência, etc."></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="closeBidModal()">
+                    Cancelar
+                </button>
+                <button class="modal-btn modal-btn-primary" onclick="submitBid()">
+                    Enviar Proposta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let requests = [];
+        let selectedRequest = null;
+        let currentLocation = null;
+
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAuth();
+            getLocation();
+            loadRequests();
+            startAutoRefresh();
+        });
+
+        function initializeAuth() {
+            // Simple test driver auth
+            const testDriverData = {
+                user: {
+                    id: 7,
+                    user_type: 'driver',
+                    full_name: 'Guincheiro Teste',
+                    email: 'guincheiro@teste.com',
+                    phone: '(11) 88888-8888'
+                },
+                session_token: 'driver_test_token_' + Date.now(),
+                expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            };
+            
+            localStorage.setItem('auth_token', testDriverData.session_token);
+            localStorage.setItem('userData', JSON.stringify(testDriverData));
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        currentLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                    },
+                    function(error) {
+                        console.log('Location error, using default');
+                        currentLocation = { lat: -23.5505, lng: -46.6333 };
+                    }
+                );
+            } else {
+                currentLocation = { lat: -23.5505, lng: -46.6333 };
+            }
+        }
+
+        async function loadRequests() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            refreshBtn.classList.add('loading');
+            
+            if (!currentLocation) {
+                currentLocation = { lat: -23.5505, lng: -46.6333 };
+            }
+
+            try {
+                const url = `/guincho/api/trips/get_simple_requests.php?lat=${currentLocation.lat}&lng=${currentLocation.lng}`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    requests = data.data || [];
+                    
+                    if (!data.driver_available) {
+                        showStatus('active-trip', 'Viagem Ativa', data.message, 'fas fa-route');
+                    } else if (requests.length === 0) {
+                        showStatus('no-requests', 'Sem Solicitações', data.message, 'fas fa-clipboard-list');
+                    } else {
+                        showStatus('available', `${requests.length} Solicitações`, data.message, 'fas fa-list');
+                        displayRequests();
+                    }
+                } else {
+                    showStatus('error', 'Erro', data.message, 'fas fa-exclamation-triangle');
+                }
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                showStatus('error', 'Erro de Conexão', 'Não foi possível carregar as solicitações', 'fas fa-wifi');
+            } finally {
+                refreshBtn.classList.remove('loading');
+            }
+        }
+
+        function showStatus(type, title, message, icon) {
+            const statusArea = document.getElementById('statusArea');
+            const requestsArea = document.getElementById('requestsArea');
+            
+            statusArea.innerHTML = `
+                <div class="status-card">
+                    <div class="status-icon">
+                        <i class="${icon}"></i>
+                    </div>
+                    <div class="status-title">${title}</div>
+                    <div class="status-message">${message}</div>
+                    <button class="refresh-btn" onclick="loadRequests()">
+                        <i class="fas fa-sync-alt"></i>
+                        Atualizar
+                    </button>
+                </div>
+            `;
+            
+            if (type === 'available') {
+                statusArea.style.display = 'none';
+            } else {
+                statusArea.style.display = 'block';
+                requestsArea.innerHTML = '';
+            }
+        }
+
+        function displayRequests() {
+            const requestsArea = document.getElementById('requestsArea');
+            
+            requestsArea.innerHTML = requests.map(request => `
+                <div class="request-item ${request.has_bid ? 'has-bid' : ''}" data-request-id="${request.id}">
+                    <div class="request-header">
+                        <div class="service-info">
+                            <div class="service-icon">
+                                <i class="${request.details.service_icon}"></i>
+                            </div>
+                            <div class="service-details">
+                                <h3>${request.details.service_name}</h3>
+                                <div class="service-meta">
+                                    <span><i class="fas fa-user"></i> ${request.client_name}</span>
+                                    <span><i class="fas fa-map-marker-alt"></i> ${request.distance} km</span>
+                                    <span><i class="fas fa-clock"></i> ${formatTimeRemaining(request.time_remaining)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="offer-info">
+                            <div class="offer-value">${request.details.formatted_offer}</div>
+                            <div class="offer-label">Oferta do Cliente</div>
+                        </div>
+                    </div>
+
+                    <div class="route-display">
+                        <div class="route-point">
+                            <div class="route-marker origin-marker"></div>
+                            <span>${request.details.origin_short}</span>
+                        </div>
+                        <div class="route-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="route-point">
+                            <div class="route-marker destination-marker"></div>
+                            <span>${request.details.destination_short}</span>
+                        </div>
+                    </div>
+
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <div class="detail-value">${request.distance_km || '-'} km</div>
+                            <div class="detail-label">Distância</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value">${request.estimated_duration_minutes || '-'} min</div>
+                            <div class="detail-label">Duração</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value">${new Date(request.created_at).toLocaleTimeString()}</div>
+                            <div class="detail-label">Criado</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value">${formatTimeRemaining(request.time_remaining)}</div>
+                            <div class="detail-label">Expira em</div>
+                        </div>
+                    </div>
+
+                    ${request.questionnaire_answers && request.questionnaire_answers.length > 0 ? `
+                        <div class="questionnaire-info">
+                            <h4><i class="fas fa-clipboard-list"></i> Informações do Cliente</h4>
+                            ${request.questionnaire_answers.map(answer => `
+                                <div class="questionnaire-item">
+                                    <div class="questionnaire-question">${answer.question_text}</div>
+                                    <div class="questionnaire-answer">${answer.option_text}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
+                    <div class="actions">
+                        ${request.has_bid ? 
+                            '<button class="btn btn-secondary" disabled><i class="fas fa-check"></i> Proposta Enviada</button>' :
+                            `<button class="btn btn-secondary" onclick="viewOnMap(${request.id})"><i class="fas fa-map"></i> Ver no Mapa</button>
+                             <button class="btn btn-primary" onclick="openBidModal(${request.id})"><i class="fas fa-paper-plane"></i> Enviar Proposta</button>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatTimeRemaining(seconds) {
+            if (seconds <= 0) return 'Expirou';
+            
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            
+            if (minutes > 0) {
+                return `${minutes}:${secs.toString().padStart(2, '0')}`;
+            }
+            return `${secs}s`;
+        }
+
+        function openBidModal(requestId) {
+            selectedRequest = requests.find(r => r.id == requestId);
+            if (!selectedRequest) return;
+
+            document.getElementById('clientOfferValue').textContent = selectedRequest.details.formatted_offer;
+            document.getElementById('bidAmount').value = selectedRequest.client_offer;
+            document.getElementById('arrivalTime').value = Math.ceil(selectedRequest.distance * 2);
+            document.getElementById('bidMessage').value = '';
+
+            document.getElementById('bidModal').style.display = 'flex';
+        }
+
+        function closeBidModal() {
+            document.getElementById('bidModal').style.display = 'none';
+            selectedRequest = null;
+        }
+
+        async function submitBid() {
+            if (!selectedRequest) {
+                await modalSystem.error('Nenhuma solicitação selecionada');
+                return;
+            }
+
+            const bidAmount = parseFloat(document.getElementById('bidAmount').value);
+            const arrivalTime = parseInt(document.getElementById('arrivalTime').value);
+            const message = document.getElementById('bidMessage').value;
+
+            if (!bidAmount || bidAmount <= 0) {
+                await modalSystem.warning('Informe um valor válido para a proposta');
+                return;
+            }
+
+            if (!arrivalTime || arrivalTime <= 0) {
+                await modalSystem.warning('Informe um tempo estimado de chegada');
+                return;
+            }
+
+            try {
+                const response = await fetch('/guincho/api/trips/place_bid.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                    },
+                    body: JSON.stringify({
+                        trip_request_id: selectedRequest.id,
+                        bid_amount: bidAmount,
+                        estimated_arrival_minutes: arrivalTime,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    await modalSystem.success('Proposta enviada com sucesso!');
+                    closeBidModal();
+                    loadRequests();
+                } else {
+                    await modalSystem.error('Erro ao enviar proposta: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error submitting bid:', error);
+                await modalSystem.error('Erro ao enviar proposta: ' + error.message);
+            }
+        }
+
+        function viewOnMap(requestId) {
+            const request = requests.find(r => r.id == requestId);
+            if (request && request.origin_lat && request.origin_lng) {
+                const mapsUrl = `https://www.google.com/maps/dir/${currentLocation.lat},${currentLocation.lng}/${request.origin_lat},${request.origin_lng}`;
+                window.open(mapsUrl, '_blank');
+            }
+        }
+
+        function startAutoRefresh() {
+            // Auto refresh every 30 seconds
+            setInterval(() => {
+                if (!document.hidden) {
+                    loadRequests();
+                }
+            }, 30000);
+        }
+    </script>
+</body>
+</html>
