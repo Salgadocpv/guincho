@@ -821,11 +821,10 @@
             try {
                 const formData = getFormData();
                 
-                const response = await fetch('/guincho/api/profile/update_driver.php', {
+                const response = await fetch('/guincho/api/profile/update_driver_simple.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(formData)
                 });
