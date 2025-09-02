@@ -466,11 +466,7 @@
         // Load user profile data
         async function loadUserProfile() {
             try {
-                const response = await fetch('/guincho/api/profile/get_profile.php', {
-                    headers: {
-                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
-                    }
-                });
+                const response = await fetch('/guincho/api/profile/get_profile_simple.php?type=client');
 
                 const result = await response.json();
                 
