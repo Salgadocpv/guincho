@@ -836,7 +836,15 @@
                     originalData = { ...originalData, ...formData };
                     hasChanges = false;
                     
-                    await modalSystem.success('Perfil atualizado com sucesso!');
+                    await modalSystem.success('Perfil atualizado com sucesso!\nVocê será redirecionado para o dashboard.');
+                    
+                    // Disable beforeunload warning for redirect
+                    window.removeEventListener('beforeunload', beforeUnloadHandler);
+                    
+                    // Redirect to dashboard after success
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
                 } else {
                     throw new Error(result.message || 'Erro ao salvar perfil');
                 }
@@ -884,12 +892,14 @@
         }
 
         // Handle page unload
-        window.addEventListener('beforeunload', function(e) {
+        function beforeUnloadHandler(e) {
             if (hasChanges) {
                 e.preventDefault();
                 e.returnValue = '';
             }
-        });
+        }
+        
+        window.addEventListener('beforeunload', beforeUnloadHandler);
     </script>
 </body>
 </html>
