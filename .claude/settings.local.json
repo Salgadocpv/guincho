@@ -22,7 +22,8 @@
       "Bash(start:*)",
       "Bash(\"C:\\xampp\\php\\php.exe\":*)",
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"CREATE DATABASE IF NOT EXISTS iguincho CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
-      "WebFetch(domain:www.coppermane.com.br)"
+      "WebFetch(domain:www.coppermane.com.br)",
+      "WebFetch(domain:localhost)"
     ],
     "deny": [],
     "ask": [],

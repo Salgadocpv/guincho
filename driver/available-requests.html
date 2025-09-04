@@ -1230,10 +1230,8 @@
                 const serviceFilter = document.getElementById('serviceFilter').value;
                 const radiusFilter = document.getElementById('radiusFilter').value;
                 
-                let url = `/guincho/api/trips/get_requests.php?lat=${currentLocation.lat}&lng=${currentLocation.lng}`;
-                if (serviceFilter) {
-                    url += `&service=${serviceFilter}`;
-                }
+                // Use simplified API first to test
+                let url = `/guincho/api/trips/get_simple_requests.php`;
 
                 console.log('Fetching requests from:', url);
                 
