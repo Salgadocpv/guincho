@@ -1699,23 +1699,10 @@
 
             // Initialize map after modal is in DOM
             setTimeout(() => {
-                if (typeof google !== 'undefined' && google.maps) {
-                    initializeTripDetailsMap(request);
-                } else {
-                    // Google Maps not loaded, show fallback
-                    document.getElementById('tripDetailsMap').innerHTML = `
-                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; color: #6c757d; text-align: center; padding: 20px; border-radius: 8px;">
-                            <div>
-                                <i class="fas fa-map-marked-alt" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                                <div>Mapa não disponível no momento</div>
-                                <div style="font-size: 0.8rem; margin-top: 5px;">Dados de localização serão calculados</div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Show approximate distances
-                    calculateApproximateDistances(request);
-                }
+                // Always use fallback for now due to API issues
+                console.log('Using fallback map display');
+                showMapFallback(request);
+                calculateApproximateDistances(request);
             }, 300);
         }
 
@@ -1740,6 +1727,66 @@
             questionnaireContent.innerHTML = answersHtml || `
                 <div class="questionnaire-empty">
                     Nenhuma informação adicional fornecida pelo cliente.
+                </div>
+            `;
+        }
+
+        function showMapFallback(request) {
+            const mapElement = document.getElementById('tripDetailsMap');
+            
+            // Create a visual representation without Google Maps
+            mapElement.innerHTML = `
+                <div style="height: 100%; background: linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <i class="fas fa-route" style="font-size: 2.5rem; color: #007bff; margin-bottom: 10px;"></i>
+                        <div style="font-weight: 600; color: #495057; font-size: 1.1rem;">Trajeto da Viagem</div>
+                        <div style="color: #6c757d; font-size: 0.9rem;">Guincheiro → Origem → Destino</div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 0 10px;">
+                        <!-- Driver -->
+                        <div style="text-align: center; flex: 1;">
+                            <div style="width: 40px; height: 40px; background: #007bff; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-truck" style="color: white; font-size: 1.2rem;"></i>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #495057; font-weight: 500;">Você</div>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div style="flex: 0 0 auto; margin: 0 15px;">
+                            <i class="fas fa-arrow-right" style="color: #007bff; font-size: 1.5rem;"></i>
+                        </div>
+                        
+                        <!-- Origin -->
+                        <div style="text-align: center; flex: 1;">
+                            <div style="width: 40px; height: 40px; background: #28a745; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-map-marker-alt" style="color: white; font-size: 1.2rem;"></i>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #495057; font-weight: 500;">Origem</div>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div style="flex: 0 0 auto; margin: 0 15px;">
+                            <i class="fas fa-arrow-right" style="color: #28a745; font-size: 1.5rem;"></i>
+                        </div>
+                        
+                        <!-- Destination -->
+                        <div style="text-align: center; flex: 1;">
+                            <div style="width: 40px; height: 40px; background: #dc3545; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-flag-checkered" style="color: white; font-size: 1.2rem;"></i>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #495057; font-weight: 500;">Destino</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; text-align: center; padding: 15px; background: rgba(0,123,255,0.1); border-radius: 6px;">
+                        <div style="font-size: 0.9rem; color: #495057; margin-bottom: 5px;">
+                            <strong>Distância Total:</strong> ${request.distance_km} km
+                        </div>
+                        <div style="font-size: 0.9rem; color: #495057;">
+                            <strong>Tempo Estimado:</strong> ${request.estimated_duration_minutes} min
+                        </div>
+                    </div>
                 </div>
             `;
         }
