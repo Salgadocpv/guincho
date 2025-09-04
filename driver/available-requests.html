@@ -6,7 +6,7 @@
     <title>Iguincho - Solicitações Disponíveis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="../js/modal-system.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw&libraries=geometry,places"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&libraries=geometry,places&callback=initGoogleMaps"></script>
     <style>
         * {
             margin: 0;
@@ -1157,9 +1157,16 @@
         let requests = [];
         let selectedRequest = null;
         let pollInterval = null;
+        let googleMapsLoaded = false;
 
         // Initialize modal system
         const modalSystem = new ModalSystem();
+
+        // Google Maps callback function
+        function initGoogleMaps() {
+            console.log('Google Maps API loaded successfully');
+            googleMapsLoaded = true;
+        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -1699,10 +1706,22 @@
 
             // Initialize map after modal is in DOM
             setTimeout(() => {
-                // Always use fallback for now due to API issues
-                console.log('Using fallback map display');
-                showMapFallback(request);
-                calculateApproximateDistances(request);
+                if (typeof google !== 'undefined' && google.maps && googleMapsLoaded) {
+                    console.log('Google Maps available - initializing real map');
+                    initializeTripDetailsMap(request);
+                } else {
+                    console.log('Google Maps not ready - using fallback, will retry...');
+                    showMapFallback(request);
+                    calculateApproximateDistances(request);
+                    
+                    // Retry after more time for Google Maps to load
+                    setTimeout(() => {
+                        if (typeof google !== 'undefined' && google.maps) {
+                            console.log('Google Maps ready on retry - switching to real map');
+                            initializeTripDetailsMap(request);
+                        }
+                    }, 2000);
+                }
             }, 300);
         }
 
