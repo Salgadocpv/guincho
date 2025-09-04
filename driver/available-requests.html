@@ -668,6 +668,20 @@
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
             margin-bottom: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .route-info::before {
+            content: '🗺️ Trajeto Completo da Viagem';
+            display: block;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #495057;
+            text-align: center;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
         }
 
         .route-segment {
@@ -1567,8 +1581,8 @@
                         <div class="route-info">
                             <div class="route-segment">
                                 <div class="segment-title">
-                                    <i class="fas fa-map-marker-alt" style="color: #007bff;"></i>
-                                    Sua posição → Origem
+                                    <i class="fas fa-truck" style="color: #007bff;"></i>
+                                    Sua posição → Origem (Deslocamento)
                                 </div>
                                 <div class="segment-details">
                                     <span class="distance" id="driverToOriginDistance">Calculando...</span>
@@ -1578,8 +1592,8 @@
                             
                             <div class="route-segment">
                                 <div class="segment-title">
-                                    <i class="fas fa-map-marker-alt" style="color: #28a745;"></i>
-                                    Origem → Destino
+                                    <i class="fas fa-route" style="color: #28a745;"></i>
+                                    Origem → Destino (Serviço)
                                 </div>
                                 <div class="segment-details">
                                     <span class="distance" id="originToDestinationDistance">Calculando...</span>
@@ -1590,7 +1604,7 @@
                             <div class="route-segment total">
                                 <div class="segment-title">
                                     <i class="fas fa-calculator"></i>
-                                    Totais da Viagem
+                                    Totais da Viagem Completa
                                 </div>
                                 <div class="segment-details">
                                     <span class="distance" id="totalDistance">Calculando...</span>
@@ -1860,9 +1874,77 @@
             bounds.extend(destinationPos);
             map.fitBounds(bounds);
 
-            // Calculate routes
+            // Calculate complete route: Driver → Origin → Destination
             const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer1 = new google.maps.DirectionsRenderer({
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#007bff',
+                    strokeWeight: 5,
+                    strokeOpacity: 0.8
+                },
+                preserveViewport: false
+            });
+
+            // Create complete route with waypoint at origin
+            directionsService.route({
+                origin: driverPos,
+                destination: destinationPos,
+                waypoints: [{
+                    location: originPos,
+                    stopover: true
+                }],
+                optimizeWaypoints: false, // Keep exact order: driver → origin → destination
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+                region: 'BR'
+            }, (result, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                    
+                    const legs = result.routes[0].legs;
+                    
+                    // First leg: Driver to Origin
+                    const driverToOrigin = legs[0];
+                    document.getElementById('driverToOriginDistance').textContent = driverToOrigin.distance.text;
+                    document.getElementById('driverToOriginDuration').textContent = driverToOrigin.duration.text;
+                    
+                    // Second leg: Origin to Destination  
+                    const originToDestination = legs[1];
+                    document.getElementById('originToDestinationDistance').textContent = originToDestination.distance.text;
+                    document.getElementById('originToDestinationDuration').textContent = originToDestination.duration.text;
+                    
+                    // Store service distance for calculations
+                    window.currentTripServiceDistance = originToDestination.distance.value / 1000; // Convert to km
+                    
+                    // Update price calculations
+                    updateClientPricePerKm(request.client_offer);
+                    updateDriverPricePerKm();
+                    
+                    // Update totals
+                    updateTotalCalculations();
+                    
+                    console.log('Complete route calculated successfully');
+                } else {
+                    console.error('Directions request failed:', status);
+                    // Fallback: calculate individual routes
+                    calculateIndividualRoutes(directionsService, driverPos, originPos, destinationPos, request);
+                }
+            });
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                // Fallback to approximate calculations
+                calculateApproximateDistances(request);
+            }
+        }
+
+        // Fallback function for individual route calculations
+        function calculateIndividualRoutes(directionsService, driverPos, originPos, destinationPos, request) {
+            console.log('Calculating individual routes as fallback');
+            
+            // Create separate renderers with different colors
+            const driverToOriginRenderer = new google.maps.DirectionsRenderer({
                 map: map,
                 suppressMarkers: true,
                 polylineOptions: {
@@ -1871,7 +1953,8 @@
                     strokeOpacity: 0.8
                 }
             });
-            const directionsRenderer2 = new google.maps.DirectionsRenderer({
+            
+            const originToDestinationRenderer = new google.maps.DirectionsRenderer({
                 map: map,
                 suppressMarkers: true,
                 polylineOptions: {
@@ -1885,16 +1968,19 @@
             directionsService.route({
                 origin: driverPos,
                 destination: originPos,
-                travelMode: google.maps.TravelMode.DRIVING
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+                region: 'BR'
             }, (result, status) => {
                 if (status === 'OK') {
-                    directionsRenderer1.setDirections(result);
+                    driverToOriginRenderer.setDirections(result);
                     const route = result.routes[0].legs[0];
                     document.getElementById('driverToOriginDistance').textContent = route.distance.text;
                     document.getElementById('driverToOriginDuration').textContent = route.duration.text;
                     
-                    // Update totals
                     updateTotalCalculations();
+                } else {
+                    console.error('Driver to origin route failed:', status);
                 }
             });
 
@@ -1902,30 +1988,30 @@
             directionsService.route({
                 origin: originPos,
                 destination: destinationPos,
-                travelMode: google.maps.TravelMode.DRIVING
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+                region: 'BR'
             }, (result, status) => {
                 if (status === 'OK') {
-                    directionsRenderer2.setDirections(result);
+                    originToDestinationRenderer.setDirections(result);
                     const route = result.routes[0].legs[0];
                     document.getElementById('originToDestinationDistance').textContent = route.distance.text;
                     document.getElementById('originToDestinationDuration').textContent = route.duration.text;
                     
                     // Store service distance for calculations
-                    window.currentTripServiceDistance = route.distance.value / 1000; // Convert to km
+                    window.currentTripServiceDistance = route.distance.value / 1000;
                     
                     // Update price calculations
                     updateClientPricePerKm(request.client_offer);
                     updateDriverPricePerKm();
                     
-                    // Update totals
                     updateTotalCalculations();
+                } else {
+                    console.error('Origin to destination route failed:', status);
+                    // Final fallback to approximate calculations
+                    calculateApproximateDistances(request);
                 }
             });
-            } catch (error) {
-                console.error('Error initializing map:', error);
-                // Fallback to approximate calculations
-                calculateApproximateDistances(request);
-            }
         }
 
         function updateTotalCalculations() {
