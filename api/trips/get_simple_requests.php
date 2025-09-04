@@ -13,11 +13,14 @@ $database = new Database();
 $db = $database->getConnection();
 
 try {
-    // Ultra-simple query - get ALL active trip requests
-    $query = "SELECT tr.*, u.full_name as client_name, u.phone as client_phone
+    // Ultra-simple query - get ALL active trip requests with LEFT JOIN to avoid missing users
+    $query = "SELECT tr.*, 
+                     COALESCE(u.full_name, 'Cliente') as client_name, 
+                     COALESCE(u.phone, 'N/A') as client_phone
               FROM trip_requests tr
-              JOIN users u ON tr.client_id = u.id
+              LEFT JOIN users u ON tr.client_id = u.id
               WHERE tr.status = 'pending' 
+                AND (tr.expires_at IS NULL OR tr.expires_at > NOW())
               ORDER BY tr.created_at DESC";
     
     $stmt = $db->prepare($query);
