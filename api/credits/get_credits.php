@@ -4,9 +4,9 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-require_once '../config/database.php';
+require_once '../config/database_local.php';
 require_once '../classes/CreditSystem.php';
-require_once '../middleware/auth.php';
+require_once '../middleware/AuthSimple.php';
 
 try {
     // Verificar autenticação
@@ -26,7 +26,7 @@ try {
     }
     
     // Obter driver_id
-    $database = new Database();
+    $database = new DatabaseLocal();
     $pdo = $database->getConnection();
     
     $query = "SELECT id FROM drivers WHERE user_id = :user_id";

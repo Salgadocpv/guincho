@@ -29,7 +29,12 @@
       "Read(/C:\\xampp\\htdocs\\guincho\\admin/**)",
       "Read(/C:\\xampp\\htdocs\\guincho\\admin/**)",
       "Read(/C:\\xampp\\htdocs\\guincho\\api\\trips/**)",
-      "Read(/C:\\xampp\\htdocs\\guincho\\api\\config/**)"
+      "Read(/C:\\xampp\\htdocs\\guincho\\api\\config/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\api\\credits/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\api\\middleware/**)",
+      "Bash(curl:*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root iguincho -e \"SHOW TABLES LIKE ''%credit%''\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root iguincho -e \"SHOW TABLES;\")"
     ],
     "deny": [],
     "ask": [],

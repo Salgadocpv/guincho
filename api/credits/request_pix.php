@@ -7,7 +7,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 require_once '../config/database_local.php';
 require_once '../classes/CreditSystem.php';
 require_once '../classes/PixIntegration.php';
-require_once '../middleware/auth.php';
+require_once '../middleware/AuthSimple.php';
 
 try {
     // Verificar método

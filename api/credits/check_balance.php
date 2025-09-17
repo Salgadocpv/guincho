@@ -6,7 +6,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 require_once '../config/database_local.php';
 require_once '../classes/CreditSystem.php';
-require_once '../middleware/auth.php';
+require_once '../middleware/AuthSimple.php';
 
 try {
     // Verificar autenticação
@@ -35,7 +35,7 @@ try {
     $stmt->execute();
     $driver = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if (!driver) {
+    if (!$driver) {
         throw new Exception('Guincheiro não encontrado');
     }
     
