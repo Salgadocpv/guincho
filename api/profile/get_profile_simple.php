@@ -71,7 +71,7 @@ try {
         $query = "SELECT u.id, u.full_name, u.cpf, u.birth_date, u.phone, u.whatsapp, u.email, u.created_at,
                          d.cnh, d.cnh_category, d.experience, d.specialty, d.work_region, d.availability,
                          d.truck_plate, d.truck_brand, d.truck_model, d.truck_year, d.truck_capacity,
-                         d.status, d.verified_at, d.rating
+                         d.approval_status, d.approval_date, d.rating
                   FROM users u
                   LEFT JOIN drivers d ON u.id = d.user_id
                   WHERE u.user_type = 'driver'
@@ -101,7 +101,7 @@ try {
                 'truck_model' => 'Cargo 816',
                 'truck_year' => '2018',
                 'truck_capacity' => 'media',
-                'status' => 'approved'
+                'approval_status' => 'approved'
             ];
         }
         
@@ -125,8 +125,8 @@ try {
                 'truckModel' => $profile['truck_model'],
                 'truckYear' => $profile['truck_year'],
                 'truckCapacity' => $profile['truck_capacity'],
-                'status' => $profile['status'],
-                'verifiedAt' => $profile['verified_at'] ?? null,
+                'status' => $profile['approval_status'],
+                'verifiedAt' => $profile['approval_date'] ?? null,
                 'rating' => $profile['rating'] ?? '0.00',
                 'memberSince' => date('Y-m-d')
             ]
