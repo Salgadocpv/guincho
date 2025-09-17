@@ -334,6 +334,34 @@
             color: white;
             border-color: #dc3545;
         }
+
+        /* Button styles */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #0056b3;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -362,6 +390,7 @@
             <div class="category-tab active" onclick="showCategory('general')">Geral</div>
             <div class="category-tab" onclick="showCategory('business')">Negócio</div>
             <div class="category-tab" onclick="showCategory('credits')">Créditos</div>
+            <div class="category-tab" onclick="showCategory('pix')">PIX</div>
             <div class="category-tab" onclick="showCategory('system')">Sistema</div>
             <div class="category-tab" onclick="showCategory('contact')">Contato</div>
         </div>
@@ -459,6 +488,159 @@
                         <div class="form-description">Tempo em horas para expirar uma solicitação de recarga PIX</div>
                         <input type="number" class="form-input" id="pix_request_expiry_hours" data-key="pix_request_expiry_hours" min="1" max="168">
                     </div>
+                </div>
+            </div>
+
+            <!-- PIX Integration Settings -->
+            <div class="settings-section" data-category="pix" style="display: none;">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h2 class="section-title">Configurações PIX</h2>
+                </div>
+
+                <!-- PIX Provider Selection -->
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Provedor PIX</label>
+                        <div class="form-description">Selecione o provedor de pagamentos PIX</div>
+                        <select class="form-select" id="pix_provider" data-key="pix_provider" onchange="togglePixProviderSettings()">
+                            <option value="manual">Manual (sem integração)</option>
+                            <option value="mercadopago">MercadoPago</option>
+                            <option value="pagseguro">PagSeguro</option>
+                            <option value="gerencianet">Gerencianet</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Modo Sandbox</label>
+                        <div class="form-description">Usar ambiente de testes da API PIX</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pix_sandbox_mode" data-key="pix_sandbox_mode">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Company PIX Settings -->
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Chave PIX da Empresa</label>
+                        <div class="form-description">Chave PIX principal para recebimentos</div>
+                        <input type="text" class="form-input" id="company_pix_key" data-key="company_pix_key" placeholder="CNPJ, email ou chave aleatória">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tipo da Chave PIX</label>
+                        <div class="form-description">Tipo da chave PIX da empresa</div>
+                        <select class="form-select" id="company_pix_key_type" data-key="company_pix_key_type">
+                            <option value="cnpj">CNPJ</option>
+                            <option value="email">Email</option>
+                            <option value="phone">Telefone</option>
+                            <option value="random">Chave Aleatória</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Nome da Empresa</label>
+                        <div class="form-description">Nome que aparecerá nos comprovantes PIX</div>
+                        <input type="text" class="form-input" id="company_name" data-key="company_name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cidade da Empresa</label>
+                        <div class="form-description">Cidade da empresa para PIX</div>
+                        <input type="text" class="form-input" id="company_city" data-key="company_city">
+                    </div>
+                </div>
+
+                <!-- MercadoPago Settings -->
+                <div id="mercadopago-settings" style="display: none;">
+                    <h3 style="margin: 20px 0 10px 0; color: #333;">Configurações MercadoPago</h3>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label">Access Token</label>
+                            <div class="form-description">Token de acesso da aplicação MercadoPago</div>
+                            <input type="password" class="form-input" id="mp_access_token" data-key="mp_access_token" placeholder="APP_USR-XXXXXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">User ID</label>
+                            <div class="form-description">ID do usuário MercadoPago</div>
+                            <input type="text" class="form-input" id="mp_user_id" data-key="mp_user_id">
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label">Webhook URL</label>
+                            <div class="form-description">URL para receber notificações de pagamento</div>
+                            <input type="url" class="form-input" id="mp_webhook_url" data-key="mp_webhook_url" placeholder="https://seudominio.com/webhook/mercadopago">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PagSeguro Settings -->
+                <div id="pagseguro-settings" style="display: none;">
+                    <h3 style="margin: 20px 0 10px 0; color: #333;">Configurações PagSeguro</h3>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <div class="form-description">Email da conta PagSeguro</div>
+                            <input type="email" class="form-input" id="ps_email" data-key="ps_email">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Token</label>
+                            <div class="form-description">Token de segurança PagSeguro</div>
+                            <input type="password" class="form-input" id="ps_token" data-key="ps_token">
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label">App ID</label>
+                            <div class="form-description">ID da aplicação PagSeguro</div>
+                            <input type="text" class="form-input" id="ps_app_id" data-key="ps_app_id">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">App Key</label>
+                            <div class="form-description">Chave da aplicação PagSeguro</div>
+                            <input type="password" class="form-input" id="ps_app_key" data-key="ps_app_key">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gerencianet Settings -->
+                <div id="gerencianet-settings" style="display: none;">
+                    <h3 style="margin: 20px 0 10px 0; color: #333;">Configurações Gerencianet</h3>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label">Client ID</label>
+                            <div class="form-description">Client ID da aplicação Gerencianet</div>
+                            <input type="text" class="form-input" id="gn_client_id" data-key="gn_client_id">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Client Secret</label>
+                            <div class="form-description">Client Secret da aplicação Gerencianet</div>
+                            <input type="password" class="form-input" id="gn_client_secret" data-key="gn_client_secret">
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label">Caminho do Certificado</label>
+                            <div class="form-description">Caminho para o arquivo .p12 do certificado</div>
+                            <input type="text" class="form-input" id="gn_certificate_path" data-key="gn_certificate_path" placeholder="/path/to/certificate.p12">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Chave PIX Gerencianet</label>
+                            <div class="form-description">Chave PIX cadastrada na Gerencianet</div>
+                            <input type="text" class="form-input" id="gn_pix_key" data-key="gn_pix_key">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Connection Button -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary" onclick="testPixConnection()" id="testPixBtn">
+                        <i class="fas fa-plug"></i> Testar Conexão PIX
+                    </button>
                 </div>
             </div>
 
@@ -669,6 +851,66 @@
             setTimeout(() => {
                 messageBox.style.display = 'none';
             }, 5000);
+        }
+
+        function togglePixProviderSettings() {
+            const provider = document.getElementById('pix_provider').value;
+            
+            // Hide all provider settings
+            document.getElementById('mercadopago-settings').style.display = 'none';
+            document.getElementById('pagseguro-settings').style.display = 'none';
+            document.getElementById('gerencianet-settings').style.display = 'none';
+            
+            // Show selected provider settings
+            switch(provider) {
+                case 'mercadopago':
+                    document.getElementById('mercadopago-settings').style.display = 'block';
+                    break;
+                case 'pagseguro':
+                    document.getElementById('pagseguro-settings').style.display = 'block';
+                    break;
+                case 'gerencianet':
+                    document.getElementById('gerencianet-settings').style.display = 'block';
+                    break;
+            }
+        }
+
+        async function testPixConnection() {
+            const testBtn = document.getElementById('testPixBtn');
+            const originalText = testBtn.innerHTML;
+            
+            testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testando...';
+            testBtn.disabled = true;
+
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                
+                const response = await fetch('../api/admin/test_pix_connection.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userData.session_token}`
+                    },
+                    body: JSON.stringify({
+                        provider: document.getElementById('pix_provider').value,
+                        sandbox: document.getElementById('pix_sandbox_mode').checked
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('✅ Conexão PIX testada com sucesso!', 'success');
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Erro no teste de conexão:', error);
+                showMessage('❌ Erro no teste de conexão: ' + error.message, 'error');
+            } finally {
+                testBtn.innerHTML = originalText;
+                testBtn.disabled = false;
+            }
         }
     </script>
 </body>

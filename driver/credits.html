@@ -574,7 +574,15 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    await modalSystem.success('Solicitação de recarga criada com sucesso! Aguarde o processamento.');
+                    const result = data.data;
+                    
+                    // Se tiver QR Code, mostrar modal com QR
+                    if (result.qr_code) {
+                        await showPixQRCode(result);
+                    } else {
+                        await modalSystem.success('Solicitação de recarga criada com sucesso! Aguarde o processamento.');
+                    }
+                    
                     loadCredits(); // Reload data
                 } else {
                     throw new Error(data.message);
@@ -583,6 +591,93 @@
                 console.error('Erro ao solicitar recarga:', error);
                 await modalSystem.error('Erro ao solicitar recarga: ' + error.message);
             }
+        }
+
+        async function showPixQRCode(pixData) {
+            const qrCode = pixData.qr_code;
+            const amount = parseFloat(pixData.amount_requested).toFixed(2).replace('.', ',');
+            const provider = pixData.pix_provider || 'manual';
+            const expiresAt = new Date(pixData.expires_at).toLocaleString('pt-BR');
+            
+            let qrDisplay = '';
+            
+            if (pixData.qr_code_base64) {
+                // QR Code como imagem
+                qrDisplay = `<img src="data:image/png;base64,${pixData.qr_code_base64}" alt="QR Code PIX" style="max-width: 250px; margin: 20px auto; display: block;">`;
+            } else if (qrCode) {
+                // QR Code como texto (Pix Copia e Cola)
+                qrDisplay = `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; font-family: monospace; font-size: 0.8rem; word-break: break-all; border: 1px solid #ddd;">
+                        ${qrCode}
+                    </div>
+                    <button onclick="copyToClipboard('${qrCode}')" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                        <i class="fas fa-copy"></i> Copiar Pix Copia e Cola
+                    </button>
+                `;
+            }
+            
+            const modalContent = `
+                <div style="text-align: center; padding: 20px;">
+                    <h3 style="color: #333; margin-bottom: 20px;">
+                        <i class="fas fa-qrcode" style="color: #007bff;"></i>
+                        PIX - R$ ${amount}
+                    </h3>
+                    
+                    ${qrDisplay}
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; border-left: 4px solid #007bff;">
+                        <p style="margin: 0; font-size: 0.9rem; color: #333;">
+                            <strong>Provedor:</strong> ${provider.toUpperCase()}<br>
+                            <strong>Expira em:</strong> ${expiresAt}<br>
+                            <strong>Instruções:</strong> ${qrCode ? 'Use o app do seu banco para ler o QR Code ou copie o código Pix Copia e Cola' : 'Aguarde a aprovação manual'}
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button onclick="modalSystem.closeAll()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                            Entendi
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            await modalSystem.custom({
+                title: 'Pagamento PIX',
+                content: modalContent,
+                showCloseButton: true
+            });
+        }
+        
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    modalSystem.success('Código PIX copiado para a área de transferência!');
+                }).catch(() => {
+                    fallbackCopyToClipboard(text);
+                });
+            } else {
+                fallbackCopyToClipboard(text);
+            }
+        }
+        
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                modalSystem.success('Código PIX copiado para a área de transferência!');
+            } catch (err) {
+                modalSystem.error('Não foi possível copiar o código PIX.');
+            }
+            
+            document.body.removeChild(textArea);
         }
 
         function showFullHistory() {

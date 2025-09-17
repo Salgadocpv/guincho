@@ -4,8 +4,9 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-require_once '../config/database.php';
+require_once '../config/database_local.php';
 require_once '../classes/CreditSystem.php';
+require_once '../classes/PixIntegration.php';
 require_once '../middleware/auth.php';
 
 try {
@@ -54,7 +55,7 @@ try {
     }
     
     // Obter driver_id
-    $database = new Database();
+    $database = new DatabaseLocal();
     $pdo = $database->getConnection();
     
     $query = "SELECT id FROM drivers WHERE user_id = :user_id";
@@ -84,6 +85,41 @@ try {
     // Criar solicitação PIX
     $creditSystem = new CreditSystem($pdo);
     $result = $creditSystem->createPixRequest($driver_id, $amount_requested, $pix_key, $pix_key_type);
+    
+    // Tentar gerar QR Code PIX se integração estiver habilitada
+    try {
+        $pixIntegration = new PixIntegration($pdo);
+        $qrData = $pixIntegration->generatePixQRCode(
+            $amount_requested, 
+            'Recarga de créditos Iguincho - ID: ' . $result['request_id'],
+            [
+                'email' => $user['email'] ?? 'usuario@iguincho.com',
+                'driver_id' => $driver_id,
+                'request_id' => $result['request_id']
+            ]
+        );
+        
+        // Adicionar dados do QR Code ao resultado
+        $result['qr_code'] = $qrData['qr_code'] ?? null;
+        $result['qr_code_base64'] = $qrData['qr_code_base64'] ?? null;
+        $result['payment_id'] = $qrData['payment_id'] ?? null;
+        $result['pix_provider'] = $qrData['provider'] ?? 'manual';
+        
+        // Atualizar solicitação com dados do pagamento
+        if (isset($qrData['payment_id'])) {
+            $updateQuery = "UPDATE pix_credit_requests SET pix_transaction_id = :payment_id WHERE id = :request_id";
+            $stmt = $pdo->prepare($updateQuery);
+            $stmt->bindParam(':payment_id', $qrData['payment_id']);
+            $stmt->bindParam(':request_id', $result['request_id']);
+            $stmt->execute();
+        }
+        
+    } catch (Exception $e) {
+        // Se falhar na geração do QR Code, continuar com modo manual
+        error_log('Erro ao gerar QR Code PIX: ' . $e->getMessage());
+        $result['qr_error'] = $e->getMessage();
+        $result['pix_provider'] = 'manual';
+    }
     
     echo json_encode([
         'success' => true,
