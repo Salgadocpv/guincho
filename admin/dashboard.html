@@ -332,6 +332,13 @@
                 </div>
                 <div class="action-title">Viagens</div>
             </div>
+
+            <div class="action-card" onclick="showPixRequests()">
+                <div class="action-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="action-title">PIX Pendentes</div>
+            </div>
         </div>
 
         
@@ -442,6 +449,10 @@
 
         function showTrips() {
             window.location.href = 'list.html?type=services';
+        }
+
+        function showPixRequests() {
+            window.location.href = 'pix-requests.html';
         }
     </script>
 </body>

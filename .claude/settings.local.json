@@ -23,7 +23,13 @@
       "Bash(\"C:\\xampp\\php\\php.exe\":*)",
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"CREATE DATABASE IF NOT EXISTS iguincho CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
       "WebFetch(domain:www.coppermane.com.br)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\api\\database/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\driver/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\admin/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\admin/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\api\\trips/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\api\\config/**)"
     ],
     "deny": [],
     "ask": [],

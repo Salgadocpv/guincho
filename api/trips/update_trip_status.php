@@ -12,6 +12,7 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 include_once '../config/database.php';
 include_once '../classes/ActiveTrip.php';
 include_once '../classes/TripNotification.php';
+include_once '../classes/CreditSystem.php';
 include_once '../middleware/auth.php';
 
 // Check authentication
@@ -192,6 +193,53 @@ try {
                     break;
                     
                 case 'completed':
+                    // Process credit charge for completed trip
+                    try {
+                        $creditSystem = new CreditSystem($db);
+                        $settings = $creditSystem->getCreditSettings();
+                        $creditPerTrip = floatval($settings['credit_per_trip']);
+                        
+                        // Get driver ID
+                        $stmt = $db->prepare("SELECT id FROM drivers WHERE user_id = (SELECT driver_user_id FROM active_trips WHERE id = ?)");
+                        $stmt->execute([$trip_data['id']]);
+                        $driver = $stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        if ($driver) {
+                            $driver_id = $driver['id'];
+                            
+                            // Check if trip was already charged
+                            $checkQuery = "SELECT COUNT(*) as charged FROM credit_transactions 
+                                          WHERE driver_id = ? AND trip_id = ? AND transaction_type = 'spend'";
+                            $stmt = $db->prepare($checkQuery);
+                            $stmt->execute([$driver_id, $trip_data['trip_request_id']]);
+                            $alreadyCharged = $stmt->fetch(PDO::FETCH_ASSOC)['charged'] > 0;
+                            
+                            if (!$alreadyCharged) {
+                                // Charge credits for the trip
+                                $creditResult = $creditSystem->spendCredits(
+                                    $driver_id, 
+                                    $creditPerTrip, 
+                                    $trip_data['trip_request_id'], 
+                                    'Cobrança por viagem concluída'
+                                );
+                                
+                                // Add credit info to notifications
+                                $creditInfo = [
+                                    'credit_charged' => $creditPerTrip,
+                                    'new_balance' => $creditResult['new_balance']
+                                ];
+                            } else {
+                                $creditInfo = ['already_charged' => true];
+                            }
+                        } else {
+                            $creditInfo = ['error' => 'Guincheiro não encontrado'];
+                        }
+                    } catch (Exception $e) {
+                        // Log error but don't fail the completion
+                        error_log("Erro ao processar créditos da viagem: " . $e->getMessage());
+                        $creditInfo = ['error' => $e->getMessage()];
+                    }
+                    
                     // Notify both client and driver that trip is completed
                     $notification->create(
                         $trip_data['client_id'],
@@ -207,6 +255,18 @@ try {
                         ]
                     );
                     
+                    $driverNotificationData = [
+                        'client_name' => $trip_data['client_name'],
+                        'final_price' => $trip_data['final_price'],
+                        'completion_time' => date('H:i')
+                    ];
+                    
+                    // Add credit info to driver notification
+                    if (isset($creditInfo['credit_charged'])) {
+                        $driverNotificationData['credit_charged'] = $creditInfo['credit_charged'];
+                        $driverNotificationData['new_balance'] = $creditInfo['new_balance'];
+                    }
+                    
                     $notification->create(
                         $trip_data['driver_user_id'] ?? $trip_data['driver_id'],
                         'trip_completed',
@@ -214,11 +274,7 @@ try {
                         "Viagem concluída com sucesso! Você pode avaliar o cliente {$trip_data['client_name']}",
                         $trip_data['trip_request_id'],
                         $trip_data['id'],
-                        [
-                            'client_name' => $trip_data['client_name'],
-                            'final_price' => $trip_data['final_price'],
-                            'completion_time' => date('H:i')
-                        ]
+                        $driverNotificationData
                     );
                     break;
                     

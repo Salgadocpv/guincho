@@ -361,6 +361,7 @@
         <div class="category-tabs">
             <div class="category-tab active" onclick="showCategory('general')">Geral</div>
             <div class="category-tab" onclick="showCategory('business')">Negócio</div>
+            <div class="category-tab" onclick="showCategory('credits')">Créditos</div>
             <div class="category-tab" onclick="showCategory('system')">Sistema</div>
             <div class="category-tab" onclick="showCategory('contact')">Contato</div>
         </div>
@@ -408,6 +409,55 @@
                         <label class="form-label">Distância Máxima (km)</label>
                         <div class="form-description">Distância máxima de atendimento</div>
                         <input type="number" class="form-input" id="max_distance_km" data-key="max_distance_km" min="1" max="200">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credits Settings -->
+            <div class="settings-section" data-category="credits" style="display: none;">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <h2 class="section-title">Sistema de Créditos</h2>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Crédito por Viagem (R$)</label>
+                        <div class="form-description">Valor em reais cobrado do guincheiro por cada viagem realizada</div>
+                        <input type="number" class="form-input" id="credit_per_trip" data-key="credit_per_trip" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Taxa PIX para Crédito</label>
+                        <div class="form-description">Quantos créditos o guincheiro recebe por cada R$ 1,00 via PIX</div>
+                        <input type="number" class="form-input" id="pix_credit_rate" data-key="pix_credit_rate" min="0.1" step="0.01">
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Saldo Mínimo (R$)</label>
+                        <div class="form-description">Saldo mínimo de créditos necessário para aceitar viagens</div>
+                        <input type="number" class="form-input" id="minimum_credit_balance" data-key="minimum_credit_balance" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Recarga PIX Máxima (R$)</label>
+                        <div class="form-description">Valor máximo permitido para recarga via PIX</div>
+                        <input type="number" class="form-input" id="max_pix_credit_amount" data-key="max_pix_credit_amount" min="10" step="0.01">
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group">
+                        <label class="form-label">Recarga PIX Mínima (R$)</label>
+                        <div class="form-description">Valor mínimo permitido para recarga via PIX</div>
+                        <input type="number" class="form-input" id="min_pix_credit_amount" data-key="min_pix_credit_amount" min="1" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expiração Solicitação PIX (horas)</label>
+                        <div class="form-description">Tempo em horas para expirar uma solicitação de recarga PIX</div>
+                        <input type="number" class="form-input" id="pix_request_expiry_hours" data-key="pix_request_expiry_hours" min="1" max="168">
                     </div>
                 </div>
             </div>

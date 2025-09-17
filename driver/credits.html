@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Meus Créditos</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="../js/modal-system.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #007bff 0%, #495057 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 8px;
+        }
+
+        .balance-label {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .balance-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .balance-warning.show {
+            display: block;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: #f8f9fa;
+            border-color: #007bff;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .action-btn i {
+            font-size: 1.5rem;
+            color: #007bff;
+        }
+
+        .action-btn span {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Transaction History */
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-description {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .transaction-date {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .transaction-amount.positive {
+            color: #28a745;
+        }
+
+        .transaction-amount.negative {
+            color: #dc3545;
+        }
+
+        /* PIX Requests */
+        .pix-request {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #f8f9fa;
+        }
+
+        .pix-request.pending {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .pix-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .pix-status.pending {
+            background: #ffc107;
+            color: #856404;
+        }
+
+        .pix-status.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: #ccc;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .balance-amount {
+                font-size: 2rem;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <a href="dashboard.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Voltar
+        </a>
+        <h1 class="page-title">Meus Créditos</h1>
+        <div style="width: 100px;"></div> <!-- Spacer -->
+    </div>
+
+    <div class="container">
+        <!-- Loading -->
+        <div class="loading" id="loadingIndicator">
+            <i class="fas fa-spinner"></i>
+            <div>Carregando informações...</div>
+        </div>
+
+        <!-- Content -->
+        <div id="content" style="display: none;">
+            <!-- Balance Card -->
+            <div class="balance-card">
+                <div class="balance-amount" id="balanceAmount">R$ 0,00</div>
+                <div class="balance-label">Saldo atual em créditos</div>
+                <div class="balance-warning" id="balanceWarning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Saldo baixo! Recarregue seus créditos para continuar aceitando viagens.
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn" onclick="openPixModal()">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Recarregar via PIX</span>
+                </button>
+                <button class="action-btn" onclick="showFullHistory()">
+                    <i class="fas fa-history"></i>
+                    <span>Histórico Completo</span>
+                </button>
+            </div>
+
+            <!-- Pending PIX Requests -->
+            <div class="card" id="pixRequestsCard" style="display: none;">
+                <div class="card-header">
+                    <h3 class="card-title">Solicitações PIX Pendentes</h3>
+                </div>
+                <div id="pixRequestsList"></div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Transações Recentes</h3>
+                </div>
+                <div id="transactionsList">
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <div>Nenhuma transação encontrada</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize modal system
+        const modalSystem = new ModalSystem();
+        let creditData = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadCredits();
+        });
+
+        function checkAuth() {
+            const userData = localStorage.getItem('userData');
+            
+            if (!userData) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            
+            if (user.user.user_type !== 'driver') {
+                modalSystem.error('Acesso negado.');
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 2000);
+                return;
+            }
+        }
+
+        async function loadCredits() {
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                
+                const response = await fetch('../api/credits/get_credits.php', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + userData.session_token
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    creditData = data.data;
+                    updateUI();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar créditos:', error);
+                await modalSystem.error('Erro ao carregar informações de créditos: ' + error.message);
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            }
+        }
+
+        function updateUI() {
+            if (!creditData) return;
+
+            // Update balance
+            const balance = parseFloat(creditData.credits.current_balance || 0);
+            document.getElementById('balanceAmount').textContent = 'R$ ' + balance.toFixed(2).replace('.', ',');
+            
+            // Show warning if balance is low
+            const minBalance = parseFloat(creditData.settings.minimum_credit_balance || 0);
+            const warningElement = document.getElementById('balanceWarning');
+            if (balance < minBalance) {
+                warningElement.classList.add('show');
+            } else {
+                warningElement.classList.remove('show');
+            }
+
+            // Update PIX requests
+            updatePixRequests();
+
+            // Update transaction history
+            updateTransactionHistory();
+        }
+
+        function updatePixRequests() {
+            const pixRequests = creditData.pending_pix_requests || [];
+            const card = document.getElementById('pixRequestsCard');
+            const list = document.getElementById('pixRequestsList');
+            
+            if (pixRequests.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+            
+            card.style.display = 'block';
+            list.innerHTML = '';
+            
+            pixRequests.forEach(request => {
+                const div = document.createElement('div');
+                div.className = 'pix-request pending';
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div>
+                            <div style="font-weight: 600;">R$ ${parseFloat(request.amount_requested).toFixed(2).replace('.', ',')}</div>
+                            <div style="font-size: 0.8rem; color: #666;">
+                                ${parseFloat(request.credits_to_receive).toFixed(2).replace('.', ',')} créditos
+                            </div>
+                        </div>
+                        <span class="pix-status pending">Pendente</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #666;">
+                        Chave PIX: ${request.pix_key}<br>
+                        Expira em: ${new Date(request.expires_at).toLocaleString('pt-BR')}
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function updateTransactionHistory() {
+            const transactions = creditData.recent_history || [];
+            const list = document.getElementById('transactionsList');
+            
+            if (transactions.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <div>Nenhuma transação encontrada</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = '';
+            
+            transactions.forEach(transaction => {
+                const div = document.createElement('div');
+                div.className = 'transaction-item';
+                
+                const amount = parseFloat(transaction.amount);
+                const isPositive = transaction.transaction_type === 'add' || transaction.transaction_type === 'refund';
+                const amountClass = isPositive ? 'positive' : 'negative';
+                const amountPrefix = isPositive ? '+' : '-';
+                
+                let description = transaction.description || 'Transação';
+                if (transaction.pickup_address && transaction.dropoff_address) {
+                    description += ` (${transaction.pickup_address} → ${transaction.dropoff_address})`;
+                }
+                
+                div.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-description">${description}</div>
+                        <div class="transaction-date">${new Date(transaction.created_at).toLocaleString('pt-BR')}</div>
+                    </div>
+                    <div class="transaction-amount ${amountClass}">
+                        ${amountPrefix}R$ ${amount.toFixed(2).replace('.', ',')}
+                    </div>
+                `;
+                
+                list.appendChild(div);
+            });
+        }
+
+        async function openPixModal() {
+            const settings = creditData.settings;
+            const minAmount = parseFloat(settings.min_pix_credit_amount || 10);
+            const maxAmount = parseFloat(settings.max_pix_credit_amount || 500);
+            const rate = parseFloat(settings.pix_credit_rate || 1);
+            
+            const amount = await modalSystem.prompt({
+                title: 'Recarregar Créditos via PIX',
+                message: `Valor para recarga (R$ ${minAmount.toFixed(2)} - R$ ${maxAmount.toFixed(2)}):`,
+                inputType: 'number',
+                inputPlaceholder: 'Ex: 50.00',
+                inputMin: minAmount,
+                inputMax: maxAmount,
+                inputStep: '0.01'
+            });
+            
+            if (!amount) return;
+            
+            const amountValue = parseFloat(amount);
+            if (isNaN(amountValue) || amountValue < minAmount || amountValue > maxAmount) {
+                await modalSystem.error(`Valor inválido. Mínimo: R$ ${minAmount.toFixed(2)}, Máximo: R$ ${maxAmount.toFixed(2)}`);
+                return;
+            }
+            
+            const pixKey = await modalSystem.prompt({
+                title: 'Chave PIX',
+                message: 'Digite sua chave PIX para recebimento:',
+                inputPlaceholder: 'CPF, email, telefone ou chave aleatória'
+            });
+            
+            if (!pixKey) return;
+            
+            await requestPixCredit(amountValue, pixKey.trim());
+        }
+
+        async function requestPixCredit(amount, pixKey) {
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                
+                // Determine PIX key type
+                let pixKeyType = 'random';
+                if (/^\d{11}$/.test(pixKey.replace(/\D/g, ''))) {
+                    pixKeyType = 'cpf';
+                } else if (/^\d{14}$/.test(pixKey.replace(/\D/g, ''))) {
+                    pixKeyType = 'cnpj';
+                } else if (pixKey.includes('@')) {
+                    pixKeyType = 'email';
+                } else if (/^\d{10,11}$/.test(pixKey.replace(/\D/g, ''))) {
+                    pixKeyType = 'phone';
+                }
+                
+                const response = await fetch('../api/credits/request_pix.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + userData.session_token
+                    },
+                    body: JSON.stringify({
+                        amount_requested: amount,
+                        pix_key: pixKey,
+                        pix_key_type: pixKeyType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    await modalSystem.success('Solicitação de recarga criada com sucesso! Aguarde o processamento.');
+                    loadCredits(); // Reload data
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Erro ao solicitar recarga:', error);
+                await modalSystem.error('Erro ao solicitar recarga: ' + error.message);
+            }
+        }
+
+        function showFullHistory() {
+            // This could open a modal or navigate to a detailed history page
+            modalSystem.info('Funcionalidade em desenvolvimento. Use a aba de transações recentes por enquanto.');
+        }
+    </script>
+</body>
+</html>
