@@ -1118,39 +1118,6 @@
         <button onclick="requestLocation()">Permitir</button>
     </div>
 
-    <!-- Bid Modal -->
-    <div class="modal-overlay" id="bidModal">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">Enviar Proposta</div>
-                <div class="modal-subtitle">Defina sua proposta para este serviço</div>
-            </div>
-            <div class="modal-content">
-                <div class="form-group">
-                    <label class="form-label">Valor da Proposta (R$)</label>
-                    <input type="number" class="form-input currency" id="bidAmount" placeholder="0,00" step="0.01" min="0">
-                    <div class="form-helper">Oferta do cliente: <span id="clientOfferValue">R$ 0,00</span></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Tempo Estimado de Chegada (minutos)</label>
-                    <input type="number" class="form-input" id="arrivalTime" placeholder="15" min="1" max="120">
-                    <div class="form-helper">Tempo realista para chegar ao local</div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Mensagem (opcional)</label>
-                    <textarea class="form-input" id="bidMessage" rows="3" placeholder="Detalhes sobre seu serviço, experiência, etc."></textarea>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-secondary" onclick="closeBidModal()">
-                    Cancelar
-                </button>
-                <button class="modal-btn modal-btn-primary" onclick="submitBid()">
-                    Enviar Proposta
-                </button>
-            </div>
-        </div>
-    </div>
 
     <script>
         // Global variables
@@ -1319,7 +1286,7 @@
                 const timeRemaining = Math.max(0, request.time_remaining || 0);
                 
                 return `
-                    <div class="request-item ${request.has_bid ? 'has-bid' : ''}" data-request-id="${request.id}" onclick="viewDetails(${request.id})" style="cursor: pointer;">
+                    <div class="request-item ${request.has_bid ? 'has-bid' : ''}" data-request-id="${request.id}">
                         ${request.has_bid ? '<div class="bid-status">Proposta Enviada</div>' : ''}
                         
                         <div class="request-header">
@@ -1374,7 +1341,7 @@
                         <div class="request-actions">
                             ${request.has_bid ? 
                                 '<button class="btn btn-secondary" disabled><i class="fas fa-check"></i> Proposta Enviada</button>' :
-                                `<button class="btn btn-primary" onclick="event.stopPropagation(); openBidModal(${request.id})"><i class="fas fa-paper-plane"></i> Enviar Proposta</button>`
+                                `<button class="btn btn-primary" onclick="viewDetails(${request.id})"><i class="fas fa-paper-plane"></i> Enviar Proposta</button>`
                             }
                         </div>
                     </div>
@@ -1398,88 +1365,6 @@
             document.getElementById('myBids').textContent = requests.filter(r => r.has_bid).length;
         }
 
-        function openBidModal(requestId) {
-            selectedRequest = requests.find(r => r.id == requestId);
-            if (!selectedRequest) return;
-
-            // Pre-fill modal with request data
-            document.getElementById('clientOfferValue').textContent = `R$ ${parseFloat(selectedRequest.client_offer).toFixed(2).replace('.', ',')}`;
-            document.getElementById('bidAmount').value = selectedRequest.client_offer;
-            document.getElementById('arrivalTime').value = Math.ceil((selectedRequest.distance || 10) * 2); // Estimate 2 min per km
-            document.getElementById('bidMessage').value = '';
-
-            document.getElementById('bidModal').style.display = 'flex';
-        }
-
-        function closeBidModal() {
-            document.getElementById('bidModal').style.display = 'none';
-            selectedRequest = null;
-        }
-
-        async function submitBid() {
-            console.log('submitBid called, selectedRequest:', selectedRequest);
-            
-            if (!selectedRequest) {
-                console.log('No selected request');
-                await modalSystem.error('Nenhuma solicitação selecionada');
-                return;
-            }
-
-            const bidAmount = parseFloat(document.getElementById('bidAmount').value);
-            const arrivalTime = parseInt(document.getElementById('arrivalTime').value);
-            const message = document.getElementById('bidMessage').value;
-            
-            console.log('Form values:', { bidAmount, arrivalTime, message });
-
-            if (!bidAmount || bidAmount <= 0) {
-                await modalSystem.warning('Informe um valor válido para a proposta');
-                return;
-            }
-
-            if (!arrivalTime || arrivalTime <= 0) {
-                await modalSystem.warning('Informe um tempo estimado de chegada');
-                return;
-            }
-
-            try {
-                const token = localStorage.getItem('auth_token') || '';
-                console.log('Sending request with token:', token ? 'present' : 'missing');
-                
-                const requestBody = {
-                    trip_request_id: selectedRequest.id,
-                    bid_amount: bidAmount,
-                    estimated_arrival_minutes: arrivalTime,
-                    message: message
-                };
-                
-                console.log('Request body:', requestBody);
-                
-                const response = await fetch('/guincho/api/trips/place_bid.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-
-                console.log('Response status:', response.status);
-                
-                const data = await response.json();
-                console.log('Response data:', data);
-                
-                if (data.success) {
-                    await modalSystem.success('Proposta enviada com sucesso!');
-                    closeBidModal();
-                    loadRequests(); // Refresh the list
-                } else {
-                    await modalSystem.error('Erro ao enviar proposta: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error submitting bid:', error);
-                await modalSystem.error('Erro ao enviar proposta: ' + error.message);
-            }
-        }
 
         function viewDetails(requestId) {
             const request = requests.find(r => r.id == requestId);
