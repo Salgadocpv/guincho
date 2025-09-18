@@ -46,7 +46,11 @@
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root iguincho -e \"SELECT id, full_name, email, user_type FROM users LIMIT 5;\")",
       "Read(/C:\\xampp\\htdocs\\guincho\\api\\config/**)",
       "Read(/C:\\xampp\\htdocs\\guincho\\api\\profile/**)",
-      "Read(/C:\\xampp\\htdocs\\guincho\\api\\config/**)"
+      "Read(/C:\\xampp\\htdocs\\guincho\\api\\config/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\api\\credits/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\driver/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\driver/**)",
+      "Read(/C:\\xampp\\htdocs\\guincho\\driver/**)"
     ],
     "deny": [],
     "ask": [],

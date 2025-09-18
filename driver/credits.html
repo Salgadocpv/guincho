@@ -380,11 +380,10 @@
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
                 
-                const response = await fetch('../api/credits/get_credits.php', {
+                const response = await fetch('../api/credits/get_credits_simple.php', {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + userData.session_token
+                        'Content-Type': 'application/json'
                     }
                 });
                 
