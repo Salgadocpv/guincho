@@ -55,7 +55,7 @@ try {
             'message' => 'Dados de créditos carregados (modo demo)',
             'data' => [
                 'credits' => [
-                    'current_balance' => 150.00,
+                    'current_balance' => 10.00,
                     'total_earned' => 500.00,
                     'total_spent' => 350.00,
                     'last_updated' => date('Y-m-d H:i:s')
@@ -66,7 +66,7 @@ try {
                     'pix_max_amount' => 500.00,
                     'pix_fee_percentage' => 3.5
                 ],
-                'can_accept_trip' => true,
+                'can_accept_trip' => false,
                 'recent_history' => [
                     [
                         'id' => 1,

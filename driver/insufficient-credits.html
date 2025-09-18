@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguincho - Créditos Insuficientes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="../js/modal-system.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 400px;
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .warning-icon {
+            font-size: 4rem;
+            color: #ffc107;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .credit-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .credit-balance {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .trip-cost {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h1>Créditos Insuficientes</h1>
+        
+        <p class="message">
+            Você não possui créditos suficientes para aceitar viagens. 
+            Faça uma recarga via PIX para continuar trabalhando.
+        </p>
+        
+        <div class="credit-info">
+            <div class="credit-balance">
+                Saldo atual: R$ <span id="currentBalance">0,00</span>
+            </div>
+            <div class="trip-cost">
+                Custo por viagem: R$ <span id="tripCost">25,00</span>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="credits.html" class="btn btn-primary">
+                <i class="fas fa-credit-card"></i>
+                Recarregar via PIX
+            </a>
+            
+            <a href="dashboard.html" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Voltar ao Painel
+            </a>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Verificando créditos...</span>
+        </div>
+    </div>
+
+    <script>
+        // Carregar informações de créditos
+        async function loadCreditInfo() {
+            try {
+                document.getElementById('loading').style.display = 'flex';
+                
+                const response = await fetch('../api/credits/get_credits_simple.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const credits = data.data.credits;
+                    const settings = data.data.settings;
+                    
+                    document.getElementById('currentBalance').textContent = 
+                        credits.current_balance.toFixed(2).replace('.', ',');
+                    
+                    document.getElementById('tripCost').textContent = 
+                        settings.cost_per_trip.toFixed(2).replace('.', ',');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar informações de créditos:', error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // Carregar informações ao abrir a página
+        document.addEventListener('DOMContentLoaded', loadCreditInfo);
+        
+        // Verificar periodicamente se os créditos foram recarregados
+        setInterval(async () => {
+            try {
+                const response = await fetch('../api/credits/get_credits_simple.php');
+                const data = await response.json();
+                
+                if (data.success && data.data.can_accept_trip) {
+                    // Se pode aceitar viagens, redirecionar para solicitações
+                    window.location.href = 'available-requests.html';
+                }
+            } catch (error) {
+                // Ignorar erros na verificação automática
+            }
+        }, 30000); // Verificar a cada 30 segundos
+    </script>
+</body>
+</html>

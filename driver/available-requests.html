@@ -6,6 +6,7 @@
     <title>Iguincho - Solicitações Disponíveis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="../js/modal-system.js"></script>
+    <script src="../js/credit-checker.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5CfnBBfbxBT0xLLpQxFNUCwA3DmVZilE&libraries=geometry,places&callback=initGoogleMaps"></script>
     <style>
         * {
@@ -1169,8 +1170,15 @@
         }
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             checkAuth();
+            
+            // Verificar créditos antes de permitir acesso
+            const hasCredits = await creditChecker.enforceCreditsRequired();
+            if (!hasCredits) {
+                return; // Será redirecionado automaticamente
+            }
+            
             checkForActiveTrip();
             initializeLocation();
             setupEventListeners();
