@@ -55,9 +55,9 @@ try {
             'message' => 'Dados de créditos carregados (modo demo)',
             'data' => [
                 'credits' => [
-                    'current_balance' => 10.00,
-                    'total_earned' => 500.00,
-                    'total_spent' => 350.00,
+                    'current_balance' => 500.00,
+                    'total_earned' => 1000.00,
+                    'total_spent' => 500.00,
                     'last_updated' => date('Y-m-d H:i:s')
                 ],
                 'settings' => [
@@ -66,7 +66,7 @@ try {
                     'pix_max_amount' => 500.00,
                     'pix_fee_percentage' => 3.5
                 ],
-                'can_accept_trip' => false,
+                'can_accept_trip' => true,
                 'recent_history' => [
                     [
                         'id' => 1,
@@ -172,9 +172,9 @@ try {
             'message' => 'Dados de créditos carregados (modo fallback)',
             'data' => [
                 'credits' => [
-                    'current_balance' => 75.00,
-                    'total_earned' => 300.00,
-                    'total_spent' => 225.00,
+                    'current_balance' => 500.00,
+                    'total_earned' => 1000.00,
+                    'total_spent' => 500.00,
                     'last_updated' => date('Y-m-d H:i:s')
                 ],
                 'settings' => [
