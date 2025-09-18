@@ -1319,7 +1319,7 @@
                 const timeRemaining = Math.max(0, request.time_remaining || 0);
                 
                 return `
-                    <div class="request-item ${request.has_bid ? 'has-bid' : ''}" data-request-id="${request.id}">
+                    <div class="request-item ${request.has_bid ? 'has-bid' : ''}" data-request-id="${request.id}" onclick="viewDetails(${request.id})" style="cursor: pointer;">
                         ${request.has_bid ? '<div class="bid-status">Proposta Enviada</div>' : ''}
                         
                         <div class="request-header">
@@ -1374,8 +1374,7 @@
                         <div class="request-actions">
                             ${request.has_bid ? 
                                 '<button class="btn btn-secondary" disabled><i class="fas fa-check"></i> Proposta Enviada</button>' :
-                                `<button class="btn btn-secondary" onclick="viewDetails(${request.id})"><i class="fas fa-info-circle"></i> Detalhes</button>
-                                 <button class="btn btn-primary" onclick="openBidModal(${request.id})"><i class="fas fa-paper-plane"></i> Enviar Proposta</button>`
+                                `<button class="btn btn-primary" onclick="event.stopPropagation(); openBidModal(${request.id})"><i class="fas fa-paper-plane"></i> Enviar Proposta</button>`
                             }
                         </div>
                     </div>
